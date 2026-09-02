@@ -2,24 +2,27 @@
 
 ## `project/` — JavaScript-анимации
 
-Основной проект без номера. В нём четыре задания, и каждое находится в отдельном JS-файле:
+Основной проект без номера: 28 заданий на JavaScript.
 
-- `1_rockets.js` — массив ракет;
-- `2_pizza.js` — множество ингредиентов;
-- `3_train.js` — связный список вагонов;
-- `4_hero.js` — словарь героя.
+- `module_1.js` — задания 01–04;
+- `module_2.js` — задания 05–08;
+- `module_3.js` — задания 09–12;
+- `module_4.js` — задания 13–16;
+- `module_5.js`–`module_16.js` — задания 17–28.
 
-Открыть подробную инструкцию: [project/README.md](project/README.md).
+Инструкция: [project/README.md](project/README.md).
 
-## `project_ascii/` — старый ASCII-проект
-
-Предыдущая консольная версия с четырьмя Python-подпрограммами сохранена отдельно: [project_ascii/README.md](project_ascii/README.md).
-
-## Запуск JS-проекта
+Запуск:
 
 ```bash
 cd project
 python3 -m http.server 8000
 ```
 
-Затем открой `http://localhost:8000` или проброшенный порт 8000 в Codespaces.
+Открой `http://localhost:8000` или проброшенный порт 8000 в Codespaces.
+
+## `project_ascii/` — ASCII-анимации
+
+Отдельная консольная версия также содержит 28 заданий в 16 Python-модулях.
+
+Инструкция: [project_ascii/README.md](project_ascii/README.md).

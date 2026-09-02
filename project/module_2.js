@@ -1,0 +1,9 @@
+// МОДУЛЬ 2: множества и коллекции. Замени заглушки в каждом задании.
+const blocked = value => [...value].some(item => String(item).startsWith('ВПИШИ_'));
+const task = (title, data, hint, example, draw) => ({ title, hint, example, valid: () => data.size > 0 && !blocked(data), draw });
+export const module2 = [
+ task('05 · Множество ингредиентов', new Set(['ВПИШИ_ПРОДУКТ_1','ВПИШИ_ПРОДУКТ_2','ВПИШИ_ПРОДУКТ_3']), 'Добавь продукты между скобками Set. Повтор можно оставить.', "new Set(['сыр', 'томаты', 'сыр'])", (c,f,w,h)=>{c.fillStyle='#d89a55';c.beginPath();c.ellipse(w/2,h/2,190,65,0,0,7);c.fill();[...new Set(['🍅','🧀','🌶️'])].forEach((x,i)=>{c.font='42px serif';c.fillText(x,w/2-75+i*70+Math.sin(f*.03+i)*20,h/2+10);});}),
+ task('06 · Коллекция звёзд', new Set(['ВПИШИ_ЗВЕЗДУ_1','ВПИШИ_ЗВЕЗДУ_2','ВПИШИ_ЗВЕЗДУ_3']), 'Впиши 3 названия созвездий или звёзд.', "new Set(['Сириус', 'Полярная', 'Сириус'])", (c,f,w,h)=>{for(let i=0;i<8;i++){const a=f*.01+i*.8;c.fillStyle='#ffd166';c.beginPath();c.arc(w/2+Math.cos(a)*180,h/2+Math.sin(a)*100,4+i%3,0,7);c.fill();}}),
+ task('07 · Уникальные кристаллы', new Set(['ВПИШИ_КРИСТАЛЛ_1','ВПИШИ_КРИСТАЛЛ_2','ВПИШИ_КРИСТАЛЛ_3']), 'Впиши названия кристаллов. Повторы исчезнут.', "new Set(['Рубин', 'Сапфир', 'Рубин'])", (c,f,w,h)=>{[...Array(6)].forEach((_,i)=>{c.save();c.translate(w/2+(i-2.5)*55,h/2);c.rotate(f*.01+i);c.fillStyle=['#ff6574','#65e6bd','#9b8cff'][i%3];c.beginPath();c.moveTo(0,-35);c.lineTo(24,0);c.lineTo(0,35);c.lineTo(-24,0);c.fill();c.restore();});}),
+ task('08 · Фильтр цветов', new Set(['ВПИШИ_ЦВЕТ_1','ВПИШИ_ЦВЕТ_2','ВПИШИ_ЦВЕТ_3']), 'Впиши уникальные цвета для светового шоу.', "new Set(['Красный', 'Синий', 'Красный'])", (c,f,w,h)=>{for(let i=0;i<5;i++){c.fillStyle=`hsl(${(f+i*70)%360},80%,60%)`;c.beginPath();c.arc(w/2,h/2,35+i*28,0,7);c.fill();}})
+];
