@@ -2,6 +2,7 @@
 
 import os
 import time
+from typing import List
 
 FAST = False
 
@@ -26,7 +27,7 @@ def title(text: str) -> None:
     print("=" * 60)
 
 
-def extra_scene(name: str, values: list[str], picture: str) -> None:
+def extra_scene(name: str, values: List[str], picture: str) -> None:
     """Показывает короткую ASCII-анимацию дополнительного задания."""
     if any(value.startswith("ВПИШИ_") for value in values):
         title("GAME OVER: заполни задание")
