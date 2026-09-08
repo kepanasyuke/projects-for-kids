@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>КРЕЙЗИ МАШИНА: ДИАМАНТОВАЯ ШАХТА</title>
+    <style>
+        /* ===== ГЛОБАЛЬНЫЙ СБРОС ===== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; overflow: hidden; }
+        body {
+            background-color: #030508;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            user-select: none;
+            image-rendering: pixelated;
+        }
+
+        /* ===== НАВБАР ===== */
+        .navbar {
+            background-color: #0c0f14;
+            padding: 6px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            border-bottom: 4px solid #ffffff;
+            flex-shrink: 0;
+            min-height: 50px;
+        }
+        .nav-btn {
+            background: #171c26;
+            color: #ffffff;
+            border: 3px solid #3d4960;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            box-shadow: 3px 3px #000000;
+            white-space: nowrap;
+        }
+        .nav-btn:hover { background: #252e3f; border-color: #ffffff; }
+        .nav-btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px #000000; }
+        .btn-danger { background: #661010; border-color: #931b1b; }
+        .btn-danger:hover { background: #931b1b; }
+        .audio-toggle.active { background: #0f6311; border-color: #15803d; }
+        .btn-help { background: #1a2a3a; border-color: #3a6a8a; }
+        .btn-help:hover { background: #2a4a5a; border-color: #6a9aba; }
+
+        .timer-display, .progress-display {
+            background: #000000;
+            border: 3px solid #2d3546;
+            padding: 3px 12px;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        .timer-display { color: #38fe51; margin-left: auto; }
+        .progress-display { color: #ffaa00; }
+
+        /* ===== ОСНОВНАЯ ОБЛАСТЬ ===== */
+        .main-container {
+            display: flex;
+            flex: 1;
+            padding: 10px;
+            gap: 10px;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        /* ===== ИГРОВОЕ ПОЛЕ (квадрат) ===== */
+        .game-panel {
+            flex: 1 1 60%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000000;
+            min-width: 0;
+            min-height: 0;
+        }
+        .maze-container {
+            background: #0c0f14;
+            padding: 4px;
+            border: 4px solid #ffffff;
+            box-shadow: 6px 6px #000000;
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .maze-container canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            image-rendering: pixelated;
+        }
+
+        /* ===== БОКОВАЯ ПАНЕЛЬ (без изменений) ===== */
+        .side-controls {
+            flex: 1 1 35%;
+            max-width: 550px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 280px;
+            min-height: 0;
+        }
+        .instructor-panel {
+            flex: 1;
+            background: #0c0f14;
+            border: 4px solid #1c222e;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .chat-header {
+            font-size: 14px;
+            font-weight: bold;
+            color: #38fe51;
+            margin-bottom: 6px;
+            flex-shrink: 0;
+        }
+        .chat-box {
+            background: #000000;
+            padding: 8px;
+            flex: 1;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #d1d5db;
+            overflow-y: auto;
+            border: 4px solid #14171f;
+            min-height: 0;
+        }
+
+        .code-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: #0c0f14;
+            border: 4px solid #1c222e;
+            padding: 10px;
+            flex-shrink: 0;
+        }
+        .blocks-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            align-items: center;
+        }
+        .block-btn {
+            background: #14171f;
+            color: #38fe51;
+            border: 3px solid #2d3546;
+            padding: 4px 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            box-shadow: 2px 2px #000000;
+            white-space: nowrap;
+        }
+        .block-btn:hover { border-color: #38fe51; background: #1c212d; }
+        .block-btn:active { transform: translate(1px, 1px); box-shadow: 1px 1px #000000; }
+        .block-loop { color: #fe385f; }
+        .block-loop:hover { border-color: #fe385f; }
+        .block-clear { background: #2d1f1f; color: #ff6b6b; border-color: #6b2d2d; }
+        .block-clear:hover { background: #4a2d2d; border-color: #ff6b6b; }
+        .block-prompt { background: #1f2d2d; color: #66ffcc; border-color: #2d6b6b; }
+        .block-prompt:hover { background: #2d4a4a; border-color: #66ffcc; }
+        .block-undo { background: #1f1f2d; color: #88aaff; border-color: #2d2d6b; }
+        .block-undo:hover { background: #2d2d4a; border-color: #88aaff; }
+        .block-del { background: #2d1f1f; color: #ff8888; border-color: #6b2d2d; }
+        .block-del:hover { background: #4a2d2d; border-color: #ff8888; }
+
+        .editor-wrapper {
+            position: relative;
+            width: 100%;
+            height: 150px;
+            flex-shrink: 0;
+        }
+        textarea, .backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            padding: 8px;
+            box-sizing: border-box;
+            line-height: 22px;
+            margin: 0;
+            white-space: pre;
+            overflow-y: auto;
+            tab-size: 4;
+        }
+        textarea {
+            background: transparent;
+            color: #38fe51;
+            border: 4px solid #2d3546;
+            z-index: 2;
+            resize: none;
+        }
+        textarea:focus { outline: none; border-color: #ffffff; }
+        .backdrop {
+            background: #000000;
+            color: transparent;
+            border: 4px solid transparent;
+            z-index: 1;
+            pointer-events: none;
+        }
+        .backdrop .line-highlight {
+            background-color: #2a3a3a;
+            display: block;
+            width: 100%;
+        }
+
+        .btn-launch {
+            background: #fe385f;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            padding: 10px;
+            border: 4px solid #a82343;
+            cursor: pointer;
+            box-shadow: 4px 4px #000000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            font-family: 'Courier New', monospace;
+        }
+        .btn-launch:hover { background: #ff5274; border-color: #ffffff; }
+        .btn-launch:active { transform: translate(2px, 2px); box-shadow: 2px 2px #000000; }
+
+        /* ===== МОДАЛЬНЫЕ ОКНА ===== */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-card {
+            background: #0c0f14;
+            border: 4px solid #ffffff;
+            padding: 25px;
+            max-width: 720px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: left;
+            box-shadow: 8px 8px #000000;
+        }
+        .modal-card h2 { color: #fe385f; margin-top: 0; text-align: center; }
+        .modal-card input {
+            background: #000000;
+            color: #38fe51;
+            border: 4px solid #2d3546;
+            padding: 10px;
+            font-size: 16px;
+            font-family: 'Courier New', monospace;
+            width: 80%;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+        .modal-card input:focus { border-color: #ffffff; outline: none; }
+        .modal-btn {
+            background: #0f6311;
+            color: white;
+            padding: 10px 28px;
+            border: 4px solid #15803d;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            box-shadow: 3px 3px #000000;
+            margin: 8px 0;
+            display: inline-block;
+        }
+        .modal-btn:hover { background: #15803d; border-color: #ffffff; }
+
+        .help-text {
+            color: #cbd5e1;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        .help-text code {
+            background: #1a1a2a;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #88ddff;
+            font-weight: bold;
+        }
+        .help-text .example {
+            background: #0a0a12;
+            padding: 12px;
+            border-left: 4px solid #fe385f;
+            margin: 12px 0;
+            color: #88dd88;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .quiz-question {
+            text-align: left;
+            margin: 15px 0;
+            padding: 12px;
+            background: #000000;
+            border: 2px solid #2d3546;
+        }
+        .quiz-question p { margin: 5px 0; color: #d1d5db; }
+        .quiz-option {
+            display: block;
+            margin: 5px 0;
+            color: #ffffff;
+            cursor: pointer;
+            padding: 6px 12px;
+            background: #14171f;
+            border: 2px solid #3d4960;
+        }
+        .quiz-option:hover { background: #252e3f; border-color: #38fe51; }
+        .quiz-option.selected { border-color: #fe385f; }
+
+        /* ===== АДАПТИВНОСТЬ (без изменений) ===== */
+        @media (max-width: 1400px) { .side-controls { max-width: 480px; } }
+        @media (max-width: 1200px) { .side-controls { max-width: 400px; } .block-btn { font-size: 11px; padding: 3px 8px; } .editor-wrapper { height: 130px; } }
+        @media (max-width: 1024px) { .side-controls { max-width: 340px; min-width: 220px; } .block-btn { font-size: 10px; padding: 2px 6px; } .nav-btn { font-size: 11px; padding: 3px 8px; } .timer-display, .progress-display { font-size: 12px; padding: 2px 8px; } .chat-box { font-size: 12px; } .editor-wrapper { height: 110px; } }
+        @media (max-width: 850px) {
+            .main-container { flex-direction: column; padding: 6px; gap: 6px; }
+            .game-panel { flex: 1 1 auto; max-height: 55vh; }
+            .side-controls { flex: 0 0 auto; width: 100%; max-width: 100%; flex-direction: row; flex-wrap: wrap; gap: 6px; height: auto; max-height: 45vh; min-width: unset; }
+            .instructor-panel { flex: 1 1 40%; min-width: 140px; }
+            .code-container { flex: 1 1 50%; min-width: 160px; }
+            .editor-wrapper { height: 100px; }
+            .blocks-palette .block-btn { font-size: 10px; padding: 2px 6px; }
+            .navbar { padding: 4px 8px; gap: 4px; min-height: 42px; }
+            .nav-btn { font-size: 11px; padding: 3px 6px; }
+            .timer-display, .progress-display { font-size: 11px; padding: 2px 6px; }
+            .btn-launch { font-size: 13px; padding: 6px; }
+        }
+        @media (max-width: 700px) {
+            .side-controls { flex-direction: column; max-height: 50vh; }
+            .instructor-panel { flex: 1 1 auto; min-height: 70px; }
+            .code-container { flex: 1 1 auto; }
+            .editor-wrapper { height: 80px; }
+            .blocks-palette .block-btn { font-size: 9px; padding: 2px 5px; }
+            .navbar { padding: 2px 6px; gap: 3px; min-height: 36px; }
+            .nav-btn { font-size: 10px; padding: 2px 5px; }
+            .timer-display, .progress-display { font-size: 10px; padding: 2px 5px; }
+        }
+        @media (max-width: 550px) {
+            .main-container { padding: 4px; gap: 4px; }
+            .game-panel { max-height: 50vh; }
+            .side-controls { max-height: 50vh; }
+            .instructor-panel { min-height: 60px; }
+            .code-container { padding: 6px; }
+            .editor-wrapper { height: 70px; }
+            textarea, .backdrop { font-size: 12px; padding: 4px; line-height: 18px; }
+        }
+        @media (max-width: 400px) {
+            .navbar { flex-wrap: wrap; justify-content: center; }
+            .timer-display, .progress-display { font-size: 9px; padding: 2px 4px; }
+            .nav-btn { font-size: 9px; padding: 2px 4px; }
+            .block-btn { font-size: 8px; padding: 1px 4px; }
+            .editor-wrapper { height: 60px; }
+            .btn-launch { font-size: 12px; padding: 4px; }
+            .chat-box { font-size: 10px; }
+        }
+
+        /* ===== ПИКСЕЛЬ-ИКОНКИ (без изменений) ===== */
+        .pixel-icon { display: inline-block; width: 12px; height: 12px; position: relative; background: transparent; }
+        .icon-r { box-shadow: 2px 4px #38fe51, 4px 4px #38fe51, 6px 4px #38fe51, 6px 2px #38fe51, 6px 6px #38fe51; width: 8px; height: 8px; }
+        .icon-d { box-shadow: 4px 2px #38fe51, 4px 4px #38fe51, 4px 6px #38fe51, 2px 6px #38fe51, 6px 6px #38fe51; width: 8px; height: 8px; }
+        .icon-l { box-shadow: 6px 4px #38fe51, 4px 4px #38fe51, 2px 4px #38fe51, 2px 2px #38fe51, 2px 6px #38fe51; width: 8px; height: 8px; }
+        .icon-u { box-shadow: 4px 6px #38fe51, 4px 4px #38fe51, 4px 2px #38fe51, 2px 2px #38fe51, 6px 2px #38fe51; width: 8px; height: 8px; }
+        .icon-lop { box-shadow: 2px 2px #fe385f, 4px 2px #fe385f, 6px 2px #fe385f, 6px 4px #fe385f, 6px 6px #fe385f, 4px 6px #fe385f, 2px 6px #fe385f, 2px 4px #fe385f; width: 8px; height: 8px; }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== ИНТРО ==================== -->
+    <div class="overlay" id="introModal">
+        <div class="modal-card">
+            <h2>👾 ДОБРО ПОЖАЛОВАТЬ В ШАХТУ</h2>
+            <p style="color: #cbd5e1; text-align: center; font-size: 14px;">
+                Робот застрял в глубокой шахте. Собери <b>8 кристаллов</b> и доберись до портала.<br>
+                Используй команды и циклы.
+            </p>
+            <label style="color: #ffffff; font-size: 14px;">Введи своё имя и фамилию:</label><br>
+            <input type="text" id="playerNameInput" placeholder="Например: Иван Петров" value="Тестер">
+            <br>
+            <button class="modal-btn" onclick="startGame()">🚀 НАЧАТЬ ИСПЫТАНИЕ</button>
+        </div>
+    </div>
+
+    <!-- ==================== ИНСТРУКЦИЯ ==================== -->
+    <div class="overlay" id="helpModal" style="display: none;">
+        <div class="modal-card">
+            <h2>📖 ИНСТРУКЦИЯ ПО ВВОДУ КОМАНД</h2>
+            <div class="help-text">
+                <p><b>Команды движения:</b></p>
+                <ul>
+                    <li><code>move_right()</code> – шаг вправо</li>
+                    <li><code>move_left()</code>  – шаг влево</li>
+                    <li><code>move_up()</code>    – шаг вверх</li>
+                    <li><code>move_down()</code>  – шаг вниз</li>
+                </ul>
+                <p><b>Циклы (повторение блока команд):</b></p>
+                <ul>
+                    <li>Используйте конструкцию <code>for i in range(N):</code>, где <b>N</b> – количество повторений.</li>
+                    <li>Тело цикла должно быть с <b>отступом</b> (4 пробела или табуляция) относительно <code>for</code>.</li>
+                    <li>Внутри цикла могут быть только команды движения.</li>
+                </ul>
+                <p><b>Пример правильного кода:</b></p>
+                <div class="example">for i in range(4):
+    move_right()
+    move_down()</div>
+                <p><b>Комментарии:</b> строки, начинающиеся с <code>#</code>, игнорируются.</p>
+                <p><b>Подсказки:</b></p>
+                <ul>
+                    <li>Используйте кнопки палитры для быстрой вставки команд и циклов.</li>
+                    <li>Кнопка <b>«Удалить строку (текущую)»</b> удаляет строку, в которой находится курсор.</li>
+                    <li>Во время выполнения кода текущая команда подсвечивается в редакторе.</li>
+                    <li>Если команды закончились, а робот не победил – вы увидите подсказку, что делать дальше.</li>
+                </ul>
+            </div>
+            <button class="modal-btn" onclick="document.getElementById('helpModal').style.display='none'" style="background:#2a3a4a; border-color:#4a6a8a;">ЗАКРЫТЬ</button>
+        </div>
+    </div>
+
+    <!-- ==================== ВИКТОРИНА ==================== -->
+    <div class="overlay" id="quizModal" style="display: none;">
+        <div class="modal-card">
+            <h2>🏆 ПОЗДРАВЛЯЕМ, <span id="winnerName"></span>!</h2>
+            <p style="color: #38fe51; font-size: 18px; text-align:center;">Время: <span id="finalTime"></span> секунд</p>
+            <p style="color: #cbd5e1; text-align:center;">А теперь проверь свои знания кода — ответь на вопросы:</p>
+            <div id="quizContainer"></div>
+            <button class="modal-btn" onclick="showQuizResult()" id="quizSubmitBtn" style="display: none;">ПОКАЗАТЬ РЕЗУЛЬТАТ</button>
+            <div id="quizFinalResult" style="margin-top: 15px; font-size: 20px; text-align:center;"></div>
+            <button class="modal-btn" onclick="resetFullGame()" style="background: #661010; border-color: #931b1b;">↺ ИГРАТЬ ЗАНОВО</button>
+        </div>
+    </div>
+
+    <!-- ==================== НАВБАР ==================== -->
+    <div class="navbar">
+        <button class="nav-btn" onclick="resetLevel()">Сбросить Уровень</button>
+        <button class="nav-btn" onclick="togglePause()" id="pauseBtn">Пауза</button>
+        <button class="nav-btn btn-danger" onclick="window.close()">Выход</button>
+        <button class="nav-btn audio-toggle" id="musicBtn" onclick="toggleMusic()">Музыка: ВЫКЛ</button>
+        <button class="nav-btn btn-help" onclick="document.getElementById('helpModal').style.display='flex'">📖 Инструкция</button>
+        <span class="timer-display" id="timerDisplay">⏱ 0 с</span>
+        <span class="progress-display" id="progressDisplay">💎 0 / 8</span>
+    </div>
+
+    <!-- ==================== ОСНОВНОЙ ИНТЕРФЕЙС ==================== -->
+    <div class="main-container">
+        <div class="game-panel">
+            <div class="maze-container">
+                <canvas id="gameCanvas" width="1024" height="1024"></canvas>
+            </div>
+        </div>
+
+        <div class="side-controls">
+            <div class="instructor-panel">
+                <div class="chat-header">&gt; ЦЕНТР СВЯЗИ:</div>
+                <div class="chat-box" id="chat"></div>
+            </div>
+
+            <div class="code-container">
+                <div class="blocks-palette">
+                    <button class="block-btn" onclick="addCode('move_right()\n')" title="Вправо"><span class="pixel-icon icon-r"></span> Вправо</button>
+                    <button class="block-btn" onclick="addCode('move_down()\n')" title="Вниз"><span class="pixel-icon icon-d"></span> Вниз</button>
+                    <button class="block-btn" onclick="addCode('move_left()\n')" title="Влево"><span class="pixel-icon icon-l"></span> Влево</button>
+                    <button class="block-btn" onclick="addCode('move_up()\n')" title="Вверх"><span class="pixel-icon icon-u"></span> Вверх</button>
+                    <button class="block-btn block-loop" onclick="addCode('for i in range(5):\n    move_right()\n')" title="Повторить 5 раз"><span class="pixel-icon icon-lop"></span> Повторить 5 раз</button>
+                    <button class="block-btn block-prompt" onclick="insertLoopWithPrompt()" title="Ввести число повторений"><span class="pixel-icon icon-lop"></span> Повторить (ввести число)</button>
+                    <button class="block-btn block-undo" onclick="undoLastLine()" title="Удалить последнюю строку">↩ Удалить последнюю</button>
+                    <button class="block-btn block-del" onclick="deleteCurrentLine()" title="Удалить строку с курсором">✕ Удалить строку</button>
+                    <button class="block-btn block-clear" onclick="clearCode()" title="Очистить всё"><span style="font-size:18px;">✕</span> Очистить все</button>
+                </div>
+
+                <div class="editor-wrapper">
+                    <div class="backdrop" id="backdrop"></div>
+                    <textarea id="codeField" onscroll="syncScroll()" oninput="syncBackdropText()" placeholder="# Введи или собери алгоритм блоками..."></textarea>
+                </div>
+
+                <button class="btn-launch" onclick="launchCode()">[ ЗАПУСК МАШИНЫ ]</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================================================================
+        // 1. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+        // ================================================================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const COLS = 16;
+        const ROWS = 32;
+        const TOTAL_BATTERIES = 8;
+
+        let mazeMap = [];
+        let robotX = 1, robotY = 1;
+        let gatheredBatteries = 0;
+        let isPaused = false, isAnimating = false;
+        let typewriterTimeout = null;
+        let playerName = '';
+        let startTime = null;
+        let timerInterval = null;
+        let elapsedSeconds = 0;
+        let gameFinished = false;
+
+        let currentHighlightLine = -1;
+        let finishBlink = false;
+
+        // Звёздный фон (остаётся)
+        const stars = [];
+        for (let i = 0; i < 80; i++) {
+            stars.push({
+                x: Math.random() * 1024,
+                y: Math.random() * 1024,
+                r: Math.random() * 1.5 + 0.5,
+                alpha: Math.random() * 0.8 + 0.2,
+                speed: Math.random() * 0.02 + 0.01
+            });
+        }
+
+        // ================================================================
+        // 2. КАРТА (8 кристаллов + финиш)
+        // ================================================================
+        const mapData = [
+            [1, 'S', 0, 0, 0, 0, 'B', 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 'B', 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 'B', 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+            [1, 0, 'B', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+            [1, 0, 1, 0, 0, 0, 0, 'B', 0, 0, 0, 0, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 0, 1, 0, 0, 'B', 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 'B', 0, 1],
+            [1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1],
+            [1, 0, 'B', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1],
+            [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 'F', 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        ];
+
+        // ================================================================
+        // 3. АУДИО (без изменений)
+        // ================================================================
+        let audioCtx = null;
+        let musicInterval = null;
+        let isMusicPlaying = false;
+        let melodyStep = 0;
+        const retroScale = [146.83, 164.81, 196.00, 220.00, 293.66];
+        function getAudioContext() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return audioCtx;
+        }
+        const defSound = (freq, type, duration, vol = 0.1) => {
+            const ctxRef = getAudioContext();
+            if (!ctxRef) return;
+            try {
+                let osc = ctxRef.createOscillator();
+                let gain = ctxRef.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, ctxRef.currentTime);
+                gain.gain.setValueAtTime(vol, ctxRef.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctxRef.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctxRef.destination);
+                osc.start();
+                osc.stop(ctxRef.currentTime + duration);
+            } catch (e) {}
+        };
+        const playStepSound = () => defSound(110, 'square', 0.08, 0.08);
+        const playBatterySound = () => {
+            defSound(440, 'square', 0.1, 0.1);
+            setTimeout(() => defSound(659.25, 'square', 0.15, 0.1), 60);
+        };
+        const playCrashSound = () => defSound(75, 'sawtooth', 0.4, 0.2);
+        const playErrorSound = () => {
+            defSound(150, 'sawtooth', 0.2, 0.3);
+            setTimeout(() => defSound(100, 'sawtooth', 0.25, 0.3), 80);
+        };
+        const playWinSound = () => {
+            [293.66, 349.23, 392.00, 587.33].forEach((f, i) => setTimeout(() => defSound(f, 'square', 0.2, 0.1), i * 90));
+        };
+        function toggleMusic() {
+            getAudioContext();
+            const btn = document.getElementById('musicBtn');
+            if (isMusicPlaying) {
+                if (musicInterval) clearInterval(musicInterval);
+                isMusicPlaying = false;
+                btn.innerText = "Музыка: ВЫКЛ";
+                btn.classList.remove('active');
+            } else {
+                isMusicPlaying = true;
+                btn.innerText = "Музыка: ВКЛ";
+                btn.classList.add('active');
+                musicInterval = setInterval(() => {
+                    if (isPaused) return;
+                    let freq = retroScale[Math.floor(Math.random() * retroScale.length)];
+                    if (melodyStep % 4 === 0) defSound(73.42, 'sawtooth', 0.3, 0.04);
+                    defSound(freq, 'square', 0.15, 0.01);
+                    melodyStep++;
+                }, 220);
+            }
+        }
+
+        // ================================================================
+        // 4. СПРАЙТЫ (без изменений)
+        // ================================================================
+        const robotHD = [
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,5,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,1,1,1,3,3,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,1,1,1,1,3,3,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,1,1,1,1,1,1,1,1,4,4,4,4,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,1,1,1,1,1,1,1,1,1,4,4,4,4,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+            [0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
+            [0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
+            [0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
+            [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        ];
+
+        const batteryHD = [
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        ];
+
+        const finishHD = [
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+            [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+        ];
+
+        // ================================================================
+        // 5. ФУНКЦИИ ОТРИСОВКИ С МАСШТАБИРОВАНИЕМ
+        // ================================================================
+
+        // Главная функция рисования, пересчитывает размер клетки и отрисовывает всё
+        function drawMaze() {
+            const w = canvas.width;
+            const h = canvas.height;
+            // Вычисляем размер клетки так, чтобы 16 столбцов и 32 строки влезли
+            const cellSize = Math.min(w / COLS, h / ROWS);
+            // Смещение для центрирования
+            const offsetX = (w - cellSize * COLS) / 2;
+            const offsetY = (h - cellSize * ROWS) / 2;
+
+            ctx.clearRect(0, 0, w, h);
+            // Звёздный фон
+            drawStars();
+
+            // Рисуем стены и пустые клетки
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    drawStaticCell(r, c, cellSize, offsetX, offsetY);
+                    drawInteractiveItems(r, c, cellSize, offsetX, offsetY);
+                }
+            }
+
+            // Подписи СТАРТ и ФИНИШ
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (mazeMap[r][c] === 'S') {
+                        drawLabel(c, r, 'СТАРТ', '#38fe51', 16, cellSize, offsetX, offsetY);
+                    } else if (mazeMap[r][c] === 'F') {
+                        drawLabel(c, r, 'ФИНИШ', '#fe385f', 16, cellSize, offsetX, offsetY);
+                    }
+                }
+            }
+
+            // Робот
+            const eyeColor = isAnimating ? '#fe385f' : (isPaused ? '#eab308' : '#38fe51');
+            drawPixelBlockHD(robotX, robotY, robotHD, ['#38fe51', '#0e1117', eyeColor, '#1c9c34', '#ffffff'], cellSize, offsetX, offsetY);
+
+            // Искры от робота при движении
+            if (isAnimating) {
+                for (let i = 0; i < 2; i++) {
+                    const angle = Date.now() / 200 + i * 1.8;
+                    const rad = 6 + Math.sin(Date.now() / 300 + i) * 3;
+                    const px = offsetX + robotX * cellSize + cellSize / 2 + Math.cos(angle) * rad;
+                    const py = offsetY + robotY * cellSize + cellSize / 2 + Math.sin(angle) * rad + 14;
+                    ctx.beginPath();
+                    ctx.arc(px, py, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255,200,100,${0.5 + 0.3 * Math.sin(Date.now() / 200 + i)})`;
+                    ctx.fill();
+                }
+            }
+        }
+
+        // Отрисовка одной клетки (стена или пустота)
+        function drawStaticCell(r, c, cellSize, offsetX, offsetY) {
+            const x = offsetX + c * cellSize;
+            const y = offsetY + r * cellSize;
+            if (mazeMap[r][c] === 1) {
+                const gradient = ctx.createLinearGradient(x, y, x + cellSize, y + cellSize);
+                gradient.addColorStop(0, '#1a2332');
+                gradient.addColorStop(0.5, '#2a3a50');
+                gradient.addColorStop(1, '#0f1825');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, y, cellSize, cellSize);
+                ctx.strokeStyle = '#3a4a60';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(x, y, cellSize, cellSize);
+                ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                ctx.fillRect(x + 4, y + 4, 8, 8);
+            } else {
+                ctx.fillStyle = '#0a0a12';
+                ctx.fillRect(x, y, cellSize, cellSize);
+                ctx.strokeStyle = '#151a22';
+                ctx.lineWidth = 0.5;
+                ctx.strokeRect(x, y, cellSize, cellSize);
+            }
+        }
+
+        // Отрисовка предметов (кристаллы, финиш)
+        function drawInteractiveItems(r, c, cellSize, offsetX, offsetY) {
+            if (mazeMap[r][c] === 'F') {
+                const pulse = Math.sin(Date.now() / 400) * 0.3 + 0.7;
+                ctx.save();
+                ctx.shadowColor = '#fe385f';
+                ctx.shadowBlur = 30 * pulse;
+                drawPixelBlockHD(c, r, finishHD, ['#ec4899', '#bc1b6c', '#ffffff', '#000000'], cellSize, offsetX, offsetY);
+                ctx.restore();
+                if (finishBlink) {
+                    ctx.save();
+                    ctx.strokeStyle = `rgba(254,56,95,${0.3 + 0.3 * pulse})`;
+                    ctx.lineWidth = 4;
+                    ctx.shadowColor = '#fe385f';
+                    ctx.shadowBlur = 40;
+                    ctx.strokeRect(offsetX + c * cellSize, offsetY + r * cellSize, cellSize, cellSize);
+                    ctx.restore();
+                }
+            }
+            if (mazeMap[r][c] === 'B') {
+                const glow = Math.sin(Date.now() / 500 + r + c) * 0.2 + 0.8;
+                ctx.save();
+                ctx.shadowColor = '#ffaa00';
+                ctx.shadowBlur = 25 * glow;
+                drawPixelBlockHD(c, r, batteryHD, ['#ffaa00', '#ff8800', '#cc5500', '#ffffff', '#331100'], cellSize, offsetX, offsetY);
+                ctx.restore();
+                // Искры
+                for (let i = 0; i < 3; i++) {
+                    const angle = Date.now() / 600 + i * 2.1;
+                    const rad = 8 + Math.sin(Date.now() / 400 + i) * 4;
+                    const px = offsetX + c * cellSize + cellSize / 2 + Math.cos(angle) * rad;
+                    const py = offsetY + r * cellSize + cellSize / 2 + Math.sin(angle) * rad;
+                    ctx.beginPath();
+                    ctx.arc(px, py, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255,200,80,${0.4 + 0.3 * Math.sin(Date.now() / 300 + i)})`;
+                    ctx.fill();
+                }
+            }
+        }
+
+        // Отрисовка пиксельного спрайта
+        function drawPixelBlockHD(cellX, cellY, matrix, colors, cellSize, offsetX, offsetY) {
+            const pxSize = cellSize / 32; // каждый пиксель спрайта будет такого размера
+            const startX = offsetX + cellX * cellSize + (cellSize - pxSize * 32) / 2; // центрируем спрайт в клетке
+            const startY = offsetY + cellY * cellSize + (cellSize - pxSize * 32) / 2;
+            ctx.save();
+            ctx.translate(startX, startY);
+            for (let r = 0; r < matrix.length; r++) {
+                for (let c = 0; c < matrix[r].length; c++) {
+                    const idx = matrix[r][c];
+                    if (idx > 0) {
+                        ctx.fillStyle = colors[idx - 1];
+                        ctx.fillRect(c * pxSize, r * pxSize, pxSize, pxSize);
+                    }
+                }
+            }
+            ctx.restore();
+        }
+
+        // Отрисовка текстовой метки
+        function drawLabel(cellX, cellY, text, color, fontSize, cellSize, offsetX, offsetY) {
+            const x = offsetX + cellX * cellSize + cellSize / 2;
+            const y = offsetY + cellY * cellSize + cellSize / 2;
+            ctx.save();
+            ctx.font = `bold ${fontSize}px "Courier New", monospace`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor = '#000000';
+            ctx.shadowBlur = 8;
+            ctx.fillStyle = color;
+            ctx.fillText(text, x, y);
+            ctx.restore();
+        }
+
+        // Звёздный фон
+        function drawStars() {
+            stars.forEach(star => {
+                star.alpha += star.speed * (Math.random() > 0.99 ? 0.1 : 0);
+                if (star.alpha > 1) star.alpha = 0.2;
+                if (star.alpha < 0.2) star.alpha = 0.2;
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255,255,255,${star.alpha * 0.5})`;
+                ctx.fill();
+            });
+        }
+
+        // ================================================================
+        // 6. АНИМАЦИЯ (перерисовка)
+        // ================================================================
+        let animationFrame = null;
+        function animate() {
+            if (!gameFinished && !isPaused) {
+                drawMaze();
+            }
+            animationFrame = requestAnimationFrame(animate);
+        }
+        animate();
+
+        // ================================================================
+        // 7. УПРАВЛЕНИЕ ИГРОЙ (без изменений)
+        // ================================================================
+        function initMap() {
+            mazeMap = JSON.parse(JSON.stringify(mapData));
+            robotX = 1;
+            robotY = 1;
+            gatheredBatteries = 0;
+            gameFinished = false;
+            updateProgress();
+            currentHighlightLine = -1;
+            syncBackdropText();
+            drawMaze();
+        }
+
+        function updateProgress() {
+            document.getElementById('progressDisplay').textContent = `💎 ${gatheredBatteries} / ${TOTAL_BATTERIES}`;
+        }
+
+        function startGame() {
+            const nameInput = document.getElementById('playerNameInput');
+            playerName = nameInput.value.trim() || 'Игрок';
+            document.getElementById('introModal').style.display = 'none';
+            startTime = Date.now();
+            elapsedSeconds = 0;
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+            resetLevel();
+            typeWriter(`> ДОБРО ПОЖАЛОВАТЬ, ${playerName}!<br>> ВРЕМЯ ПОШЛО... УДАЧИ!`, 'chat', 20);
+        }
+
+        function updateTimer() {
+            if (isPaused || gameFinished) return;
+            const now = Date.now();
+            elapsedSeconds = Math.floor((now - startTime) / 1000);
+            document.getElementById('timerDisplay').textContent = `⏱ ${elapsedSeconds} с`;
+        }
+
+        function resetLevel() {
+            if (gameFinished) return;
+            initMap();
+            document.getElementById('chat').innerHTML = '> УРОВЕНЬ СБРОШЕН';
+        }
+
+        function togglePause() {
+            if (gameFinished) return;
+            isPaused = !isPaused;
+            document.getElementById('pauseBtn').innerText = isPaused ? 'Продолжить' : 'Пауза';
+            if (!isPaused) {
+                startTime = Date.now() - elapsedSeconds * 1000;
+            }
+        }
+
+        // ================================================================
+        // 8. РЕДАКТОР И ЧАТ (без изменений)
+        // ================================================================
+        function syncScroll() {
+            const textarea = document.getElementById('codeField');
+            const backdrop = document.getElementById('backdrop');
+            backdrop.scrollTop = textarea.scrollTop;
+            backdrop.scrollLeft = textarea.scrollLeft;
+        }
+
+        function syncBackdropText() {
+            const textarea = document.getElementById('codeField');
+            const backdrop = document.getElementById('backdrop');
+            const lines = textarea.value.split('\n');
+            let html = '';
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const cls = (i === currentHighlightLine) ? 'line-highlight' : '';
+                html += `<span class="${cls}">${line.replace(/ /g, '&nbsp;')}</span>\n`;
+            }
+            backdrop.innerHTML = html;
+            backdrop.scrollTop = textarea.scrollTop;
+            backdrop.scrollLeft = textarea.scrollLeft;
+            if (currentHighlightLine >= 0) {
+                const highlightEl = backdrop.querySelector('.line-highlight');
+                if (highlightEl) {
+                    highlightEl.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                }
+            }
+        }
+
+        function typeWriter(text, elementId, speed = 25) {
+            let i = 0;
+            const elem = document.getElementById(elementId);
+            if (typewriterTimeout) clearTimeout(typewriterTimeout);
+            elem.innerHTML = '';
+            function type() {
+                if (i < text.length) {
+                    if (text.substr(i, 4) === '<br>') {
+                        elem.innerHTML += '<br>';
+                        i += 4;
+                    } else {
+                        elem.innerHTML += text.charAt(i);
+                        i++;
+                    }
+                    typewriterTimeout = setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        function addCode(text) {
+            const txtArea = document.getElementById('codeField');
+            txtArea.value += text;
+            syncBackdropText();
+        }
+
+        function clearCode() {
+            document.getElementById('codeField').value = '';
+            currentHighlightLine = -1;
+            syncBackdropText();
+            document.getElementById('chat').innerHTML = '> ТЕКСТ ОЧИЩЕН. ВВЕДИ НОВЫЙ АЛГОРИТМ.';
+        }
+
+        function undoLastLine() {
+            const textarea = document.getElementById('codeField');
+            let val = textarea.value;
+            const lastNewline = val.lastIndexOf('\n');
+            if (lastNewline === -1) {
+                val = '';
+            } else {
+                val = val.substring(0, lastNewline);
+            }
+            textarea.value = val;
+            currentHighlightLine = -1;
+            syncBackdropText();
+            document.getElementById('chat').innerHTML = '> ПОСЛЕДНЯЯ СТРОКА УДАЛЕНА.';
+        }
+
+        function deleteCurrentLine() {
+            const textarea = document.getElementById('codeField');
+            const cursorPos = textarea.selectionStart;
+            const value = textarea.value;
+            const start = value.lastIndexOf('\n', cursorPos - 1) + 1;
+            let end = value.indexOf('\n', cursorPos);
+            if (end === -1) end = value.length;
+            const before = value.substring(0, start);
+            const after = value.substring(end + 1);
+            const newValue = before + after;
+            textarea.value = newValue;
+            const newPos = Math.min(start, newValue.length);
+            textarea.setSelectionRange(newPos, newPos);
+            currentHighlightLine = -1;
+            syncBackdropText();
+            document.getElementById('chat').innerHTML = '> ТЕКУЩАЯ СТРОКА УДАЛЕНА.';
+        }
+
+        function insertLoopWithPrompt() {
+            const count = prompt('Введите количество повторений (целое число > 0):', '5');
+            if (count === null) return;
+            const num = parseInt(count);
+            if (isNaN(num) || num < 1) {
+                alert('Введите целое число больше 0.');
+                return;
+            }
+            const code = `for i in range(${num}):\n    `;
+            addCode(code);
+            const textarea = document.getElementById('codeField');
+            textarea.focus();
+            const pos = textarea.value.length;
+            textarea.setSelectionRange(pos, pos);
+            syncBackdropText();
+        }
+
+        function highlightLine(lineIndex) {
+            if (currentHighlightLine !== lineIndex) {
+                currentHighlightLine = lineIndex;
+                syncBackdropText();
+            }
+        }
+
+        // ================================================================
+        // 9. ПАРСЕР И ИСПОЛНИТЕЛЬ (без изменений)
+        // ================================================================
+        function parseUserCode(userCode) {
+            const lines = userCode.split('\n');
+            const actions = [];
+            const validCommands = ["move_right()", "move_left()", "move_up()", "move_down()"];
+            let i = 0;
+            while (i < lines.length) {
+                const raw = lines[i];
+                const line = raw.trim();
+                if (!line || line.startsWith('#')) { i++; continue; }
+
+                if (line.startsWith('for ')) {
+                    const match = line.match(/for\s+\w+\s+in\s+range\(\s*(\d+)\s*\):?/);
+                    if (!match) {
+                        return { error: true, msg: `Ошибка в строке ${i+1}: неверный формат цикла!<br>Нужно: <b style='color:#fe385f;'>for i in range(число):</b>` };
+                    }
+                    const count = parseInt(match[1]);
+                    const body = [];
+                    let j = i + 1;
+                    while (j < lines.length && (lines[j].startsWith(' ') || lines[j].startsWith('\t') || lines[j].trim() === '')) {
+                        const cmd = lines[j].trim();
+                        if (cmd && !cmd.startsWith('#')) {
+                            if (!validCommands.includes(cmd)) {
+                                return { error: true, msg: `Ошибка в строке ${j+1}: команда <b style='color:#fe385f;'>${cmd}</b> неизвестна` };
+                            }
+                            body.push(cmd);
+                        }
+                        j++;
+                    }
+                    if (body.length === 0) {
+                        return { error: true, msg: `Ошибка в строке ${i+1}: цикл пустой!` };
+                    }
+                    for (let k = 0; k < count; k++) {
+                        body.forEach(cmd => {
+                            const act = mapCommand(cmd);
+                            if (act) actions.push({ action: act, line: i });
+                        });
+                    }
+                    i = j;
+                    continue;
+                }
+
+                if (!validCommands.includes(line)) {
+                    return { error: true, msg: `Ошибка в строке ${i+1}: команда <b style='color:#fe385f;'>${line}</b> не распознана` };
+                }
+                const act = mapCommand(line);
+                if (act) actions.push({ action: act, line: i });
+                i++;
+            }
+            return { actions };
+        }
+
+        function mapCommand(cmd) {
+            if (cmd.includes('right')) return 'RIGHT';
+            if (cmd.includes('left')) return 'LEFT';
+            if (cmd.includes('up')) return 'UP';
+            if (cmd.includes('down')) return 'DOWN';
+            return null;
+        }
+
+        function launchCode() {
+            if (gameFinished) return;
+            const code = document.getElementById('codeField').value;
+            const result = parseUserCode(code);
+            if (result.error) {
+                document.getElementById('chat').innerHTML = 'ОШИБКА: ' + result.msg;
+                playErrorSound();
+                return;
+            }
+            const actions = result.actions;
+            if (!actions || actions.length === 0) {
+                document.getElementById('chat').innerHTML = '> НЕТ КОМАНД ДЛЯ ВЫПОЛНЕНИЯ';
+                return;
+            }
+            document.getElementById('chat').innerHTML = '> АЛГОРИТМ ПРИНЯТ. ЗАПУСК...';
+            executeActions(actions);
+        }
+
+        function executeActions(actions) {
+            if (isAnimating || gameFinished) return;
+            isAnimating = true;
+            let idx = 0;
+            const step = () => {
+                if (idx >= actions.length || isPaused || gameFinished) {
+                    isAnimating = false;
+                    highlightLine(-1);
+                    if (!gameFinished) {
+                        const onFinish = (mazeMap[robotY] && mazeMap[robotY][robotX] === 'F');
+                        let msg = '';
+                        if (gatheredBatteries === TOTAL_BATTERIES && onFinish) {
+                            gameFinished = true;
+                            playWinSound();
+                            clearInterval(timerInterval);
+                            showQuiz();
+                            drawMaze();
+                            return;
+                        } else if (gatheredBatteries === TOTAL_BATTERIES && !onFinish) {
+                            msg = '> ВСЕ КРИСТАЛЛЫ СОБРАНЫ! ТЕПЕРЬ ДОБЕРИСЬ ДО ФИНИША.';
+                        } else if (onFinish && gatheredBatteries < TOTAL_BATTERIES) {
+                            msg =
+                                `> ТЫ НА ФИНИШЕ, НО НЕ СОБРАЛ ВСЕ КРИСТАЛЛЫ! СОБРАНО ${gatheredBatteries} ИЗ ${TOTAL_BATTERIES}.`;
+                        } else {
+                            msg = `> СОБРАНО ${gatheredBatteries} ИЗ ${TOTAL_BATTERIES} КРИСТАЛЛОВ. ПРОДОЛЖАЙ!`;
+                        }
+                        document.getElementById('chat').innerHTML = msg;
+                        drawMaze();
+                    }
+                    return;
+                }
+                const act = actions[idx];
+                highlightLine(act.line);
+
+                let dx = 0, dy = 0;
+                if (act.action === 'RIGHT') dx = 1;
+                else if (act.action === 'LEFT') dx = -1;
+                else if (act.action === 'UP') dy = -1;
+                else if (act.action === 'DOWN') dy = 1;
+                const newX = robotX + dx;
+                const newY = robotY + dy;
+                if (newY >= 0 && newY < mazeMap.length && newX >= 0 && newX < mazeMap[0].length && mazeMap[newY][newX] !== 1) {
+                    robotX = newX;
+                    robotY = newY;
+                    playStepSound();
+                    if (mazeMap[newY][newX] === 'B') {
+                        gatheredBatteries++;
+                        mazeMap[newY][newX] = 0;
+                        playBatterySound();
+                        updateProgress();
+                        document.getElementById('chat').innerHTML =
+                            `> КРИСТАЛЛ СОБРАН! (${gatheredBatteries}/${TOTAL_BATTERIES})`;
+                    }
+                    if (mazeMap[newY][newX] === 'F' && gatheredBatteries === TOTAL_BATTERIES) {
+                        gameFinished = true;
+                        isAnimating = false;
+                        playWinSound();
+                        drawMaze();
+                        clearInterval(timerInterval);
+                        showQuiz();
+                        highlightLine(-1);
+                        return;
+                    }
+                    drawMaze();
+                } else {
+                    playCrashSound();
+                    document.getElementById('chat').innerHTML = '> СТОЛКНОВЕНИЕ СО СТЕНОЙ!';
+                    isAnimating = false;
+                    highlightLine(-1);
+                    return;
+                }
+                idx++;
+                setTimeout(step, 300);
+            };
+            step();
+        }
+
+        // ================================================================
+        // 10. ВИКТОРИНА (без изменений)
+        // ================================================================
+        const quizData = [
+            {
+                question: 'Какой оператор используется для создания цикла с фиксированным числом повторений?',
+                options: ['while', 'for', 'repeat', 'loop'],
+                correct: 1
+            },
+            {
+                question: 'Какая команда заставляет робота двигаться вправо?',
+                options: ['move_right()', 'go_right()', 'right()', 'step_right()'],
+                correct: 0
+            },
+            {
+                question: 'Что обозначает отступ (пробел или табуляция) в теле цикла?',
+                options: ['Ничего не обозначает', 'Команды внутри цикла', 'Комментарий', 'Ошибку'],
+                correct: 1
+            },
+            {
+                question: 'Какой символ используется для комментария в Python?',
+                options: ['//', '/*', '#', '--'],
+                correct: 2
+            }
+        ];
+
+        let quizAnswers = [];
+        let quizSubmitted = false;
+
+        function showQuiz() {
+            document.getElementById('winnerName').textContent = playerName;
+            document.getElementById('finalTime').textContent = elapsedSeconds;
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = '';
+            quizAnswers = [];
+            quizSubmitted = false;
+            document.getElementById('quizSubmitBtn').style.display = 'none';
+            document.getElementById('quizFinalResult').innerHTML = '';
+
+            quizData.forEach((q, qIdx) => {
+                const div = document.createElement('div');
+                div.className = 'quiz-question';
+                div.innerHTML = `<p><b>${qIdx+1}. ${q.question}</b></p>`;
+                q.options.forEach((opt, oIdx) => {
+                    const label = document.createElement('label');
+                    label.className = 'quiz-option';
+                    label.textContent = opt;
+                    label.dataset.q = qIdx;
+                    label.dataset.opt = oIdx;
+                    label.addEventListener('click', () => {
+                        if (quizSubmitted) return;
+                        const siblings = div.querySelectorAll('.quiz-option');
+                        siblings.forEach(s => s.classList.remove('selected'));
+                        label.classList.add('selected');
+                        quizAnswers[qIdx] = oIdx;
+                        if (quizAnswers.length === quizData.length && !quizAnswers.includes(undefined)) {
+                            document.getElementById('quizSubmitBtn').style.display = 'inline-block';
+                        }
+                    });
+                    div.appendChild(label);
+                });
+                container.appendChild(div);
+            });
+
+            document.getElementById('quizModal').style.display = 'flex';
+        }
+
+        function showQuizResult() {
+            if (quizSubmitted) return;
+            let correctCount = 0;
+            quizData.forEach((q, i) => {
+                const userAns = quizAnswers[i];
+                const isCorrect = (userAns === q.correct);
+                if (isCorrect) correctCount++;
+                const options = document.querySelectorAll('.quiz-question')[i].querySelectorAll('.quiz-option');
+                options.forEach((label, idx) => {
+                    if (idx === q.correct) {
+                        label.style.borderColor = '#38fe51';
+                        label.style.background = '#0f2b1f';
+                    } else if (idx === userAns && !isCorrect) {
+                        label.style.borderColor = '#fe385f';
+                        label.style.background = '#2b0f0f';
+                    }
+                    label.style.cursor = 'default';
+                    label.style.pointerEvents = 'none';
+                });
+            });
+            document.getElementById('quizSubmitBtn').style.display = 'none';
+            const resultDiv = document.getElementById('quizFinalResult');
+            resultDiv.innerHTML = `✅ Правильных ответов: ${correctCount} из ${quizData.length}`;
+            if (correctCount === quizData.length) {
+                resultDiv.innerHTML += ' 🎉 Отлично! Ты знаешь код!';
+            } else {
+                resultDiv.innerHTML += ' 📖 Повтори основы и попробуй снова.';
+            }
+            quizSubmitted = true;
+        }
+
+        function resetFullGame() {
+            document.getElementById('quizModal').style.display = 'none';
+            document.getElementById('introModal').style.display = 'flex';
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById('timerDisplay').textContent = '⏱ 0 с';
+            gameFinished = false;
+            isPaused = false;
+            isAnimating = false;
+            document.getElementById('pauseBtn').innerText = 'Пауза';
+            initMap();
+            document.getElementById('codeField').value = '';
+            currentHighlightLine = -1;
+            syncBackdropText();
+            document.getElementById('chat').innerHTML = '>';
+        }
+
+        // ================================================================
+        // 11. ИНИЦИАЛИЗАЦИЯ
+        // ================================================================
+        initMap();
+        document.getElementById('codeField').focus();
+
+        // При изменении размера окна перерисовываем (хотя анимация делает это постоянно)
+        window.addEventListener('resize', () => {});
+    </script>
+</body>
+</html>
