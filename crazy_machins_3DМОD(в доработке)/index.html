@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Мастерская Профессора Шестеренкина</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+<style>
+:root{--bg:#34261c;--panel:linear-gradient(150deg,#4a3426,#2a1e16);--border:#6a4a34;--accent:#d6a060;--surface:#5c3f2e;--metal:#9a8068;--dark:#1e1410;--light:#e8dcd0;--ok:#4a8a4a;--bad:#b85040}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--light);display:flex}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--dark)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+#panel{width:520px;min-width:520px;height:100%;background:var(--panel);border-right:3px solid var(--border);display:flex;flex-direction:column;padding:14px 18px 12px 18px;z-index:10;position:relative;overflow:hidden}
+#panel::after{content:'';position:absolute;bottom:-40px;right:-40px;width:180px;height:180px;border-radius:50%;border:2px solid var(--border);opacity:.06;pointer-events:none}
+
+.top{display:flex;justify-content:space-between;align-items:center;padding-bottom:8px;border-bottom:2px solid var(--border);margin-bottom:8px}
+.top h1{font-size:14px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--light)}
+.top h1 span{color:var(--accent)}
+
+.lvl-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.lvl-bar .info{font-size:10px;color:var(--metal);letter-spacing:1px;font-weight:700}
+.lvl-bar .btns{display:flex;gap:4px}
+.lvl-btn{background:var(--dark);border:1px solid var(--border);color:var(--metal);padding:4px 12px;font-size:9px;font-weight:700;cursor:pointer;border-radius:6px;transition:.2s;text-transform:uppercase;letter-spacing:1px;font-family:'Nunito',sans-serif}
+.lvl-btn:hover{color:var(--light);background:var(--surface)}
+
+.assist{display:flex;gap:8px;background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:7px 10px;margin-bottom:8px;min-height:44px}
+.assist .port{width:28px;height:28px;border-radius:50%;background:var(--surface);border:2px solid var(--accent);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--accent)}
+.assist .txt{font-size:11.5px;line-height:1.5;color:var(--metal);padding:2px 0}
+.assist .txt b{color:var(--light);font-weight:700}
+.assist .txt .h{color:var(--accent);font-weight:600}
+
+.tblock{background:var(--dark);border:1px solid var(--border);border-radius:8px;padding:7px 10px;margin-bottom:8px;display:flex;align-items:flex-start;gap:6px}
+.tblock .t{font-size:11px;color:var(--metal);line-height:1.5}
+.tblock .t b{color:var(--light);font-weight:700}
+
+.sg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px}
+.sc{background:var(--dark);border:1px solid var(--border);border-radius:6px;padding:5px 8px}
+.sc .l{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--metal);font-weight:700;display:block}
+.sc .v{font-size:13px;font-weight:700;color:var(--light);font-family:'JetBrains Mono',monospace}
+#tmr{color:var(--accent);font-size:14px}
+
+.chn{display:flex;align-items:center;gap:6px;background:var(--dark);border:1px solid var(--border);border-radius:6px;padding:5px 10px;margin-bottom:8px}
+.chn-d{width:6px;height:6px;border-radius:50%;background:var(--surface);flex-shrink:0;transition:.3s}
+.chn-d.ok{background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.chn-d.bd{background:var(--bad);box-shadow:0 0 6px var(--bad)}
+.chn .l{font-size:9px;letter-spacing:1px;color:var(--metal);font-weight:700;text-transform:uppercase}
+#chs{font-size:11px;font-weight:700;letter-spacing:.5px;margin-left:auto;color:var(--bad);transition:.3s;font-family:'JetBrains Mono',monospace}
+
+.es{flex:1;display:flex;flex-direction:column;margin-bottom:6px;min-height:0}
+.es label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--metal);margin-bottom:4px;font-weight:700}
+.ew{flex:1;display:flex;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:var(--dark);min-height:60px}
+.ln{width:28px;background:var(--dark);border-right:1px solid var(--border);padding:6px 0;text-align:center;font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.7;color:var(--surface);user-select:none;overflow:hidden}
+.ei{flex:1;position:relative;overflow:hidden}
+.hl{position:absolute;top:0;left:0;right:0;padding:6px 10px;margin:0;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;color:var(--light);white-space:pre-wrap;word-wrap:break-word;pointer-events:none;overflow:hidden;z-index:1;min-height:100%;transform:translateY(0)}
+.hl .kw{color:#7ab6e8}.hl .op{color:var(--metal)}.hl .st{color:var(--accent)}.hl .tr{color:var(--ok);font-weight:700}.hl .fa{color:var(--bad);font-weight:700}.hl .br{color:var(--metal)}.hl .cm{color:var(--surface);font-style:italic}
+#ta{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;padding:6px 10px;background:transparent;border:none;resize:none;outline:none;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;color:transparent;caret-color:var(--accent);user-select:text;overflow:auto;white-space:pre-wrap;word-wrap:break-word;scrollbar-width:thin;scrollbar-color:var(--border) var(--dark)}
+#ta::-webkit-scrollbar{width:8px}
+#ta::-webkit-scrollbar-track{background:var(--dark)}
+#ta::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+.chips{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;align-items:stretch;max-height:86px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--border) var(--dark)}
+.chip{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:4px 8px;border-radius:6px;cursor:pointer;transition:.15s;border:1px solid var(--border);background:var(--dark);color:var(--metal);display:flex;flex-direction:column;gap:2px;min-width:64px}
+.chip:hover{color:var(--light);background:var(--surface)}
+.chip .pn{font-size:9px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px}
+.chip .pv{font-size:11px;font-weight:700;color:var(--light)}
+.chip .ph{font-size:8.5px;color:var(--accent);font-style:italic}
+.chip .val-ok{color:var(--ok)}.chip .val-bad{color:var(--bad)}
+.chip.op{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:6px;min-width:auto}
+.chip .pmn,.chip .ppl{font-size:13px;font-weight:700;color:var(--accent);padding:0 5px;cursor:pointer;user-select:none}
+.chip .pmn:hover,.chip .ppl:hover{color:var(--light)}
+.chip .ci{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--light);font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 4px;box-sizing:border-box;outline:none}
+.chip .ci:focus{border-color:var(--accent)}
+
+.lg{background:var(--dark);border:1px solid var(--border);border-radius:6px;padding:5px 10px;margin-bottom:6px;min-height:26px;display:flex;align-items:center}
+.lg p{font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.4;color:var(--metal);white-space:pre-wrap;word-wrap:break-word;max-height:26px;overflow-y:auto}
+
+.pb{width:100%;height:4px;background:var(--dark);border-radius:4px;margin-bottom:6px;overflow:hidden}
+.pb-b{height:100%;width:0%;background:linear-gradient(90deg,var(--ok),var(--accent));transition:width .25s;border-radius:4px}
+
+.btn{width:100%;padding:12px;background:linear-gradient(180deg,#6a4a34,#3d2b1f);border:2px solid var(--border);border-radius:8px;color:var(--light);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:2px;cursor:pointer;transition:.15s;box-shadow:0 3px 8px rgba(0,0,0,.4)}
+.btn:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(0,0,0,.5)}
+.btn:active{transform:translateY(1px)}
+
+#vp{flex:1;position:relative;background:var(--bg);overflow:hidden}
+
+#gate{position:absolute;top:0;left:0;width:100%;height:100%;z-index:100;background:rgba(20,12,8,.92);display:flex;justify-content:center;align-items:center;transition:transform .8s cubic-bezier(.65,0,.35,1)}
+.gb{background:var(--panel);border:2px solid var(--border);padding:28px 34px;width:430px;text-align:center;border-radius:14px;box-shadow:0 30px 60px rgba(0,0,0,.7);max-height:92vh;overflow-y:auto}
+.gb h1{font-size:21px;font-weight:800;letter-spacing:1px;color:var(--light);border-bottom:2px solid var(--border);padding-bottom:12px;margin-bottom:8px}
+.gb h1 span{color:var(--accent)}
+.gb .slv{font-size:10px;color:var(--metal);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;font-weight:600}
+.gb .sd{font-size:13px;color:var(--metal);margin-bottom:8px;line-height:1.6}
+.gb .spat{background:var(--dark);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:11px;margin:6px 0 12px;color:var(--accent);line-height:1.7;text-align:left}
+.gb label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--metal);text-align:left;margin-bottom:4px;font-weight:700}
+.gb input{width:100%;padding:10px 14px;background:var(--dark);border:1px solid var(--border);border-radius:6px;color:var(--light);font-family:'Nunito',sans-serif;font-size:15px;outline:none;transition:border .2s;font-weight:600}
+.gb input:focus{border-color:var(--accent)}
+.gb .b2{width:100%;padding:11px;background:linear-gradient(180deg,var(--surface),var(--dark));border:1px solid var(--border);border-radius:6px;color:var(--light);font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:2px;cursor:pointer;margin-top:10px;transition:.2s}
+.gb .b2:hover{opacity:.85}
+.gb .b2.sm{font-size:9px;letter-spacing:1px;padding:8px;margin-top:6px;background:var(--dark);border-color:var(--metal);color:var(--metal)}
+.gb .b2.sm:hover{color:var(--light)}
+</style>
+</head>
+<body>
+
+<div id="gate"><div class="gb" id="gate-inner"></div></div>
+
+<div id="panel">
+  <div class="top">
+    <h1>Мастерская <span>Шестеренкина</span></h1>
+  </div>
+
+  <div class="lvl-bar">
+    <span class="info" id="lvl-info"></span>
+    <div class="btns">
+      <button class="lvl-btn" id="pv">Назад</button>
+      <button class="lvl-btn" id="nx">Далее</button>
+    </div>
+  </div>
+
+  <div class="assist"><div class="port">Ш</div><div class="txt" id="ast"></div></div>
+  <div class="tblock"><span class="t" id="task"></span></div>
+
+  <div class="sg">
+    <div class="sc"><span class="l">Инженер</span><span class="v" id="en">—</span></div>
+    <div class="sc"><span class="l">Время</span><span class="v" id="tmr">00:00.00</span></div>
+    <div class="sc"><span class="l">Цель</span><span class="v" id="cnt">—</span></div>
+  </div>
+
+  <div class="chn"><span class="chn-d" id="chd"></span><span class="l">Статус</span><span id="chs">ГОТОВО</span></div>
+
+  <div class="es">
+    <label>РЕГИСТРЫ СИСТЕМЫ</label>
+    <div class="ew">
+      <div class="ln" id="ln"></div>
+      <div class="ei"><pre class="hl" id="hl"></pre><textarea id="ta" spellcheck="false"></textarea></div>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <div class="lg"><p id="lg">% Журнал: ожидание запуска...</p></div>
+  <div class="pb"><div class="pb-b" id="pb" style="width:0%"></div></div>
+  <button class="btn" id="sb" onclick="startRun()">Запустить механизм</button>
+  <button class="btn" id="sb2" onclick="checkExtra()" style="margin-top:6px;display:none">Проверить настройки</button>
+</div>
+
+<div id="vp"></div>
+
+<script type="module">
+import*as THREE from'three';import{EffectComposer}from'three/addons/postprocessing/EffectComposer.js';import{RenderPass}from'three/addons/postprocessing/RenderPass.js';import{UnrealBloomPass}from'three/addons/postprocessing/UnrealBloomPass.js';import{SSAOPass}from'three/addons/postprocessing/SSAOPass.js';import{OutputPass}from'three/addons/postprocessing/OutputPass.js';
+
+/* ============================================================
+   УРОВНИ: тип 'nodes' — конвейер с 12 узлами true/false (ур.1)
+           тип 'goal'  — цель механизма Crazy Machines (ур.2-8)
+   ============================================================ */
+const LVLS=[
+{num:1,nm:'Конвейер',kind:'nodes',sc:'stair',goal:'Открыть все 12 стопоров',desc:'Шар катится по деревянной лесенке. Каждый узел пропускает шар только если регистр равен true.',task:'Измените регистры 2-12: вместо <span class="h" style="color:var(--bad)">false</span> поставьте <span class="h" style="color:var(--ok)">true</span>.',w:'all',hint:'Смотрите в код: для каждого узла написано false. Замените на true и запустите механизм.'},
+{num:2,nm:'Лампочка',kind:'goal',sc:'abyss',goal:'Зажечь лампочку',desc:'Рельс обрывается над бездной. Вилка падает на стальную плиту с розеткой — лампочка загорится, если напряжение ровно 220 вольт и цепь замкнута.',task:'Подайте <b>220</b> вольт (сейчас 110) и замкните цепь.',ch:'═══ ЦЕХ 2 · ЭНЕРГЕТИКА ═══\nЗадание 1 · СМОТРИ: Что висит над розеткой?\n  Это вилка. Что ей нужно, чтобы попасть в розетку?\nЗадание 2 · НАПРЯЖЕНИЕ: В розетке дома — 220В.\n  Текущее: 110. СКОЛЬКО вписать?\n  Подумай: 110 — это в половину меньше.\nЗадание 3 · ЦЕПЬ: Ток идёт только по ЗАМКНУТОМУ контуру.\n  Что нужно замкнуть? Найди fuse_closed и сделай true.\n  Без замыкания ток не побежит — лампа тёмная.\nЗадание 4 · ЭКСПЕРИМЕНТ: Поставь 300 — и посмотри,\n  как лампа «перегорает». Почему 220 — безопасно?\n  Что для лампы важнее: много вольт или правильный ток?\nЗадание 5 · ФЛАГИ: power_supply уже true.\n  Что будет, если его выключить на секунду?\n  А если оставить true, но не замкнуть цепь?\nЗадание 6 · ЛОГИКА: Собери формулу успеха:\n  напряжение = ? И цепь = ? И питание = ?\n  Все три условия должны быть верными (И).\nЗадание 7 · ВЫВОД: Зажги лампу и проверь, что будет,\n  если изменить только одно число. Сделай вывод:\n  какой параметр — главный, а какой просто «вкл»?',cfg:{LIGHT_CONFIG:{power_supply:{type:'b',v:true,edit:'toggle'},voltage:{type:'n',v:110,step:10,min:0,max:300,edit:'manual'},fuse_closed:{type:'b',v:false,edit:'toggle'},wire_temp:{type:'n',v:25,step:5,min:0,max:200,edit:'manual'},bulb_power:{type:'n',v:60,step:10,min:10,max:200,edit:'manual'},safety_guard:{type:'b',v:true,edit:'toggle'},resistance:{type:'n',v:10,step:1,min:1,max:50,edit:'manual'},current:{type:'n',v:2,step:0.5,min:0,max:10,edit:'manual'},phase_switch:{type:'b',v:false,edit:'toggle'},breaker_reset:{type:'b',v:true,edit:'toggle'}}},check:{voltage:220,fuse_closed:true,power_supply:true},check2:{wire_temp:[30,60],bulb_power:[40,100],safety_guard:true,breaker_reset:true},hint:'Крутите напряжение до 220 и включите предохранитель fuse_closed.'},
+{num:3,nm:'Стакан воды',kind:'goal',sc:'hydra',goal:'Налить воды в стакан',desc:'Бак с краном, под ним поворотный жёлоб, внизу мерный стакан. Вода попадёт в стакан, если кран открыт, а угол жёлоба от 15 до 35 градусов.',task:'Откройте кран и настройте угол жёлоба от <b>15</b> до <b>35</b>.',ch:'═══ ЦЕХ 3 · ГИДРАВЛИКА ═══\nЗадание 1 · СМОТРИ: Найди на сцене бак, кран и стакан.\n  Что должно случиться, чтобы вода дошла до стакана?\nЗадание 2 · КРАН: Сейчас valve_open = false.\n  Логика: false = закрыто, true = открыто.\n  Какой флаг откроет воду? Кликни или впиши true\nЗадание 3 · УГОЛ: Жёлоб наклоняется от 0 до 45°.\n  Вода попадёт в стакан ТОЛЬКО при 15–35°.\n  Попробуй соседние: 10 и 40 — мимо или в цель?\nЗадание 4 · НАБЛЮДЕНИЕ: При 5° вода капает мимо.\n  Почему? Жёлоб слишком пологий — струя не долетает.\nЗадание 5 · ГРАНИЦА: Попробуй ровно 15 и ровно 35.\n  Входит ли само число в диапазон? Проверь оба!\nЗадание 6 · УСПЕХ: Поставь 25, запусти, посчитай капли.\n  Сколько капель нужно в стакан? (их считает игра)\nЗадание 7 · ТИП: Угол — это ЧИСЛО (int), а не текст.\n  Можно ли вписать «двадцать»? Что случится?\n  Проверь границы чипа −/+ и введи число сам.',cfg:{FLUID_CONFIG:{valve_open:{type:'b',v:false,edit:'toggle'},pipe_angle:{type:'n',v:5,step:5,min:0,max:45,edit:'manual'},flow_pressure:{type:'n',v:2,step:1,min:0,max:10,edit:'manual'},tank_level:{type:'n',v:80,step:5,min:0,max:100,edit:'manual'},drip_rate:{type:'n',v:5,step:1,min:1,max:20,edit:'manual'},filter_open:{type:'b',v:true,edit:'toggle'},nozzle_size:{type:'n',v:4,step:1,min:1,max:10,edit:'manual'},hose_length:{type:'n',v:5,step:1,min:1,max:15,edit:'manual'},pump_rpm:{type:'n',v:30,step:5,min:0,max:100,edit:'manual'},spill_sensor:{type:'b',v:false,edit:'toggle'}}},check:{valve_open:true,pipe_angle:[15,35]},check2:{flow_pressure:[3,7],tank_level:[60,100],filter_open:true,spill_sensor:false},hint:'Открой valve_open и поднимай pipe_angle до 15-35.'},
+{num:4,nm:'Ящик',kind:'goal',sc:'jump',goal:'Поймать шар в ящик',desc:'Крутой трамплин обрывается над пропастью. Мяч летит по баллистической параболе — крышка ящика захлопнется, если ловушка активна и датчик стоит в зоне 4.2-4.7.',task:'Включите ловушку и поставьте датчик в зону <b>4.2-4.7</b>.',ch:'═══ ЦЕХ 4 · БАЛЛИСТИКА ═══\nЗадание 1 · СМОТРИ: Где трамплин, где ящик?\n  Как мяч должен попасть в ящик? Что ему мешает?\nЗадание 2 · ЛОВУШКА: Сейчас trap_door_active = false.\n  Логика: false = крышка не готова, true = ждёт мяч.\n  Что включить, чтобы ловушка сработала?\nЗадание 3 · ДАТЧИК: trigger_x = 1.2 — это СЛИШКОМ рано.\n  Мяч летит по дуге и входит в ящик в зоне 4.2–4.7.\n  Поставь середину зоны: 4.4 или 4.5.\nЗадание 4 · ПОЧЕМУ: Почему нельзя поставить датчик 9?\n  Подумай: мяч уже пролетит мимо ящика к тому моменту.\nЗадание 5 · ОШИБКА: Оставь 1.2 и запусти.\n  Что произойдёт? Крышка захлопнется рано — мяч мимо.\nЗадание 6 · ГРАНИЦЫ: Попробуй 4.2 и 4.7.\n  Срабатывает ли ровно на краю зоны? Проверь.\nЗадание 7 · ТОЧНОСТЬ: Это координата X с шагом 0.5.\n  Почему 4.5 лучше, чем 4.7? Что будет на 4.8?\n  Подбери значение, при котором мяч ТОЧНО в ящике.',cfg:{CATCH_CONFIG:{trap_door_active:{type:'b',v:false,edit:'manual'},trigger_x:{type:'n',v:1.2,step:0.5,min:0,max:6,edit:'manual'},catch_speed:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},latch_spring:{type:'n',v:7,step:1,min:0,max:10,edit:'manual'},auto_reset:{type:'b',v:false,edit:'toggle'},beep_alarm:{type:'b',v:false,edit:'toggle'},net_tension:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},drop_height:{type:'n',v:3,step:1,min:0,max:8,edit:'manual'},wind_comp:{type:'b',v:false,edit:'toggle'},return_timer:{type:'n',v:2,step:1,min:1,max:8,edit:'manual'}}},check:{trap_door_active:true,trigger_x:[4.2,4.7]},check2:{catch_speed:[4,8],latch_spring:[5,9],wind_comp:true,return_timer:[2,5]},hint:'Активируй ловушку и подвигай trigger_x до 4.2-4.7.'},
+{num:5,nm:'Сейф',kind:'goal',sc:'safe',goal:'Раскодировать сейф',desc:'Рельс упирается в бронированный сейф с латунным лимбом. Дверь откроется, если пароль-строка верный и включён байпас.',task:'Напишите код-слово и включите байпас.',ch:'═══ ЦЕХ 5 · КРИПТОГРАФИЯ ═══\nЗадание 1 · СМОТРИ: Что закрывает путь?\n  Это сейф с лимбом. Что нужно, чтобы он открылся?\nЗадание 2 · ПАРОЛЬ: Сейчас code = «ЗАКРЫТЬ».\n  Замок ждёт слово-команду. Это антоним к «ЗАКРЫТЬ».\n  Догадайся и впиши слово в поле в кавычках.\nЗадание 3 · РЕГИСТР: Строки чувствительны к регистру.\n  Попробуй написать слово маленькими — не сработает!\n  Верхний регистр важен: слово должно быть ЗАГЛАВНЫМ.\nЗадание 4 · БАЙПАС: bypass_system = false.\n  Это аварийный обход защиты. Какой флаг включить?\nЗадание 5 · КОМБО: Работает ли пароль БЕЗ байпаса?\n  А байпас БЕЗ пароля? Проверь оба варианта.\nЗадание 6 · ЛОГИКА: Сколько условий нужно ОДНОВРЕМЕННО?\n  Вспомни: логическое И — оба должны быть верными.\nЗадание 7 · ВЫВОД: Если дверь не открывается — что\n  проверять первым? Пароль или байпас? Запиши порядок:',cfg:{SAFE_CONFIG:{code:{type:'s',v:'ЗАКРЫТЬ',opts:['ОТКРЫТЬ','ЗАКРЫТЬ'],edit:'manual'},bypass_system:{type:'b',v:false,edit:'toggle'},alarm_volume:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},lock_attempts:{type:'n',v:3,step:1,min:1,max:10,edit:'manual'},red_light:{type:'b',v:true,edit:'toggle'},power_backup:{type:'b',v:false,edit:'toggle'},bolt_time:{type:'n',v:2,step:1,min:1,max:8,edit:'manual'},dial_speed:{type:'n',v:4,step:1,min:1,max:10,edit:'manual'},keypad_lock:{type:'b',v:false,edit:'toggle'},siren_mode:{type:'b',v:false,edit:'toggle'}}},check:{code:'ОТКРЫТЬ',bypass_system:true},check2:{alarm_volume:[3,7],lock_attempts:[3,6],power_backup:true,keypad_lock:false},hint:'Слово-команда — антоним к «ЗАКРЫТЬ». Впиши его и включи байпас.'},
+{num:6,nm:'Шины',kind:'goal',sc:'tire',goal:'Раскрутить шины и сбросить груз',desc:'Скат обрывается над двумя шинами-валиками. Второе колесо заблокировано канатом. Груз уедет, если скорость больше 8 и канат снят.',task:'Разгоните шину выше <b>8</b> и снимите канат.',ch:'═══ ЦЕХ 6 · МЕХАНИКА ═══\nЗадание 1 · СМОТРИ: Найди шины и груз.\n  Почему груз не едет? Что его держит?\nЗадание 2 · СКОРОСТЬ: Сейчас wheel_speed = 3.\n  Шина закрутится ТОЛЬКО при скорости > 8.\n  Попробуй 8 — крутится или нет? А 9?\nЗадание 3 · ПОРОГ: Число 8 — это ПОРОГ (threshold).\n  Что значит «больше 8»? Почему 9 уже работает?\n  А если вписать 8.5 — меньше или больше повезёт?\nЗадание 4 · КАНАТ: unclog_rope = false — канат держит колесо.\n  Логика: true = канат срезан, колесо свободно.\n  Какой флаг освободит вторую шину?\nЗадание 5 · ЦЕПОЧКА: Что произойдёт первым?\n  Канат исчезнет ИЛИ шины начнут крутиться?\n  Наблюдай на сцене — какое событие ведущее?\nЗадание 6 · ГРУЗ: При пуске груз висит над шиной.\n  Когда он начнёт падать? Связано ли с вращением?\nЗадание 7 · ЛОГИКА: Груз уедет, когда true ОБА условия.\n  Обведи: это И (AND) или ИЛИ (OR)? \n  Впиши скорость сам и переключи канат кнопкой — докажи.',cfg:{GEAR_CONFIG:{wheel_speed:{type:'n',v:3,step:1,min:0,max:12,edit:'manual'},unclog_rope:{type:'b',v:false,edit:'toggle'},axle_heat:{type:'n',v:40,step:5,min:0,max:200,edit:'manual'},conveyor_grip:{type:'n',v:6,step:1,min:0,max:10,edit:'manual'},auto_brake:{type:'b',v:false,edit:'toggle'},friction_lube:{type:'b',v:false,edit:'toggle'},belt_tension:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},gear_ratio:{type:'n',v:2,step:1,min:1,max:6,edit:'manual'},safety_lock:{type:'b',v:true,edit:'toggle'},motor_boost:{type:'b',v:false,edit:'toggle'}}},check:{wheel_speed:[9,12],unclog_rope:true},check2:{axle_heat:[40,90],conveyor_grip:[5,8],safety_lock:true,motor_boost:true},hint:'Разгони wheel_speed выше 8 (до 9-12) и сними канат unclog_rope.'},
+{num:7,nm:'Пинг-понг',kind:'goal',sc:'paddle',goal:'Шарик в цель',desc:'В пустоте каскадом висят 4 наклонные ракетки. Белый шарик пружинит по ним в чашку, если упругость от 0.7 до 0.95.',task:'Настройте упругость от <b>0.7</b> до <b>0.95</b>.',ch:'═══ ЦЕХ 7 · УПРУГОСТЬ ═══\nЗадание 1 · СМОТРИ: Что висит в воздухе?\n  Это ракетки каскадом. Как шарик попадёт в чашку?\nЗадание 2 · КОЭФФИЦИЕНТ: bounciness — это от 0 до 1.\n  0 = не отскакивает, 1 = отскок на 100% высоты.\n  Сейчас 0.4 — слишком «мягко». Шарик не допрыгивает.\nЗадание 3 · ДИАПАЗОН: Нужно 0.7–0.95.\n  Попробуй 0.8 — как пружина. Почему не 1.0?\n  Что будет при 0.95? А при 0.7? Найди границы.\nЗадание 4 · ДРОБЬ: Это float (дробное число)!\n  В чём разница с int? Как меняется одним шагом 0.1?\n  Впиши 0.75 — сработает ли? А 0.68?\nЗадание 5 · ВЕТЕР: wind_force = 0 — оставь ноль!\n  Если добавить ветер, шарик улетит в сторону.\n  Попробуй 0.5 — как меняется траектория?\nЗадание 6 · ПРОГНОЗ: Посчитай, сколько раз шарик\n  отскочит до чашки по 4 ракеткам. Запусти — сверься!\nЗадание 7 · ВЫВОД: Какой параметр управляет высотой\n  отскока, а какой — отклонением вбок? Запиши:',cfg:{PINGPONG_CONFIG:{bounciness:{type:'n',v:0.4,step:0.1,min:0,max:1,edit:'manual'},wind_force:{type:'n',v:0,step:0.1,min:0,max:1,edit:'manual'},table_friction:{type:'n',v:3,step:1,min:0,max:10,edit:'manual'},ball_mass:{type:'n',v:3,step:1,min:1,max:10,edit:'manual'},spin_effect:{type:'n',v:0,step:1,min:0,max:10,edit:'manual'},net_height:{type:'n',v:4,step:1,min:0,max:10,edit:'manual'},paddle_angle:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},air_drag:{type:'n',v:2,step:1,min:0,max:10,edit:'manual'},sweet_spot:{type:'b',v:false,edit:'toggle'},edge_guard:{type:'b',v:true,edit:'toggle'}}},check:{bounciness:[0.7,0.95],wind_force:0},check2:{table_friction:[2,5],ball_mass:[2,5],edge_guard:true,sweet_spot:true},hint:'Подними bounciness до 0.7-0.95, ветер оставь 0.'},
+{num:8,nm:'Водопад',kind:'goal',sc:'pipe',goal:'Вода в нужное место',desc:'Трубная магистраль с двумя насосами (А и Б). Вода попадёт в бассейн, только если оба насоса включены, а слив закрыт.',task:'Включите оба насоса и закройте слив.',ch:'═══ ЦЕХ 8 · ФИНАЛ ═══\nЗадание 1 · СМОТРИ: Найди два насоса и бассейн.\n  Куда должна попасть вода? Из чего она течёт?\nЗадание 2 · ДВА НАСОСА: pump_A и pump_B = false.\n  Вода пойдёт ТОЛЬКО когда true ОБА. Почему?\n  Один насос не создаст нужного давления.\nЗадание 3 · ЛОГИКА И: Это логическое И (AND):\n  A И B. Вспомни: если один false — результат false.\n  Меняется ли картинка, если включить только А?\nЗадание 4 · СЛИВ: drain_system = true — слив ОТКРЫТ.\n  Вода утекает! Какой флаг ЗАКРОЕТ слив?\n  Как узнать, что слив закрыт? Посмотри на бассейн.\nЗадание 5 · ПОРЯДОК: Включи сначала А, потом Б.\n  Вода пошла только после второго? Сверься!\nЗадание 6 · ЭКСПЕРИМЕНТ: Включи оба, но открой слив.\n  Что происходит с уровнем воды? Убывает или стоит?\nЗадание 7 · ПОБЕДА: Сколько условий в одной строке?\n  (Насос А) И (Насос Б) И (слив закрыт) — три!\n  Найди в коде все три и переведи в верное состояние.\n  Докажи: измени ровно одно — и вода не пойдёт.',cfg:{FINAL_CONFIG:{pump_A_power:{type:'b',v:false,edit:'toggle'},pump_B_power:{type:'b',v:false,edit:'toggle'},drain_system:{type:'b',v:true,edit:'toggle'},water_tank:{type:'n',v:50,step:5,min:0,max:100,edit:'manual'},pressure_psi:{type:'n',v:30,step:5,min:0,max:100,edit:'manual'},filter_flow:{type:'n',v:8,step:1,min:1,max:10,edit:'manual'},vapor_vent:{type:'n',v:3,step:1,min:0,max:10,edit:'manual'},pipe_capacity:{type:'n',v:6,step:1,min:1,max:12,edit:'manual'},relief_valve:{type:'b',v:true,edit:'toggle'},water_recirc:{type:'b',v:false,edit:'toggle'}}},check:{pump_A_power:true,pump_B_power:true,drain_system:false},check2:{water_tank:[60,90],pressure_psi:[40,70],relief_valve:true,water_recirc:true},hint:'Включи pump_A и pump_B, а drain_system переведи в false (закрыть слив).'}
+];
+
+const KEYS=["1_СТАРТ","2_ВЕНТ","3_МАГН","4_ОПТИ","5_ПОРШ","6_РЕДУ","7_МОСТ","8_ЛИФТ","9_ПРЕС","10_КЛАП","11_ВОРО","12_АКСЕ"];
+const NN=["Старт","Вентиль","Магнит","Оптика","Поршень","Редуктор","Мост","Лифт","Пресс","Клапан","Ворота","Аксел"];
+
+let lvlIdx=0, eng="", t0=0, tint=null, tms=0;
+let L=LVLS[0], conf={}, wanted={};
+const lg=document.getElementById('lg'),sb=document.getElementById('sb'),chs=document.getElementById('chs'),chd=document.getElementById('chd'),pb=document.getElementById('pb'),cnt=document.getElementById('cnt'),astTxt=document.getElementById('ast'),taskTxt=document.getElementById('task'),linfo=document.getElementById('lvl-info'),ta=document.getElementById('ta'),hl=document.getElementById('hl'),ln=document.getElementById('ln'),chips=document.getElementById('chips');
+
+/* ---------- ИМЯ ---------- */
+let savedName=localStorage.getItem('ws_name');
+if(savedName){eng=savedName;document.getElementById('en').textContent=eng}
+function showGate(){
+  const gi=document.getElementById('gate-inner');
+  const nameSec=savedName?`<p style="font-size:11px;color:var(--metal);margin-bottom:8px">С возвращением, <b style="color:var(--light)">${savedName}</b>!</p><button class="b2 sm" onclick="window.resetName()">Другое имя</button>`
+    :`<label for="si">Подпись юного инженера</label><input type="text" id="si" placeholder="Ваше имя..." maxlength="16" autocomplete="off"/>`;
+  gi.innerHTML=`<h1>Мастерская <span>Шестеренкина</span></h1><div class="slv">Уровень ${L.num} &middot; ${L.nm}</div>
+  <div class="sd">${L.desc}</div><div class="spat">ЦЕЛЬ: ${L.goal}</div>${nameSec}
+  <button class="b2" onclick="window.enterW()">${savedName?'Продолжить':'Войти в мастерскую'}</button>`;
+  document.getElementById('gate').style.transform='translateY(0)';
+  if(!savedName)setTimeout(()=>{const si=document.getElementById('si');if(si)si.focus()},150);
+}
+window.resetName=function(){localStorage.removeItem('ws_name');eng='';document.getElementById('en').textContent='—';savedName=null;showGate()};
+window.enterW=function(){
+  let n=savedName;
+  if(!n){const si=document.getElementById('si');n=si?si.value.trim():'';if(n.length<2){alert("Введите имя!");return}}
+  eng=n;savedName=eng;localStorage.setItem('ws_name',eng);document.getElementById('en').textContent=eng;
+  document.getElementById('gate').style.transform='translateY(-105%)';
+  lg.textContent='% Добро пожаловать, '+eng+'! Выполните ЦЕЛЬ уровня и запустите механизм.';
+};
+
+/* ---------- КОНФИГ/КОД ---------- */
+function initLevel(){
+  L=LVLS[lvlIdx];
+  if(L.kind==='nodes'){
+    wanted={};conf={};KEYS.forEach((k,i)=>{wanted[k]=(i===0)?true:(L.w==='all'?true:false);conf[k]=(i===0)?true:false});
+  }else{
+    conf={};const ck=Object.keys(L.cfg)[0];const defs=L.cfg[ck];conf[ck]={};
+    Object.keys(defs).forEach(k=>{conf[ck][k]=defs[k].v});
+  }
+}
+function codeText(){
+  if(L.kind==='nodes'){
+    return '// Включите все узлы: true = пропускает шар\nLVL1_CONFIG = {\n'+KEYS.map((k,i)=>'    "'+k+'": '+(conf[k]?'true':'false')+(i<11?',':'')).join('\n')+'\n};';
+  }
+  const ck=Object.keys(L.cfg)[0];const defs=L.cfg[ck];
+  const hints=(L.ch||L.task).split('\n');
+  const line=hints.map(h=>'// '+h).join('\n');
+  const body=Object.keys(defs).map((k,i)=>{
+    const d=defs[k];let v=conf[ck][k];
+    if(d.type==='b')v=v?'true':'false';
+    else if(d.type==='s')v='"'+v+'"';
+    else v=v;
+    return '    "'+k+'": '+v+(i<Object.keys(defs).length-1?',':'');
+  }).join('\n');
+  return line+'\n'+ck+' = {\n'+body+'\n};';
+}
+function esc2(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function hc(t){return esc2(t).replace(/([A-Z_]{3,}_CONFIG)/g,'<span class="kw">$1</span>').replace(/(\{|\}|;|,)/g,'<span class="op">$1</span>').replace(/("[^"]*")/g,'<span class="st">$1</span>').replace(/(\/\/.*)/g,'<span class="cm">$1</span>').replace(/\btrue\b/g,'<span class="tr">true</span>').replace(/\bfalse\b/g,'<span class="fa">false</span>').replace(/(^|\s)(\d+\.?\d*)(\s|$)/g,'$1<span class="br">$2</span>$3')}
+function sync(){hl.innerHTML=hc(ta.value)+'\n';ln.innerHTML=Array.from({length:Math.max(ta.value.split('\n').length,15)},(_,i)=>i+1).join('<br>')}
+ta.addEventListener('input',sync);
+ta.addEventListener('scroll',function(){
+  hl.style.transform='translateY(-'+ta.scrollTop+'px) translateX(-'+ta.scrollLeft+'px)';
+  ln.scrollTop=ta.scrollTop;
+});
+function rebuildEdit(){
+  ta.value=codeText();sync();
+  ta.scrollTop=0;ta.scrollLeft=0;
+  hl.style.transform='translateY(0) translateX(0)';
+  ln.scrollTop=0;
+  chips.innerHTML='';
+  if(L.kind==='nodes'){
+    for(let i=1;i<=12;i++){
+      const k=KEYS[i-1];
+      const t=document.createElement('span');t.className='chip';t.innerHTML='<span class="pn">Узел '+i+'</span><span class="pv '+(conf[k]?'val-ok':'val-bad')+'">'+(conf[k]?'true':'false')+'</span>';t.onclick=()=>{conf[k]=!conf[k];rebuildEdit()};
+      chips.appendChild(t);
+    }
+  }else{
+    const ck=Object.keys(L.cfg)[0];const defs=L.cfg[ck];const chval=L.check||{};
+    Object.keys(defs).forEach(k=>{
+      const d=defs[k];const box=document.createElement('span');box.className='chip';
+      // что вводить в поле (плейсхолдер)
+      let phTxt='';
+      const e=chval[k];
+      if(d.type==='b'){phTxt=e!==undefined?('введи '+(e?'true':'false')):'введи true или false'}
+      else if(d.type==='n'){phTxt=Array.isArray(e)?('введи от '+e[0]+' до '+e[1]):('введи '+(e!==undefined?e:'значение'))}
+      else if(d.type==='s'){phTxt=e!==undefined?'введи текст и Enter':'введи текст и Enter'}
+      // имя параметра
+      const pn=document.createElement('span');pn.className='pn';pn.textContent=shortKey(k);
+      box.appendChild(pn);
+      // ПОЛЕ ВВОДА (всегда)
+      const inp=document.createElement('input');inp.type='text';inp.className='ci';
+      inp.placeholder=phTxt;
+      inp.value=(d.type==='s')?'"'+conf[ck][k]+'"':String(conf[ck][k]);
+      const commit=()=>{
+        const raw=inp.value.trim().replace(/^"|"$/g,'');
+        if(d.type==='b'){
+          if(/^(true|1|on)$/i.test(raw))conf[ck][k]=true;
+          else if(/^(false|0|off)$/i.test(raw))conf[ck][k]=false;
+        }else if(d.type==='n'){
+          const v=parseFloat(raw.replace(',','.'));
+          if(!isNaN(v))conf[ck][k]=Math.min(d.max,Math.max(d.min,Math.round(v*10)/10));
+        }else{conf[ck][k]=raw;}
+        ta.value=codeText();sync();
+        inp.value=(d.type==='s')?'"'+conf[ck][k]+'"':String(conf[ck][k]);
+        inp.classList.toggle('val-ok',cfgOk(d,conf[ck][k],e));
+        inp.classList.toggle('val-bad',!cfgOk(d,conf[ck][k],e));
+      };
+      const cfgOk=(dd,v,target)=>{
+        if(Array.isArray(target))return v>=target[0]&&v<=target[1];
+        return v===target;
+      };
+      inp.classList.toggle('val-ok',cfgOk(d,conf[ck][k],e));
+      inp.classList.toggle('val-bad',!cfgOk(d,conf[ck][k],e));
+      inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();commit();}});
+      inp.addEventListener('blur',commit);
+      box.appendChild(inp);
+      // КНОПКИ рядом с полем: bool — переключатель, число — −/+
+      if(d.type==='b'){
+        const tg=document.createElement('span');tg.className='pmn';tg.textContent='⇄';
+        tg.title='переключить true/false';
+        tg.onclick=()=>{conf[ck][k]=!conf[ck][k];ta.value=codeText();sync();inp.value=conf[ck][k]?'true':'false';inp.classList.toggle('val-ok',cfgOk(d,conf[ck][k],e));inp.classList.toggle('val-bad',!cfgOk(d,conf[ck][k],e));};
+        box.appendChild(tg);
+      }else if(d.type==='n'){
+        const mn=document.createElement('span');mn.className='pmn';mn.textContent='−';
+        mn.onclick=()=>{conf[ck][k]=Math.max(d.min,Math.round((conf[ck][k]-d.step)*10)/10);ta.value=codeText();sync();inp.value=String(conf[ck][k]);};
+        const pl=document.createElement('span');pl.className='ppl';pl.textContent='+';
+        pl.onclick=()=>{conf[ck][k]=Math.min(d.max,Math.round((conf[ck][k]+d.step)*10)/10);ta.value=codeText();sync();inp.value=String(conf[ck][k]);};
+        box.appendChild(mn);box.appendChild(pl);
+      }else{ // строка — только ручной ввод, без подсказки и перебора
+        // цикл вариантов убран: пароль надо написать самому
+      }
+      chips.appendChild(box);
+    });
+  }
+}
+function shortKey(k){return k.replace(/_/g,' ')}
+function parseC(){
+  try{
+    let returnExpr;
+    if(L.kind==='nodes')returnExpr='return LVL1_CONFIG;';
+    else{const ck=Object.keys(L.cfg)[0];returnExpr='return (typeof '+ck+'!=="undefined")?'+ck+':null;'}
+    const fn=new Function(ta.value+'; '+returnExpr);
+    const p=fn();
+    if(p&&typeof p==='object'){
+      if(L.kind==='nodes'){KEYS.forEach(k=>{if(p[k]!==undefined)conf[k]=p[k]})}
+      else{const ck=Object.keys(L.cfg)[0];const defs=L.cfg[ck];Object.keys(defs).forEach(k=>{if(p[k]!==undefined)conf[ck][k]=p[k]})}
+      return true;
+    }
+  }catch(e){lg.textContent='% Ошибка: проверьте скобки, кавычки и запятые!';return false}
+  return false;
+}
+function checkGoal(){
+  if(L.kind==='nodes'){
+    for(let i=1;i<12;i++){if(conf[KEYS[i]]!==true)return{ok:false,msg:'Узел '+NN[i]+' закрыт (false). Нужно true!'}}
+    return{ok:true};
+  }
+  const ck=Object.keys(L.cfg)[0];const c=conf[ck]||{};const ch=L.check;
+  const keys=Object.keys(ch);
+  for(const k of keys){
+    const expect=ch[k];const got=c[k];
+    if(Array.isArray(expect)){
+      if(!(got>=expect[0]&&got<=expect[1]))return{ok:false,msg:'Параметр '+shortKey(k)+' = '+got+'. Нужно в диапазоне '+expect[0]+'-'+expect[1]+'!'};
+    }else{
+      if(got!==expect)return{ok:false,msg:'Неверно! У параметра '+shortKey(k)+' стоит '+(typeof got==='string'?'"'+got+'"':got)+'. Проверь подсказки в заданиях выше.'};
+    }
+  }
+  return{ok:true};
+}
+
+// Вторая кнопка: проверка дополнительных (экспериментальных) настроек
+function checkExtra(){
+  if(!eng){showGate();return}
+  if(run||crash)return;
+  if(!parseC())return;
+  const ch2=L.check2;
+  if(!ch2||L.kind==='nodes'){lg.textContent='% Для этого уровня нет доп. настроек.';return}
+  const ck=Object.keys(L.cfg)[0];const c=conf[ck]||{};
+  const keys=Object.keys(ch2);
+  for(const k of keys){
+    const expect=ch2[k];const got=c[k];
+    if(Array.isArray(expect)){
+      if(!(got>=expect[0]&&got<=expect[1]))return(bad2(shortKey(k),got,expect[0]+'-'+expect[1]));
+    }else{if(got!==expect)return bad2(shortKey(k),got,expect)}
+  }
+  lg.textContent='% Доп. настройки в норме! Эксперимент готов.';
+  lg.style.color='';
+}
+function bad2(name,got,want){
+  lg.textContent='% Доп. настройка "'+name+'" = '+got+'. Нужно: '+want;
+  lg.style.color='var(--bad)';
+  return false;
+}
+
+/* ---------- THREE.JS ---------- */
+const vp=document.getElementById('vp'),vw=vp.clientWidth,vh=vp.clientHeight;
+const sc=new THREE.Scene();sc.background=new THREE.Color(0x34261c);
+const cam=new THREE.PerspectiveCamera(36,vw/vh,0.1,60);cam.position.set(-0.3,3.8,16);cam.lookAt(0,-1.2,0);
+const ren=new THREE.WebGLRenderer({antialias:true});ren.setSize(vw,vh);ren.setPixelRatio(Math.min(devicePixelRatio,2));
+ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=.9;
+vp.appendChild(ren.domElement);
+const cmp=new EffectComposer(ren);cmp.addPass(new RenderPass(sc,cam));
+const bl=new UnrealBloomPass(new THREE.Vector2(vw,vh),.3,.2,.1);bl.threshold=.15;bl.strength=.3;bl.radius=.3;cmp.addPass(bl);
+const sa=new SSAOPass(sc,cam,vw,vh);sa.kernelRadius=5;sa.minDistance=.005;sa.maxDistance=.1;cmp.addPass(sa);
+cmp.addPass(new OutputPass());
+sc.add(new THREE.AmbientLight(0x5a4a3a,.5));
+sc.add(new THREE.HemisphereLight(0xd0c0a8,0x2a1e14,.35));
+const sun=new THREE.DirectionalLight(0xffeedd,.85);sun.position.set(6,14,10);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.near=.5;sun.shadow.camera.far=40;sun.shadow.bias=-.0005;sc.add(sun);
+const fl=new THREE.DirectionalLight(0x8a7055,.25);fl.position.set(-8,4,-6);sc.add(fl);
+
+const cv=document.createElement('canvas');cv.width=512;cv.height=512;const cx=cv.getContext('2d');
+cx.fillStyle='#3a2a1e';cx.fillRect(0,0,512,512);
+for(let i=0;i<2000;i++){cx.fillStyle=`rgba(80,60,40,${.03+Math.random()*.07})`;cx.fillRect(Math.random()*512,Math.random()*512,2+Math.random()*6,1+Math.random()*4)}
+const ft=new THREE.CanvasTexture(cv);ft.wrapS=ft.wrapT=THREE.RepeatWrapping;ft.repeat.set(8,4);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(50,22),new THREE.MeshStandardMaterial({map:ft,roughness:.85,metalness:.05}));
+floor.rotation.x=-Math.PI/2;floor.position.set(1.5,-5.8,0);floor.receiveShadow=true;sc.add(floor);
+const grid=new THREE.GridHelper(50,25,0x5a3a2a,0x3a2a1e);grid.position.set(1.5,-5.78,0);sc.add(grid);
+
+const env=new THREE.CubeTextureLoader().setPath('https://threejs.org/examples/textures/cube/SwedishRoyalCastle/').load(['px.jpg','nx.jpg','py.jpg','ny.jpg','pz.jpg','nz.jpg']);
+const ball=new THREE.Group();
+ball.position.set(-6.5,4,0);ball.userData={vx:0,vy:0};sc.add(ball);
+let actorMat=null, actorExtra={};
+function buildActor(){
+  while(ball.children.length)ball.remove(ball.children[0]);
+  actorMat=null;actorExtra={};
+  ball.visible=true; // по умолчанию актёр виден
+  const l=L.num;
+  if(l===1){ // чугунный шар (лесенка)
+    ball.add(new THREE.Mesh(new THREE.SphereGeometry(.24,40,40),new THREE.MeshStandardMaterial({color:0x8a6a4a,roughness:.2,metalness:.85,envMap:env,envMapIntensity:.8})));
+    actorMat=ball.children[0].material;
+  }else if(l===2){ // вилка (крупная, светлая) падает на розетку
+    const plug=new THREE.Group();
+    // корпус — светло-бежевый изолятор, хорошо виден на тёмном фоне
+    const body=new THREE.Mesh(new THREE.BoxGeometry(.55,.8,.4),new THREE.MeshStandardMaterial({color:0xcfc4b0,roughness:.6,metalness:.05}));
+    plug.add(body);
+    // два металлических штыря (вниз)
+    const pinMat=new THREE.MeshStandardMaterial({color:0xceb07a,roughness:.3,metalness:.8});
+    const sh1=new THREE.Mesh(new THREE.BoxGeometry(.07,.07,.35),pinMat);sh1.position.set(-.17,-.14,0);plug.add(sh1);
+    const sh2=sh1.clone();sh2.position.set(.17,-.14,0);plug.add(sh2);
+    // кабель сверху (тёмный, витой)
+    const cabMat=new THREE.MeshStandardMaterial({color:0x3a2418,roughness:.9});
+    const cab=new THREE.Mesh(new THREE.CylinderGeometry(.07,.09,.7,10),cabMat);cab.position.set(0,.55,0);plug.add(cab);
+    // красная полоса-маркировка + паз для пальцев
+    const stripe=new THREE.Mesh(new THREE.BoxGeometry(.38,.03,.42),new THREE.MeshStandardMaterial({color:0x8a2020,roughness:.5}));
+    stripe.position.set(0,.15,.2);plug.add(stripe);
+    const groove=new THREE.Mesh(new THREE.BoxGeometry(.28,.08,.42),new THREE.MeshStandardMaterial({color:0x9a9080,roughness:.7}));
+    groove.position.set(0,-.1,.2);plug.add(groove);
+    ball.add(plug);actorMat=body.material;
+    actorExtra.vyStart=-0.01;
+  }else if(l===3){ // сцена 3: шара нет — вода течёт каплями, прячем актёр
+    ball.visible=false;actorMat=null;
+  }else if(l===4){ // воздушный теннисный мяч (лёгкий, жёлтый, с белыми полосками)
+    const ten= new THREE.Group();
+    const ballCore=new THREE.Mesh(new THREE.SphereGeometry(.2,16,16),new THREE.MeshStandardMaterial({color:0xd8d830,roughness:.7,metalness:.05}));
+    ten.add(ballCore);
+    // две белые полосы — видно, что мяч крутится
+    const stripe1=new THREE.Mesh(new THREE.SphereGeometry(.205,16,12),new THREE.MeshStandardMaterial({color:0xf5f5f0,roughness:.6}));
+    stripe1.scale.set(.09,1,1);ten.add(stripe1);
+    const stripe2=stripe1.clone();stripe2.rotation.x=Math.PI/2;ten.add(stripe2);
+    ball.add(ten);actorMat=ballCore.material;actorExtra.tennis=ten;
+  }else if(l===5){ // латунный ключ (ползёт к сейфу)
+    const key=new THREE.Group();
+    const stem=new THREE.Mesh(new THREE.BoxGeometry(.5,.04,.04),M.brass);key.add(stem);
+    const ring=new THREE.Mesh(new THREE.TorusGeometry(.07,.015,6,12),M.brass);ring.position.set(-.28,0,0);key.add(ring);
+    ball.add(key);actorMat=stem.material;
+  }else if(l===6){ // грузовой ящик
+    const crate=new THREE.Mesh(new THREE.BoxGeometry(.34,.28,.34),M.base);
+    ball.add(crate);actorMat=crate.material;
+    const band=new THREE.Mesh(new THREE.BoxGeometry(.36,.03,.36),M.iron);band.position.y=.08;ball.add(band);
+  }else if(l===7){ // шарик пинг-понга
+    const pp=new THREE.Mesh(new THREE.SphereGeometry(.18,24,24),new THREE.MeshStandardMaterial({color:0xf0ece4,roughness:.4,metalness:0}));
+    ball.add(pp);actorMat=pp.material;
+  }else if(l===8){ // сцена 8: мяча нет — только вода и насосы
+    ball.visible=false;actorMat=null;
+  }
+}
+function setActorColor(hex){if(actorMat)actorMat.color.setHex(hex)}
+
+const M={base:new THREE.MeshStandardMaterial({color:0x5a3a2a,roughness:.85}),frame:new THREE.MeshStandardMaterial({color:0x8a6a4a,roughness:.4,metalness:.7}),brass:new THREE.MeshStandardMaterial({color:0xceb07a,roughness:.3,metalness:.8}),iron:new THREE.MeshStandardMaterial({color:0x4a3a2e,roughness:.75}),dark:new THREE.MeshStandardMaterial({color:0x2a1e14,roughness:.75}),glow:new THREE.MeshStandardMaterial({color:0x6a4a3a,roughness:.4,emissive:new THREE.Color(0),emissiveIntensity:0}),copper:new THREE.MeshStandardMaterial({color:0xb8865a,roughness:.35,metalness:.7}),water:new THREE.MeshStandardMaterial({color:0x3a6a8a,roughness:.2,metalness:.1,transparent:true,opacity:.8})};
+
+const nodes=[];let run=false,crash=false,cur=0,goalReached=false;const SPD=.024;
+const deco=[];let targetObj=null,targetX=6.2,winAnim=0,levelPrev=0,goalObjs=null,dropState=null,waterDrops=[],dropTimer=0,waterCaptured=0,waterMissed=0;
+
+function sceneLayout(){
+  // Каждая сцена — своя геометрия. Лесенка (stair) только на 1-й главе.
+  const a=[];
+  for(let i=0;i<12;i++){
+    let x=-6.5+i*1.35,y=3.6-i*0.25;
+    const sc=L.sc||'flat';
+    if(sc==='stair'){y=3.6-i*0.42}                    // 1: лесенка вниз
+    else if(L.num===2){x=-6.5+i*1.35;y=3.2-i*0.25;if(i>6)y-=0.5}        // 2: обрыв в бездну
+    else if(L.num===3){y=3.4-i*0.15}                  // 3: пологий лоток к стакану
+    else if(L.num===4){y=3.6-i*0.30;i>=5?0:0;if(i===5)y-=0.8;if(i>5){y=3.6-5*0.30-0.8-(i-5)*0.12}} // 4: трамплин + пропасть + ящик
+    else if(L.num===5){y=3.4-i*0.16;if(i>=6)y=2.5}   // 5: рельс упирается в сейф
+    else if(L.num===6){y=3.2-i*0.12;if(i===6)y=0.8;if(i===7)y=0.2}      // 6: скат + шины внизу
+    else if(L.num===7){x=-2.5+i*0.5;y=3.4-i*0.95;if(i>8)y=-1.0}         // 7: вертикальный каскад ракеток
+    else if(L.num===8){y=3.0-i*0.20;if(i>6)y=1.4}     // 8: трубы к шлюзу
+    a.push({x,y});
+  }
+  return a;
+}
+
+function clearObjects(){
+  nodes.forEach(n=>sc.remove(n.g));nodes.length=0;
+  deco.forEach(d=>sc.remove(d));deco.length=0;
+  sc.children.filter(c=>c.userData&&(c.userData.isPipe||c.userData.isFin||c.userData.isGoal||c.userData.isWater||c.userData.isDrop)).forEach(c=>sc.remove(c));
+  waterDrops.forEach(d=>sc.remove(d));waterDrops.length=0;
+  targetObj=null;goalReached=false;dropTimer=0;waterCaptured=0;waterMissed=0;
+}
+
+function addGoalObject(layout){
+  const gx=layout[11].x+0.9, gy=layout[11].y+0.1;
+  targetX=gx;
+  let obj={};
+  if(L.num===1){
+    const fin=new THREE.Mesh(new THREE.CylinderGeometry(.34,.38,.04,18),M.frame);
+    fin.position.set(gx,gy-.2,0);fin.receiveShadow=true;fin.castShadow=true;fin.userData={isFin:true,isGoal:true};sc.add(fin);targetObj=fin;
+    obj.fin=fin;
+  }else if(L.num===2){
+    const gr=new THREE.Group();gr.position.set(gx,gy,0);
+    // Металлическая плита-розетка (крупная, близко)
+    const plate=new THREE.Mesh(new THREE.BoxGeometry(1.6,0.25,0.9),new THREE.MeshStandardMaterial({color:0x6a6a76,roughness:.4,metalness:.7}));
+    plate.position.set(0,-0.55,0);gr.add(plate);
+    // Два гнезда розетки
+    const holeMat=new THREE.MeshStandardMaterial({color:0x1e1612,roughness:.9});
+    const h1=new THREE.Mesh(new THREE.BoxGeometry(.1,.06,.16),holeMat);h1.position.set(-.15,-0.42,0);gr.add(h1);
+    const h2=h1.clone();h2.position.set(.15,-0.42,0);gr.add(h2);
+    // Патрон лампы (латунный, крупный)
+    const socket=new THREE.Mesh(new THREE.CylinderGeometry(.22,.26,.3,14),M.copper);
+    socket.position.set(1.1,0.0,0);gr.add(socket);
+    // Стеклянная колба — крупная, заметная
+    const glass=new THREE.Mesh(new THREE.SphereGeometry(.45,20,20),new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:.18,roughness:.05}));
+    glass.position.set(1.1,.55,0);gr.add(glass);
+    // Вольфрамовая нить (толстая, витая) — будет вспыхивать
+    const fil=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.18,8),new THREE.MeshBasicMaterial({color:0x33220a}));
+    fil.position.set(1.1,.42,0);gr.add(fil);
+    // Торчащие из колбы провода к розетке
+    const wireMat=new THREE.MeshStandardMaterial({color:0x1a1410,roughness:.8});
+    const w1=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.9,6),wireMat);w1.position.set(.55,-.2,-.2);w1.rotation.z=-0.6;gr.add(w1);
+    const w2=w1.clone();w2.position.set(.55,-.2,.2);w2.rotation.z=-0.6;w2.position.z=-.2;gr.add(w2);
+    gr.userData={isGoal:true,hasSocket:true,platePos:plate.position.y};sc.add(gr);targetObj=gr;obj.fil=fil;obj.hasFil=true;
+}else if(L.num===3){
+    // ============ СЦЕНА 3: ВОДОНАПОРНАЯ СТАНЦИЯ (живая вода) ============
+    const matWater=new THREE.MeshStandardMaterial({color:0x2f8fd8,roughness:.1,metalness:.05,transparent:true,opacity:.9});
+    // --- БАК (с крышкой, хомутами, ножками и манометром сбоку) ---
+    const bgl=new THREE.Group();
+    const tankBody=new THREE.Mesh(new THREE.CylinderGeometry(.55,.55,1.1,24),new THREE.MeshStandardMaterial({color:0x546a7a,roughness:.5,metalness:.5}));
+    tankBody.position.y=0;bgl.add(tankBody);
+    const tankCap=new THREE.Mesh(new THREE.CylinderGeometry(.57,.57,.08,24),M.iron);tankCap.position.y=.58;bgl.add(tankCap);
+    const tankBase=new THREE.Mesh(new THREE.CylinderGeometry(.6,.6,.1,24),M.iron);tankBase.position.y=-.58;bgl.add(tankBase);
+    // Вода в баке (живая, колышется)
+    const tankWater=new THREE.Mesh(new THREE.CylinderGeometry(.5,.5,.8,20),matWater.clone());
+    tankWater.position.y=-.05;tankWater.userData={isTankWater:true};bgl.add(tankWater);
+    // Хомуты
+    const hoop1=new THREE.Mesh(new THREE.TorusGeometry(.56,.03,8,24),M.copper);hoop1.position.y=.25;bgl.add(hoop1);
+    const hoop2=hoop1.clone();hoop2.position.y=-.25;bgl.add(hoop2);
+    // Манометр — на коротком патрубке СБОКУ бака
+    const gaugeStem=new THREE.Mesh(new THREE.CylinderGeometry(.03,.04,.16,10),M.iron);gaugeStem.rotation.z=Math.PI/2;gaugeStem.position.set(.62,.2,0);bgl.add(gaugeStem);
+    const gauge=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,.05,14),M.brass);gauge.rotation.z=Math.PI/2;gauge.position.set(.74,.2,0);bgl.add(gauge);
+    const gaugeFace=new THREE.Mesh(new THREE.CircleGeometry(.07,12),new THREE.MeshStandardMaterial({color:0xe8dcc0}));
+    gaugeFace.rotation.y=Math.PI/2;gaugeFace.position.set(.77,.2,0);bgl.add(gaugeFace);
+    // Ножки бака
+    for(let s=0;s<3;s++){const a=s/3*Math.PI*2;const leg=new THREE.Mesh(new THREE.CylinderGeometry(.04,.045,.35,6),M.iron);leg.position.set(Math.cos(a)*.46,-.75,Math.sin(a)*.46);bgl.add(leg)}
+    bgl.position.set(-1.9,1.9,0);bgl.castShadow=true;sc.add(bgl);deco.push(bgl);
+    // --- ПАТРУБОК: из БОКА бака (нижний фланец) выходит труба-цилиндр, НЕ входит внутрь ---
+    const outletFlange=new THREE.Mesh(new THREE.TorusGeometry(.10,.025,8,16),M.copper);
+    outletFlange.position.set(-1.35,1.5,0);sc.add(outletFlange);deco.push(outletFlange);
+    const outletPipe=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.34,10),M.iron);
+    outletPipe.rotation.z=Math.PI/2;outletPipe.position.set(-1.18,1.5,0);sc.add(outletPipe);deco.push(outletPipe);
+    // --- КРАН: корпус, ручка-бабочка, носик вниз (капля падает в начало жёлоба) ---
+    const faucetGr=new THREE.Group();
+    const faucetBody=new THREE.Mesh(new THREE.CylinderGeometry(.07,.09,.16,12),M.brass);faucetGr.add(faucetBody);
+    const valveKnob=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.05,12),M.brass);valveKnob.position.y=.1;faucetGr.add(valveKnob);
+    const knobHandle=new THREE.Mesh(new THREE.BoxGeometry(.18,.03,.05),M.copper);knobHandle.position.y=.11;faucetGr.add(knobHandle);
+    const spout=new THREE.Mesh(new THREE.CylinderGeometry(.045,.05,.3,10),M.brass);spout.rotation.x=Math.PI/2;spout.position.set(0,-.23,0);faucetGr.add(spout);
+    faucetGr.position.set(-1.2,1.61,0);sc.add(faucetGr);deco.push(faucetGr);
+    // --- ЖЁЛОБ на шарнире: начало (x=-1.2, y=1.3) ровно под носиком крана ---
+    const chuteGr=new THREE.Group();chuteGr.position.set(-1.2,1.3,0);
+    const chuteBody=new THREE.Mesh(new THREE.BoxGeometry(1.2,.05,.28),M.iron);chuteBody.position.x=.6;chuteGr.add(chuteBody);
+    const chuteL=new THREE.Mesh(new THREE.BoxGeometry(1.2,.02,.02),new THREE.MeshStandardMaterial({color:0x8a8a96}));chuteL.position.set(.6,.035,.13);chuteGr.add(chuteL);
+    const chuteR=chuteL.clone();chuteR.position.z=-.13;chuteGr.add(chuteR);
+    const chuteTip=new THREE.Mesh(new THREE.BoxGeometry(.06,.06,.3),M.copper);chuteTip.position.x=1.2;chuteGr.add(chuteTip);
+    chuteGr.userData={isChute:true};sc.add(chuteGr);deco.push(chuteGr);
+    const hingePin=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.32,8),M.copper);hingePin.rotation.z=Math.PI/2;hingePin.position.set(-1.2,1.3,0);sc.add(hingePin);deco.push(hingePin);
+    // --- СТОЙКА под жёлобом ---
+    const chuteStand=new THREE.Mesh(new THREE.BoxGeometry(.08,.7,.18),M.iron);chuteStand.position.set(-1.2,.6,0);sc.add(chuteStand);deco.push(chuteStand);
+    // --- СТАКАН (прозрачный, БЕЗ квадратиков-рисок) ---
+    const glass3=new THREE.Mesh(new THREE.CylinderGeometry(.28,.22,.7,22,1,true),new THREE.MeshStandardMaterial({color:0xeaf4ff,transparent:true,opacity:.22,side:THREE.DoubleSide,roughness:.05}));
+    glass3.position.set(.37,-.15,0);sc.add(glass3);deco.push(glass3);
+    const rim3=new THREE.Mesh(new THREE.TorusGeometry(.28,.015,6,20),new THREE.MeshStandardMaterial({color:0xd0e0f0}));rim3.rotation.x=Math.PI/2;rim3.position.set(.37,.2,0);sc.add(rim3);deco.push(rim3);
+    const base3=new THREE.Mesh(new THREE.CylinderGeometry(.3,.34,.08,22),M.iron);base3.position.set(.37,-.45,0);sc.add(base3);deco.push(base3);
+    // Вода в стакане: растёт от ДНА (fill 0..0.6), без рисок
+    const water3=new THREE.Mesh(new THREE.CylinderGeometry(.25,.21,1,20),matWater);
+    water3.position.set(.37,-.5,0);water3.scale.y=.06;water3.userData={isWater:true,fill:0};sc.add(water3);targetObj=water3;
+    // Ключевые точки физики
+    goalObjs={tipX:-1.2,tipY:1.38,chutePivotX:-1.2,chutePivotY:1.3,chuteLen:1.2,
+      glassX:0.37,glassTopY:0.2,glassBottomY:-0.5,water:water3,tankWater:tankWater};
+    targetX=goalObjs.glassX;
+  }else if(L.num===4){
+    // ============ СЦЕНА 4: БАЛЛИСТИЧЕСКИЙ ТРАМПЛИН + ЯЩИК ============
+    // Воздушный теннисный мяч разгоняется по трамплину, взлетает и летит по параболе.
+    // Крышка ящика открыта. При верном коде (ловушка + датчик 4.2–4.7) мяч влетает и крышка захлопывается.
+    const t4x=-1.9,t4y=1.5; // правый край доски (там мяч слетает)
+    // Трамплин (наклон ВНИЗ вправо, rotation.z=-0.32 — согласован с физикой)
+    const tramp=new THREE.Mesh(new THREE.BoxGeometry(2.2,.1,.8),M.base);
+    tramp.position.set(-3.0,t4y+0.2,0);tramp.rotation.z=-0.32;tramp.castShadow=true;tramp.receiveShadow=true;
+    sc.add(tramp);deco.push(tramp);
+    const trRail1=new THREE.Mesh(new THREE.BoxGeometry(2.2,.03,.03),M.frame);trRail1.position.set(-3.0,t4y+0.28,0.38);trRail1.rotation.z=-0.32;sc.add(trRail1);deco.push(trRail1);
+    const trRail2=trRail1.clone();trRail2.position.z=-0.38;sc.add(trRail2);deco.push(trRail2);
+    const trLeg1=new THREE.Mesh(new THREE.BoxGeometry(.1,.9,.6),M.iron);trLeg1.position.set(-3.9,t4y-0.25,0);sc.add(trLeg1);deco.push(trLeg1);
+    // ЯЩИК
+    const box=new THREE.Mesh(new THREE.BoxGeometry(1.1,.7,1.0),M.base);box.castShadow=true;
+    box.position.set(1.2,-1.15,0);sc.add(box);deco.push(box);
+    const boxInner=new THREE.Mesh(new THREE.BoxGeometry(0.9,.4,.8),M.dark);boxInner.position.set(1.2,-1.15,0);sc.add(boxInner);deco.push(boxInner);
+    const boxBand1=new THREE.Mesh(new THREE.BoxGeometry(1.13,.05,1.03),M.iron);boxBand1.position.set(1.2,-0.95,0);sc.add(boxBand1);deco.push(boxBand1);
+    const boxBand2=boxBand1.clone();boxBand2.position.y=-1.3;sc.add(boxBand2);deco.push(boxBand2);
+    // Крышка на шарнире сзади ящика: открыта (стоит), захлопывается только при поимке
+    const lidPiv=new THREE.Group();lidPiv.position.set(1.7,-0.8,0);sc.add(lidPiv);deco.push(lidPiv);
+    const lid=new THREE.Mesh(new THREE.BoxGeometry(1.15,.06,.95),M.frame);lid.position.set(-.55,.0,0);lid.castShadow=true;lidPiv.add(lid);
+    lidPiv.rotation.z=0.95; // открыта (стоит вертикально)
+    goalObjs={trampEndX:t4x,trampEndY:t4y,rampY:t4y-0.4,rampTop:t4y+0.2,rampAngle:0.32,rampX0:-3.0,boxX:1.2,boxTopY:-0.7,lidPiv:lidPiv};
+    targetObj=lidPiv;
+    targetX=goalObjs.boxX;
+  }else if(L.num===5){
+    // ============ СЦЕНА 5: СЕЙФ (детальный) ============
+    const s5x=0.4; // центр сейфа
+    // Пьедестал-плита под сейфом
+    const ped5=new THREE.Mesh(new THREE.BoxGeometry(1.7,.22,1.3),M.iron);ped5.position.set(s5x,-0.75,0);
+    ped5.receiveShadow=true;ped5.castShadow=true;sc.add(ped5);deco.push(ped5);
+    // Сейф
+    const safeGr=new THREE.Group();safeGr.position.set(s5x,-0.35,0);
+    const safeBody=new THREE.Mesh(new THREE.BoxGeometry(1.4,1.55,1.1),new THREE.MeshStandardMaterial({color:0x4a4a58,roughness:.45,metalness:.55}));
+    safeBody.castShadow=true;safeGr.add(safeBody);
+    // Верхний и нижний кант
+    const capTop=new THREE.Mesh(new THREE.BoxGeometry(1.46,.12,1.16),new THREE.MeshStandardMaterial({color:0x3a3a46,roughness:.6}));
+    capTop.position.y=.82;safeGr.add(capTop);
+    const capBot=capTop.clone();capBot.position.y=-.82;safeGr.add(capBot);
+    // Заклёпки по периметру двери
+    for(let r=0;r<4;r++)for(let c=0;c<4;c++){
+      const riv=new THREE.Mesh(new THREE.CylinderGeometry(.028,.028,.03,6),M.brass);
+      riv.position.set(-.42+c*.28,.6-r*.4,.56);safeGr.add(riv);
+    }
+    // Тяжёлые петли слева
+    for(let py of [.55,0,-.55]){
+      const h28=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,.4,10),M.iron);h28.rotation.z=Math.PI/2;h28.position.set(-.72,py,.45);safeGr.add(h28);
+      const hPin=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.44,6),M.copper);hPin.rotation.z=Math.PI/2;hPin.position.set(-.76,py,.45);safeGr.add(hPin);
+    }
+    // Дверь (открывается влево)
+    const doorPiv=new THREE.Group();doorPiv.position.set(-.7,0,.56);safeGr.add(doorPiv);
+    const doorBr=new THREE.Mesh(new THREE.BoxGeometry(1.26,1.38,.12),new THREE.MeshStandardMaterial({color:0x5a5a68,roughness:.45,metalness:.5}));
+    doorBr.position.set(.63,0,0);doorBr.castShadow=true;doorPiv.add(doorBr);
+    // Лимб: втулка, диск, деления, стрелка
+    const dial=new THREE.Mesh(new THREE.CylinderGeometry(.24,.24,.06,24),M.brass);
+    dial.rotation.x=Math.PI/2;dial.position.set(1.12,.22,0);doorPiv.add(dial);
+    const hub=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.08,10),M.copper);
+    hub.rotation.x=Math.PI/2;hub.position.set(1.12,.22,0);doorPiv.add(hub);
+    for(let m=0;m<14;m++){const a=m/14*Math.PI*2;
+      const tick=new THREE.Mesh(new THREE.BoxGeometry(.035,.012,.05),M.dark);
+      tick.position.set(1.12+Math.cos(a)*.2,.22+Math.sin(a)*.2,0);tick.rotation.z=-a;doorPiv.add(tick);
+    }
+    const needArrow=new THREE.Mesh(new THREE.BoxGeometry(.03,.14,.02),new THREE.MeshStandardMaterial({color:0x8a2020}));
+    needArrow.position.set(1.12,.38,0);doorPiv.add(needArrow);
+    // Рукоятка-штурвал двери + замочная скважина
+    const handleWheel=new THREE.Mesh(new THREE.TorusGeometry(.09,.02,8,14),M.copper);
+    handleWheel.position.set(.55,-.3,0);doorPiv.add(handleWheel);
+    const handleArm=new THREE.Mesh(new THREE.BoxGeometry(.2,.04,.04),M.copper);handleArm.position.set(.55,-.3,0);doorPiv.add(handleArm);
+    const keyhole=new THREE.Mesh(new THREE.BoxGeometry(.05,.11,.04),M.dark);keyhole.position.set(1.12,-.32,0);doorPiv.add(keyhole);
+    // Плашка под дверью с названием
+    const nameplate=new THREE.Mesh(new THREE.BoxGeometry(.7,.07,.03),M.brass);nameplate.position.set(.63,-.7,0);doorPiv.add(nameplate);
+    sc.add(safeGr);deco.push(safeGr);
+    goalObjs={safeX:s5x,safeY:-0.4,dial:dial,doorPiv:doorPiv};
+    targetObj=doorPiv;
+    targetX=goalObjs.safeX;
+  }else if(L.num===6){
+    // ============ СЦЕНА 6: ШИНЫ + КАНАТ + ГРУЗ (детальная) ============
+    const c6x=0.2,c6y=0.2;
+    // Рама-станина под валиками
+    const bed6=new THREE.Mesh(new THREE.BoxGeometry(1.7,.18,.5),M.iron);bed6.position.set(c6x+0.1,c6y-0.55,0);
+    bed6.receiveShadow=true;bed6.castShadow=true;sc.add(bed6);deco.push(bed6);
+    // Две опорные стойки
+    const st1=new THREE.Mesh(new THREE.BoxGeometry(.14,.5,.3),M.iron);st1.position.set(c6x-0.45,c6y-0.55,0);sc.add(st1);deco.push(st1);
+    const st2=st1.clone();st2.position.set(c6x+0.65,c6y-0.55,0);sc.add(st2);deco.push(st2);
+    // Оси
+    const axle1=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.6,8),M.copper);axle1.rotation.z=Math.PI/2;axle1.position.set(c6x-0.15,c6y-0.4,0);sc.add(axle1);deco.push(axle1);
+    // Два колеса (группы: шина с протектором + диск-обод + ступица)
+    const gr6=new THREE.Group();gr6.position.set(c6x-0.4,c6y-0.3,0);
+    function makeWheel(){
+      const w=new THREE.Group();
+      // ШИНА-ТОР (кольцо резины) — в плоскости колеса (XY), чистая поверхность
+      const tire=new THREE.Mesh(new THREE.TorusGeometry(.36,.11,14,26),new THREE.MeshStandardMaterial({color:0x181410,roughness:.95}));
+      tire.castShadow=true;w.add(tire);
+      // ОБОД-ЦИЛИНДР — внутри шины, ПОЗАДИ спиц
+      const disc=new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,.12,18),M.brass);
+      disc.rotation.x=Math.PI/2;w.add(disc);
+      // Спицы (плоскость XY)
+      for(let s=0;s<6;s++){const a=s/6*Math.PI;const spoke=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.24,4),M.copper);spoke.rotation.x=Math.PI/2;spoke.position.set(Math.cos(a)*.14,Math.sin(a)*.14,0);w.add(spoke)}
+      const hub=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.16,10),M.copper);hub.rotation.x=Math.PI/2;w.add(hub);
+      return w;
+    }
+    const wheelA=makeWheel();gr6.add(wheelA);
+    const wheelB=makeWheel();wheelB.position.set(.65,0,0);gr6.add(wheelB);
+    sc.add(gr6);deco.push(gr6);
+    // Канат, обмотанный вокруг второго колеса (несколько витков)
+    const ropeGroup=new THREE.Group();ropeGroup.position.set(c6x+0.25,c6y-0.3,-0.02);
+    for(let rr=0;rr<3;rr++){
+      const rp=new THREE.Mesh(new THREE.TorusGeometry(.26,.018,8,24),M.copper);
+      rp.rotation.x=Math.PI/2-0.4;rp.position.x=rr*.09;ropeGroup.add(rp);
+    }
+    sc.add(ropeGroup);deco.push(ropeGroup);
+    // Грузовой ящик с хомутами и петлёй (висит ВЫСОКО над шиной, падает при снятии каната)
+    const box6=new THREE.Mesh(new THREE.BoxGeometry(.42,.38,.42),M.base);
+    box6.position.set(c6x+0.25,c6y+0.85,0);box6.castShadow=true;sc.add(box6);deco.push(box6);
+    const band61=new THREE.Mesh(new THREE.BoxGeometry(.44,.05,.44),M.iron);band61.position.set(c6x+0.25,c6y+0.75,0);sc.add(band61);deco.push(band61);
+    const band62=band61.clone();band62.position.y=c6y+0.97;sc.add(band62);deco.push(band62);
+    const hook6=new THREE.Mesh(new THREE.TorusGeometry(.05,.012,6,10),M.copper);hook6.position.set(c6x+0.25,c6y+1.08,0);sc.add(hook6);deco.push(hook6);
+    // убираем лишний актёр-ящик (ball) — на сцене свой груз
+    ball.visible=false;
+    // Верхняя точка шины: gr6 в (c6x-0.4, c6y-0.3), шина-тор радиус .36 + труба .11
+    const tireTopY6=c6y-0.3+0.47;
+    goalObjs={tireGr:gr6,wheelA:wheelA,wheelB:wheelB,rope:ropeGroup,boxLoad:box6,cx:c6x,cy:c6y,tireTopY:tireTopY6};
+    targetObj=gr6;
+    targetX=c6x+0.8;
+  }else if(L.num===7){
+    // ============ СЦЕНА 7: ПИНГ-ПОНГ КАСКАД (детальная) ============
+    const c7x=-0.5,c7y=1.2;
+    const pads=[];
+    for(let j=0;j<4;j++){
+      // Ракетка: основание + ручка-кронштейн, наклонена зигзагом
+      const padGr=new THREE.Group();
+      const face=new THREE.Mesh(new THREE.BoxGeometry(.85,.045,.4),new THREE.MeshStandardMaterial({color:0x8a6a4a,roughness:.7,metalness:.2}));
+      padGr.add(face);
+      const edge= new THREE.Mesh(new THREE.BoxGeometry(.85,.05,.02),M.brass);edge.position.z=.21;padGr.add(edge);
+      const edge2= edge.clone();edge2.position.z=-.21;padGr.add(edge2);
+      const handle=new THREE.Mesh(new THREE.BoxGeometry(.26,.05,.05),M.copper);handle.position.x=.35;handle.rotation.z=.6;padGr.add(handle);
+      const bracket=new THREE.Mesh(new THREE.BoxGeometry(.05,.5,.05),M.iron);bracket.position.set(.15,0,0);padGr.add(bracket);
+      padGr.position.set(c7x+j*.85,c7y-j*.55,0);
+      padGr.rotation.z=j%2===0?.18:-.18;
+      padGr.castShadow=true;sc.add(padGr);deco.push(padGr);pads.push(padGr);
+    }
+    // Чашка с подставкой и мишенью
+    const cup7=new THREE.Mesh(new THREE.CylinderGeometry(.24,.19,.4,18,1,true),new THREE.MeshStandardMaterial({color:0xeaf4ff,transparent:true,opacity:.25,side:THREE.DoubleSide}));
+    cup7.position.set(c7x+3.3,c7y-2.3,0);sc.add(cup7);deco.push(cup7);
+    const cupRim=new THREE.Mesh(new THREE.TorusGeometry(.24,.012,6,16),new THREE.MeshStandardMaterial({color:0xd0e0f0}));cupRim.rotation.x=Math.PI/2;cupRim.position.set(c7x+3.3,c7y-2.06,0);sc.add(cupRim);deco.push(cupRim);
+    const cupStand7=new THREE.Mesh(new THREE.BoxGeometry(.42,.12,.42),M.base);cupStand7.position.set(c7x+3.3,c7y-2.55,0);sc.add(cupStand7);deco.push(cupStand7);
+    const cupLeg1=new THREE.Mesh(new THREE.BoxGeometry(.04,.7,.04),M.iron);cupLeg1.position.set(c7x+3.3,c7y-2.9,0);sc.add(cupLeg1);deco.push(cupLeg1);
+    goalObjs={pads:pads,cupX:c7x+3.3,cupY:c7y-2.3,paddleCount:4};
+    targetObj=cup7;
+    targetX=goalObjs.cupX;
+  }else if(L.num===8){
+    // ============ СЦЕНА 8: ТРУБНАЯ МАГИСТРАЛЬ (детальная) ============
+    const c8x=0.0,c8y=0.0;
+    // Полупрозрачная опорная платформа-эстакада
+    const deck8=new THREE.Mesh(new THREE.BoxGeometry(3.4,.14,.9),M.iron);deck8.position.set(c8x,c8y-0.55,0);
+    deck8.receiveShadow=true;deck8.castShadow=true;sc.add(deck8);deco.push(deck8);
+    // Насос А (стальной, с манометром и патрубками)
+    const pumpA=new THREE.Mesh(new THREE.CylinderGeometry(.26,.3,.6,18),new THREE.MeshStandardMaterial({color:0x4a5a6a,roughness:.5,metalness:.5}));
+    pumpA.position.set(c8x-1.3,c8y-0.1,0);pumpA.castShadow=true;sc.add(pumpA);deco.push(pumpA);
+    const flA=new THREE.Mesh(new THREE.CylinderGeometry(.32,.32,.07,16),M.iron);flA.position.set(c8x-1.3,c8y-.4,0);sc.add(flA);deco.push(flA);
+    const topA=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.14,10),M.copper);topA.position.set(c8x-1.3,c8y+.32,0);sc.add(topA);deco.push(topA);
+    const gaugeA=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.03,12),M.brass);gaugeA.rotation.z=Math.PI/2;gaugeA.position.set(c8x-1.05,c8y+.2,0);sc.add(gaugeA);deco.push(gaugeA);
+    // Насос Б (латунный)
+    const pumpB=new THREE.Mesh(new THREE.CylinderGeometry(.26,.3,.6,18),M.brass);
+    pumpB.position.set(c8x-0.35,c8y-0.1,0);pumpB.castShadow=true;sc.add(pumpB);deco.push(pumpB);
+    const flB=new THREE.Mesh(new THREE.CylinderGeometry(.32,.32,.07,16),M.iron);flB.position.set(c8x-0.35,c8y-.4,0);sc.add(flB);deco.push(flB);
+    const topB=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.14,10),M.copper);topB.position.set(c8x-0.35,c8y+.32,0);sc.add(topB);deco.push(topB);
+    const gaugeB=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.03,12),M.brass);gaugeB.rotation.z=Math.PI/2;gaugeB.position.set(c8x-0.6,c8y+.2,0);sc.add(gaugeB);deco.push(gaugeB);
+    // Трубопровод: сегменты с фланцами и коленами
+    const tubeMat=new THREE.MeshStandardMaterial({color:0x6a7a8a,roughness:.5,metalness:.5});
+    const seg=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.5,12),tubeMat);seg.rotation.z=Math.PI/2;seg.position.set(c8x-0.75,c8y-0.1,0);sc.add(seg);deco.push(seg);
+    const flC1=new THREE.Mesh(new THREE.CylinderGeometry(.09,.09,.05,12),M.iron);flC1.rotation.z=Math.PI/2;flC1.position.set(c8x-0.9,c8y-0.1,0);sc.add(flC1);deco.push(flC1);
+    const flC2=flC1.clone();flC2.position.x=c8x-0.6;sc.add(flC2);deco.push(flC2);
+    const elbow8=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.3,12),tubeMat);elbow8.position.set(c8x-0.2,c8y-0.35,0);elbow8.rotation.z=-.5;sc.add(elbow8);deco.push(elbow8);
+    const seg2=new THREE.Mesh(new THREE.CylinderGeometry(.06,.06,.5,12),tubeMat);seg2.rotation.z=Math.PI/2;seg2.position.set(c8x+0.25,c8y-0.42,0);sc.add(seg2);deco.push(seg2);
+    const flC3=flC1.clone();flC3.position.x=c8x+0.1;flC3.position.y=c8y-0.42;sc.add(flC3);deco.push(flC3);
+    const flC4=flC1.clone();flC4.position.x=c8x+0.4;flC4.position.y=c8y-0.42;sc.add(flC4);deco.push(flC4);
+    // Бассейн с задвижкой
+    const basin8=new THREE.Mesh(new THREE.CylinderGeometry(.42,.48,.55,22,1,true),new THREE.MeshStandardMaterial({color:0xeaf4ff,transparent:true,opacity:.18,side:THREE.DoubleSide}));
+    basin8.position.set(c8x+0.95,c8y-0.25,0);sc.add(basin8);deco.push(basin8);
+    const base8=new THREE.Mesh(new THREE.CylinderGeometry(.48,.54,.09,22),M.iron);base8.position.set(c8x+0.95,c8y-.55,0);sc.add(base8);deco.push(base8);
+    const rim8=new THREE.Mesh(new THREE.TorusGeometry(.42,.018,8,20),new THREE.MeshStandardMaterial({color:0xd0e0f0}));rim8.rotation.x=Math.PI/2;rim8.position.set(c8x+0.95,c8y+.03,0);sc.add(rim8);deco.push(rim8);
+    // Вода в бассейне: цилиндр высотой 1, растёт от ДНА (яркая, заметная)
+    const water8=new THREE.Mesh(new THREE.CylinderGeometry(.37,.37,1,20),new THREE.MeshStandardMaterial({color:0x2f8fd8,roughness:.1,metalness:.05,transparent:true,opacity:.9}));
+    water8.position.set(c8x+0.95,c8y-0.53,0);water8.scale.y=.05;water8.userData={isWater:true,fill:0};sc.add(water8);targetObj=water8;
+    // ЛЕЙКА-ВОРОНКА над бассейном, подвешена на трубе
+    const can8=new THREE.Group();can8.position.set(c8x+0.95,c8y-0.05,0);
+    const canBody=new THREE.Mesh(new THREE.CylinderGeometry(.14,.1,.22,14),M.copper);canBody.position.y=.16;can8.add(canBody);
+    const canTip=new THREE.Mesh(new THREE.CylinderGeometry(.06,.09,.12,10),M.brass);canTip.position.y=.02;can8.add(canTip);
+    const canSpray=new THREE.Mesh(new THREE.CylinderGeometry(.11,.11,.04,14),new THREE.MeshStandardMaterial({color:0xd0d0d8,metalness:.6,roughness:.3}));canSpray.position.y=.28;can8.add(canSpray);
+    const canHandle=new THREE.Mesh(new THREE.TorusGeometry(.1,.015,6,12),M.copper);canHandle.rotation.x=Math.PI/2;canHandle.position.y=.28;can8.add(canHandle);
+    const canArm=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.5,8),M.iron);canArm.rotation.z=Math.PI/2;canArm.position.set(-.18,.28,0);sc.add(canArm);deco.push(canArm);
+    sc.add(can8);deco.push(can8);
+    // Струя воды (тонкий полупрозрачный цилиндр) из лейки вниз — видна при работе
+    const jet8=new THREE.Mesh(new THREE.CylinderGeometry(.045,.055,.5,10),new THREE.MeshStandardMaterial({color:0x4a9ad8,transparent:true,opacity:.55,roughness:.1}));
+    jet8.position.set(c8x+0.95,c8y-0.25,-0.05);jet8.userData={isJet:true};sc.add(jet8);deco.push(jet8);
+    goalObjs={water:water8,cx:c8x,cy:c8y,jet:jet8,canY:c8y-0.05};
+    targetX=c8x+1.2;
+  }
+  return obj;
+}
+
+function buildScene(){
+  clearObjects();
+  const layout=sceneLayout();
+  if(L.kind==='nodes'){
+    for(let i=0;i<12;i++){
+      const {x,y}=layout[i];
+      const g=new THREE.Group();g.position.set(x,y,0);
+      const plat=new THREE.Mesh(new THREE.BoxGeometry(1.28,.12,.96),M.base);plat.position.y=-.06;plat.castShadow=true;plat.receiveShadow=true;g.add(plat);
+      const rim=new THREE.Mesh(new THREE.BoxGeometry(1.32,.03,1.0),M.frame);rim.position.set(0,.04,0);g.add(rim);
+      [[-.52,.02,-.44],[.52,.02,-.44],[-.52,.02,.44],[.52,.02,.44]].forEach(p=>{const b=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.02,6),M.brass);b.position.set(p[0],p[1],p[2]);g.add(b)});
+      const indMat=M.glow.clone();const ind=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,.025,16),indMat);ind.position.set(0,.015,0);g.add(ind);
+      // Барьер на шарнире у основания: при true падает как мостик под наклоном
+      const piv=new THREE.Group();piv.position.set(.62,0,0);g.add(piv);
+      const bar=new THREE.Mesh(new THREE.BoxGeometry(.04,.38,.5),M.dark);bar.position.set(0,.19,0);bar.castShadow=true;piv.add(bar);
+      const post=new THREE.Mesh(new THREE.CylinderGeometry(.02,.03,.45,6),M.frame);post.position.set(.62,.22,0);g.add(post);
+      sc.add(g);nodes.push({g,ind,bar,piv,name:NN[i],key:KEYS[i],surfY:y+.12,x});
+    }
+    const pts=[];for(const n of nodes)pts.push(new THREE.Vector3(n.x,n.surfY+.04,0));
+    const pg=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),36,.012,6,false);
+    const pm=new THREE.Mesh(pg,new THREE.MeshStandardMaterial({color:0x8a7a6a,roughness:.3,metalness:.5}));pm.userData={isPipe:true};sc.add(pm);
+  }else if(L.num===2){
+    // сцена 2 — ступенек нет: только обрыв, падающая вилка, розетка и лампа
+    // узлы не строим, шар-актёр падает прямо в розетку
+  }else if(L.num===3){
+    // сцена 3 — ступенек нет: бак, кран, жёлоб, стакан. Капли воды летят к стакану.
+  }else if(L.num===4){
+    // сцена 4 — ступенек нет: трамплин + ящик. Мяч летит по баллистике.
+  }else if(L.num===5){
+    // сцена 5 — ступенек нет: сейф с лимбом, ключ едет слева.
+  }else if(L.num===6){
+    // сцена 6 — ступенек нет: шины-валики + грузовой ящик.
+  }else if(L.num===7){
+    // сцена 7 — ступенек нет: каскад ракеток, шарик пинг-понга.
+  }else if(L.num===8){
+    // сцена 8 — ступенек нет: трубная магистраль с насосами.
+  }else{
+    // декоративный трек из маленьких платформ
+    for(let i=0;i<12;i++){
+      const {x,y}=layout[i];
+      const g=new THREE.Group();g.position.set(x,y,0);
+      const plat=new THREE.Mesh(new THREE.BoxGeometry(1.28,.08,.9),M.base);plat.position.y=-.04;plat.receiveShadow=true;g.add(plat);
+      const indMat=M.glow.clone();const ind=new THREE.Mesh(new THREE.CylinderGeometry(.1,.1,.02,12),indMat);ind.position.set(0,.01,0);g.add(ind);
+      sc.add(g);nodes.push({g,ind,bar:null,name:NN[i],key:KEYS[i],surfY:y+.08,x});
+    }
+    const pts=[];for(const n of nodes)pts.push(new THREE.Vector3(n.x,n.surfY+.04,0));
+    const pg=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),36,.012,6,false);
+    const pm=new THREE.Mesh(pg,new THREE.MeshStandardMaterial({color:0x8a7a6a,roughness:.3,metalness:.5}));pm.userData={isPipe:true};sc.add(pm);
+  }
+  addGoalObject(layout);
+}
+
+// Пыль
+const dn=350;const dg2=new THREE.BufferGeometry();const dp=new Float32Array(dn*3);
+for(let i=0;i<dn;i++){dp[i*3]=(Math.random()-.5)*30;dp[i*3+1]=(Math.random()-.5)*15+2;dp[i*3+2]=(Math.random()-.5)*20}
+dg2.setAttribute('position',new THREE.BufferAttribute(dp,3));
+const du=new THREE.Points(dg2,new THREE.PointsMaterial({color:0x8a7a6a,size:.025,transparent:true,opacity:.15,blending:THREE.AdditiveBlending}));sc.add(du);
+const sn2=45;const sg2=new THREE.BufferGeometry();const sp2=new Float32Array(sn2*3);const sv2=[];
+for(let i=0;i<sn2;i++)sv2.push(new THREE.Vector3());
+sg2.setAttribute('position',new THREE.BufferAttribute(sp2,3));
+const ss=new THREE.Points(sg2,new THREE.PointsMaterial({color:0xe0b86a,size:.04,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
+ss.userData={vel:sv2};sc.add(ss);
+const trailPts=[];const trailGeo=new THREE.BufferGeometry();
+const trail=new THREE.Line(trailGeo,new THREE.LineBasicMaterial({color:0xceb07a,transparent:true,opacity:.2}));sc.add(trail);
+
+let actx=null;
+function tone(f,d,t){f=f||800;d=d||.08;t=t||'sine';if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g2=actx.createGain();o.type=t;o.frequency.value=f;g2.gain.setValueAtTime(.05,actx.currentTime);g2.gain.exponentialRampToValueAtTime(.001,actx.currentTime+d);o.connect(g2);g2.connect(actx.destination);o.start();o.stop(actx.currentTime+d)}
+function sparks(pos,c=25){
+  ss.material.opacity=.8;const pa=ss.geometry.attributes.position.array,vl=ss.userData.vel;
+  for(let i=0;i<c;i++){const idx=i%sn2;pa[idx*3]=pos.x+(Math.random()-.5)*.25;pa[idx*3+1]=pos.y+(Math.random()-.5)*.25;pa[idx*3+2]=pos.z+(Math.random()-.5)*.25;vl[idx].set((Math.random()-.5)*.4,Math.random()*.5,(Math.random()-.5)*.4)}
+  ss.geometry.attributes.position.needsUpdate=true;
+}
+
+function renderChips(){rebuildEdit()}
+
+/* ---------- НАВИГАЦИЯ ---------- */
+function loadLevel(idx){
+  lvlIdx=idx;initLevel();
+  linfo.textContent=`УРОВЕНЬ ${L.num} — ${L.nm.toUpperCase()}`;
+  astTxt.innerHTML=L.hint;
+  taskTxt.innerHTML=`<b>Цель:</b> ${L.goal}. ${L.task}`;
+  document.getElementById('pv').style.display=lvlIdx===0?'none':'inline';
+  document.getElementById('nx').textContent=lvlIdx>=7?'Финал':'Далее';
+  cnt.textContent=L.kind==='nodes'?'0/12':L.goal;
+  // Вторая кнопка: показываем, если есть доп. настройки (check2)
+  const sb2=document.getElementById('sb2');
+  if(sb2){sb2.style.display=(L.check2&&L.kind!=='nodes')?'block':'none';}
+  resetScene();rebuildEdit();showGate();
+}
+document.getElementById('pv').onclick=()=>{if(lvlIdx>0)loadLevel(lvlIdx-1)};
+document.getElementById('nx').onclick=()=>{if(lvlIdx<7)loadLevel(lvlIdx+1)};
+
+function resetScene(){
+  run=false;crash=false;cur=0;winAnim=0;
+  clearObjects();buildScene();buildActor();
+  if(L.num===2){ball.position.set(targetX,1.5,0);ball.userData.vx=0;ball.userData.vy=0}
+  else if(L.num===3&&goalObjs){ball.position.set(goalObjs.tipX,goalObjs.tipY+0.2,0);ball.userData.vx=0;ball.userData.vy=0}
+  // Сцена 4: старт мяча — на верхней поверхности доски (не тонет)
+  else if(L.num===4&&goalObjs){ball.position.set(-3.7,goalObjs.rampTop+0.2,0);ball.userData.flight=false;ball.userData.vy=0}
+  else if(L.num===5&&goalObjs){ball.position.set(-3.0,goalObjs.safeY+0.1,0)}
+  else if(L.num===6&&goalObjs){ball.position.set(goalObjs.cx-1.2,goalObjs.cy+0.6,0)}
+  else if(L.num===7&&goalObjs){ball.position.set(goalObjs.cupX-3.0,1.8,0)}
+  else if(L.num===8&&goalObjs){ball.position.set(goalObjs.cx-1.5,0.6,0)}
+  else{ball.position.set(-6.5,4,0)}
+  ball.userData.vx=0;ball.userData.vy=0;setActorColor(0x8a6a4a);
+  trailPts.length=0;trail.geometry.setFromPoints([]);
+  chs.textContent='ГОТОВО';chs.style.color='';chd.className='chn-d';pb.style.width='0%';
+}
+
+/* ---------- ЗАПУСК ---------- */
+window.startRun=function(){
+  if(!eng){showGate();return}
+  if(run||crash)return;
+  if(!parseC())return;
+  cur=0;run=true;crash=false;lg.style.color='';
+  if(L.num===2){ball.position.set(targetX,1.5,0);ball.userData.vx=0;ball.userData.vy=0}
+  else if(L.num===3&&goalObjs){ball.position.set(goalObjs.tipX,goalObjs.tipY+0.3,0);ball.userData.vx=0;ball.userData.vy=-0.01}
+  else if(L.num===4&&goalObjs){ball.position.set(-3.8,goalObjs.rampTop-Math.tan(goalObjs.rampAngle)*(-3.8-goalObjs.rampX0)+0.15,0);ball.userData.vx=SPD*1.2;ball.userData.vy=0;ball.userData.flight=false}
+  else if(L.num===5&&goalObjs){ball.position.set(-3.0,goalObjs.safeY+0.1,0);ball.userData.vx=SPD*1.2;ball.userData.vy=0}
+  else if(L.num===6&&goalObjs){ball.position.set(goalObjs.cx-1.2,goalObjs.cy+0.6,0);ball.userData.vx=SPD;ball.userData.vy=0}
+  else if(L.num===7&&goalObjs){ball.position.set(goalObjs.cupX-3.0,1.8,0);ball.userData.vx=0;ball.userData.vy=0}
+  else if(L.num===8&&goalObjs){ball.position.set(goalObjs.cx-1.5,0.6,0);ball.userData.vx=SPD;ball.userData.vy=0}
+  else{ball.position.set(-6.5,4,0);ball.userData.vx=SPD;ball.userData.vy=0}
+  setActorColor(0x8a6a4a);
+  if(L.kind==='nodes'){
+    nodes.forEach(n=>{
+      n.ind.material=new THREE.MeshStandardMaterial({color:0x6a4a3a,roughness:.4,emissive:new THREE.Color(0),emissiveIntensity:0});
+      const a=conf[n.key]===true;
+      if(n.piv){n.piv.rotation.z=a?1.35:0}
+      else{n.bar.position.y=a?-.09:.18;n.bar.scale.y=a?.25:1}
+    });
+  }
+  trailPts.length=0;trail.geometry.setFromPoints([]);
+  tms=0;t0=Date.now();clearInterval(tint);tint=setInterval(()=>{tms=Date.now()-t0;document.getElementById('tmr').textContent=fmt(tms)},30);
+  chs.textContent='ИДЁТ';chs.style.color='var(--light)';chd.className='chn-d ok';
+  sb.textContent='Расчет...';lg.textContent='% Механизм запущен. Шар катится к цели.';
+  pb.style.width='0%';tone(600,.1);
+  astTxt.innerHTML='Шар в пути. Следите за целью!';
+};
+
+function fmt(ms){const m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000),cs=Math.floor((ms%1000)/10);return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+String(cs).padStart(2,'0')}
+
+/* ---------- ПОБЕДА УРОВНЯ ---------- */
+function winLevel(){
+  run=false;clearInterval(tint);winAnim=1;
+  setActorColor(0x4a9a5a);
+  const key='ws_lvl'+L.num;const rec=JSON.parse(localStorage.getItem(key)||'[]');rec.push({name:eng,time:tms});localStorage.setItem(key,JSON.stringify(rec));
+  lg.textContent='% Победа! Цель "'+L.goal+'" достигнута за '+fmt(tms)+'!';
+  sb.textContent='Готово!';chs.textContent='УСПЕХ';chs.style.color='var(--ok)';chd.className='chn-d ok';pb.style.width='100%';tone(1000,.3);
+  cnt.textContent='УСПЕХ';
+  astTxt.innerHTML='Отлично! Цель достигнута. '+(lvlIdx<7?'<b style="color:var(--accent);cursor:pointer" onclick="document.getElementById(\'nx\').click()">Далее</b>':'Это был финальный уровень мастерской!');
+}
+function failLevel(msg){
+  run=false;crash=true;setActorColor(0x1a1410);sparks(ball.position,30);clearInterval(tint);
+  lg.textContent='% Не вышло: '+msg;lg.style.color='var(--bad)';
+  sb.textContent='Запустить механизм';chs.textContent='ОШИБКА';chs.style.color='var(--bad)';chd.className='chn-d bd';tone(200,.3);
+  astTxt.innerHTML='Не получилось. '+msg+' Сверьтесь с целью и кодом.';
+}
+
+/* ---------- АНИМАЦИЯ ---------- */
+let time=0;
+function anim(){
+  requestAnimationFrame(anim);time+=.016;const t=time;
+  du.rotation.y+=.0002;
+
+  if(L.kind==='nodes'){
+    nodes.forEach((n,i)=>{
+      const a=conf[n.key]===true;
+      if(a){n.ind.material.color.setHex(0x4a9a5a);n.ind.material.emissive.setHex(0x2a6a2a);n.ind.material.emissiveIntensity=.4+.3*Math.sin(t*3+i)}
+      else{n.ind.material.color.setHex(0x6a4a3a);n.ind.material.emissive.setHex(0);n.ind.material.emissiveIntensity=0}
+      if(n.piv){ // барьер-мост: true -> палочка падает как мостик под наклоном (вперёд)
+        n.piv.rotation.z+=((a?1.35:0) - n.piv.rotation.z)*.09;
+      }else{
+        n.bar.position.y+=(a?-.09:.18-n.bar.position.y)*.08;
+      }
+    });
+  }else{
+    nodes.forEach((n,i)=>{
+      n.ind.material.color.setHex(0x6a4a3a);n.ind.material.emissive.setHex(0);n.ind.material.emissiveIntensity=0;
+    });
+  }
+
+  if(run){
+    const b=ball;
+    // ---- анимация теннисного мяча (вращение полос) ----
+    if(L.num===4&&actorExtra&&actorExtra.tennis&&b.userData.flight){
+      actorExtra.tennis.rotation.x+=.15;
+      actorExtra.tennis.rotation.z+=.08;
+    }
+    // ---- СЦЕНАРИИ ДВИЖЕНИЯ ----
+    if(L.num===1||L.kind==='nodes'){ // 1: шар катится по лесенке
+      b.userData.vy-=.004;b.userData.vy*=.995;
+      b.userData.vx+=(SPD-b.userData.vx)*.04;
+      b.position.x+=b.userData.vx;b.position.y+=b.userData.vy;
+      if(b.children.length&&b.children[0].geometry.type==='SphereGeometry')b.children[0].rotation.z-=b.userData.vx*3;
+    }else if(L.num===2){ // 2: вилка падает на розетку
+      b.userData.vy-=.006;b.userData.vy*=.99;
+      b.position.y+=b.userData.vy;
+      if(b.position.y<=-0.1){ // штыри вошли в гнёзда
+        b.position.y=-0.1;b.userData.vy=0;
+        const r=checkGoal();
+        if(r.ok){winLevel();sparks(b.position,20);tone(880,.15);lg.textContent='% Лампа загорелась! Цепь замкнута.'}
+        else{failLevel(r.msg);return}
+      }
+    }else if(L.num===3&&goalObjs){ // 3: ПОТОК КАПЕЛЬ — шар не участвует
+      // поворачиваем жёлоб по pipe_angle из кода
+      const ch3=conf.FLUID_CONFIG||{};const ang=Math.min(Math.max(ch3.pipe_angle||5,0),60);
+      const chute3=deco.find(d=>d.userData&&d.userData.isChute);
+      if(chute3)chute3.rotation.z=-ang*Math.PI/180;
+      // вода в баке колышется
+      if(goalObjs.tankWater)goalObjs.tankWater.position.y=-0.05+Math.sin(t*2)*0.01;
+      // генерируем капли из крана
+      dropTimer++;
+      if(dropTimer%14===0&&waterDrops.length<50){
+        const dr=new THREE.Mesh(new THREE.SphereGeometry(.07,10,10),M.water);
+        dr.position.set(goalObjs.tipX,goalObjs.tipY,0);
+        dr.userData={vx:0,vy:0,onChute:false};sc.add(dr);waterDrops.push(dr);
+      }
+      // физика капель
+      const chPivotX=goalObjs.chutePivotX,chPivotY=goalObjs.chutePivotY,chLen=goalObjs.chuteLen;
+      const chEndX=chPivotX+Math.cos(ang*Math.PI/180)*chLen;
+      const chEndY=chPivotY-Math.sin(ang*Math.PI/180)*chLen;
+      for(let i=waterDrops.length-1;i>=0;i--){
+        const dr=waterDrops[i];
+        if(!dr.userData.onChute){
+          // падение из крана вниз на жёлоб
+          dr.userData.vy-=.008;
+          dr.position.x+=dr.userData.vx;dr.position.y+=dr.userData.vy;
+          // коснулась жёлоба? (прямая от шарнира до конца жёлоба)
+          const t=((dr.position.x-chPivotX)*Math.cos(ang*Math.PI/180)+(-(dr.position.y-chPivotY))*Math.sin(ang*Math.PI/180)); // проекция на жёлоб
+          if(t>0&&t<chLen){
+            // верхняя поверхность жёлоба: толщина 0.05 -> верх на +0.025 от оси pivot
+            const lineY=chPivotY-(t)*Math.sin(ang*Math.PI/180)+0.025;
+            if(dr.position.y<=lineY&&dr.userData.vy<0){
+              dr.position.y=lineY;dr.userData.vy=0;dr.userData.onChute=true;dr.userData.t=t;
+            }
+          }
+        }else{
+          // скольжение по жёлобу к концу
+          dr.userData.t=(dr.userData.t||0)+0.045;
+          const t=Math.min(dr.userData.t,chLen);
+          dr.position.x=chPivotX+Math.cos(ang*Math.PI/180)*t;
+          dr.position.y=chPivotY-Math.sin(ang*Math.PI/180)*t;
+          if(t>=chLen){
+            // слетела с конца — баллистический полёт
+            dr.userData.onChute=false;dr.userData.t=0;
+            dr.userData.vx=Math.cos(ang*Math.PI/180)*0.05;
+            dr.userData.vy=-Math.sin(ang*Math.PI/180)*0.05;
+            dr.position.x=chEndX;dr.position.y=chEndY;
+          }
+        }
+        if(!dr.userData.onChute&&dr.userData.t===0){
+          // свободный полёт (уже после срыва или если не попала на жёлоб)
+          dr.userData.vy-=.008;dr.userData.vy*=.995;
+          dr.position.x+=dr.userData.vx;dr.position.y+=dr.userData.vy;
+        }
+        // попала в стакан?
+        if(dr.position.x>=goalObjs.glassX-0.32&&dr.position.x<=goalObjs.glassX+0.32&&dr.position.y<=goalObjs.glassTopY&&dr.position.y>=goalObjs.glassBottomY){
+          sc.remove(dr);waterDrops.splice(i,1);waterCaptured++;
+          // вода заполняет стакан от ДНА: масштаб считаем от текущего fill
+          if(goalObjs.water){
+            const w=goalObjs.water;
+            const f=Math.min(.55,w.userData.fill+.045);
+            w.userData.fill=f;
+            const h=0.06+f*1.0; // высота воды от 0.06 до ~0.6
+            w.scale.y=Math.max(.06,h);
+            w.position.y=goalObjs.glassBottomY+h/2;
+          }
+          if(waterCaptured===12){
+            const r=checkGoal();
+            if(r.ok)winLevel();else failLevel(r.msg);
+            return;
+          }
+          continue;
+        }
+        // промах (улетела вниз)
+        if(dr.position.y<-14||dr.position.x>goalObjs.glassX+1.8){sc.remove(dr);waterDrops.splice(i,1);waterMissed++}
+      }
+      // если вода льётся мимо и НИ ОДНА капля не попала — промах
+      if(waterMissed>4&&waterCaptured===0){
+        failLevel('Вода льётся мимо стакана! Проверьте угол жёлоба (15-35).');return;
+      }
+    }else if(L.num===4&&goalObjs){ // 4: воздушный мяч по баллистике, крышка захлопывается
+      const ca4=conf.CATCH_CONFIG||{};
+      // условие: ловушка активна И trigger_x в 4.2-4.7
+      const lidOk=ca4.trap_door_active===true&&ca4.trigger_x>=4.2&&ca4.trigger_x<=4.7;
+      // крышка плавно падает при ok, иначе поднята
+      if(goalObjs.lidPiv){
+        const tZ=lidOk?1.5:0;
+        goalObjs.lidPiv.rotation.z+=(tZ-goalObjs.lidPiv.rotation.z)*.06;
+      }
+      // лёгкий мяч катится ПО ПОВЕРХНОСТИ доски, затем слетает с её края
+      if(!b.userData.flight){ // на доске
+        b.userData.vx+=(SPD*1.4-b.userData.vx)*.04;
+        b.position.x+=b.userData.vx;
+        // поверхность наклонной доски (центр на −3.0, наклон −0.32 вниз вправо)
+        const surfY=goalObjs.rampTop-Math.tan(goalObjs.rampAngle)*(b.position.x-goalObjs.rampX0);
+        // мяч радиусом 0.2 — центр на surfY+0.2 (касается, не тонет)
+        const targetY=surfY+0.2;
+        b.position.y+=(targetY-b.position.y)*0.6;
+        if(b.position.x>=goalObjs.trampEndX){ // слетел с края — подброс в полёт
+          b.userData.flight=true;b.userData.vx=.05;b.userData.vy=.05;
+        }
+      }else{ // свободный полёт по параболе
+        b.userData.vy-=.005;b.userData.vy*=.998;
+        b.userData.vx*=.998;
+        b.position.x+=b.userData.vx;b.position.y+=b.userData.vy;
+      }
+      // проверка попадания в ящик
+      if(b.position.x>=goalObjs.boxX-0.4&&b.position.x<=goalObjs.boxX+0.4&&b.position.y<=goalObjs.boxTopY+0.1){
+        if(lidOk){
+          winLevel();sparks(b.position,20);lg.textContent='% Мяч пойман! Крышка захлопнулась.';
+          b.position.y=-99;
+        }else{failLevel('Крышка не сработала! Включите ловушку и поставьте датчик 4.2-4.7.');}
+        return;
+      }
+      if(b.position.y<-14){failLevel('Мяч пролетел мимо ящика! Проверьте датчик (4.2-4.7).');return}
+    }else if(L.num===5&&goalObjs){ // 5: латунный ключ едет к сейфу, при верном коде дверь открывается
+      const sa5=conf.SAFE_CONFIG||{};
+      const open5=sa5.code==='ОТКРЫТЬ'&&sa5.bypass_system===true;
+      // лимб крутится при попытке открыть
+      if(goalObjs.dial)goalObjs.dial.rotation.z+=open5?0:.15;
+      // ключ едет вправо к сейфу
+      b.userData.vx+=(SPD*1.2-b.userData.vx)*.04;
+      b.position.x+=b.userData.vx;
+      b.position.y=goalObjs.safeY+0.1; // едет по полу
+      // дверь плавно открывается при верном коде
+      if(goalObjs.doorPiv){
+        const tR=open5?-2.0:0; // раскрытие влево
+        goalObjs.doorPiv.rotation.y+=(tR-goalObjs.doorPiv.rotation.y)*.06;
+      }
+      // ключ дошёл до сейфа
+      if(b.position.x>=goalObjs.safeX-0.3){
+        const r=checkGoal();
+        if(r.ok){winLevel();sparks(b.position,20);lg.textContent='% Сейф открыт! Код принят.';b.position.y=-99;}
+        else{failLevel(r.msg);}
+        return;
+      }
+    }else if(L.num===6&&goalObjs){ // 6: груз падает на шину и уезжает (честная физика, проверка после
+      const g6=conf.GEAR_CONFIG||{};
+      const spin=g6.wheel_speed>8;
+      const cut=g6.unclog_rope===true;
+      goalObjs.runT=(goalObjs.runT||0)+1/60;
+      // канат: плавно ослабляем витки (масштаб/смещение) при unclog, затем скрываем
+      if(goalObjs.rope){
+        if(cut){
+          goalObjs.rope.scale.y=Math.max(.2,goalObjs.rope.scale.y-.05);
+          goalObjs.rope.position.y-=.06;
+          if(goalObjs.rope.scale.y<=.25){sc.remove(goalObjs.rope);goalObjs.rope=null;}
+        }else{
+          goalObjs.rope.rotation.z=Math.sin(t*6)*.05; // канат дрожит, застрял
+        }
+      }
+      // шины крутятся (ускоряются при spin)
+      const wSpeed=spin?(0.12+goalObjs.runT*.03):0;
+      if(goalObjs.wheelA)goalObjs.wheelA.rotation.z+=wSpeed;
+      if(goalObjs.wheelB)goalObjs.wheelB.rotation.z+=wSpeed;
+      // ГРУЗ: висит высоко, при снятии каната + скорости падает на шину и уезжает
+      if(goalObjs.boxLoad){
+        const b6=goalObjs.boxLoad;
+        if(cut&&spin){
+          // шина вращается — груз отпускают: падает на шину (tireTopY) и уезжает вперёд
+          const topY=goalObjs.tireTopY||(goalObjs.cy-0.02);
+          if(b6.position.y>topY){b6.position.y-=.04;}
+          else{
+            b6.position.y=topY;
+            b6.position.x+=.06; // подхват шиной, едет вперёд
+            b6.rotation.z=.08;
+          }
+        }
+      }
+      // оцениваем код после ~2.5 сек анимации
+      if(goalObjs.runT>2.5){
+        const r=checkGoal();
+        if(r.ok)winLevel();else failLevel(r.msg);
+        return;
+      }
+    }else if(L.num===7&&goalObjs){ // 7: шарик пинг-понга падает по каскаду
+      const g7=conf.PINGPONG_CONFIG||{};
+      const bounce=Math.min(Math.max(g7.bounciness||0.4,0),1);
+      // честная гравитация: vy растёт вниз (без множителя каждый кадр)
+      b.userData.vy-=.005;
+      b.position.y+=b.userData.vy;
+      b.position.x+=.014;
+      // отскок от ракетки (упругость применяется ТОЛЬКО в момент удара)
+      if(goalObjs.pads){
+        goalObjs.pads.forEach((p,i)=>{
+          if(Math.abs(b.position.x-p.position.x)<.32&&b.position.y<=p.position.y+.06&&b.userData.vy<0){
+            b.userData.vy=.05*bounce;
+            b.position.x+=.12;
+            b.userData.bounces=(b.userData.bounces||0)+1;
+          }
+        });
+      }
+      // упал в чашку — успех/ошибка
+      if(b.position.x>=goalObjs.cupX-.25&&b.position.x<=goalObjs.cupX+.25&&b.position.y<=goalObjs.cupY+.1){
+        const r=checkGoal();
+        if(r.ok)winLevel();else failLevel(r.msg);
+        return;
+      }
+      // улетел вниз мимо чашки — проигрыш
+      if(b.position.y<-4){failLevel('Шарик упал мимо! Настройте упругость (0.7-0.95).');return}
+    }else if(L.num===8&&goalObjs){ // 8: насосы качают, лейка поливает, вода поднимается
+      const g8=conf.FINAL_CONFIG||{};
+      const ok8=g8.pump_A_power===true&&g8.pump_B_power===true&&g8.drain_system===false;
+      goalObjs.runT=(goalObjs.runT||0)+1/60;
+      // струя из лейки видна/скрыта в зависимости от насосов
+      if(goalObjs.jet){
+        const jm=goalObjs.jet.material;
+        jm.opacity=ok8?(0.5+0.15*Math.sin(t*10)):0.05;
+        goalObjs.jet.scale.y=ok8?1:0.2;
+      }
+      if(goalObjs.water){
+        // вода растёт только при верном коде — от дна бассейна
+        const f=Math.min(.8,goalObjs.water.userData.fill+(ok8?.02:0));
+        goalObjs.water.userData.fill=f;
+        const h=0.06+f*0.9;
+        goalObjs.water.scale.y=Math.max(.06,h);
+        goalObjs.water.position.y=-0.53+h/2;
+      }
+      // после 2 сек — оцениваем код
+      if(goalObjs.runT>2.0){
+        const r=checkGoal();
+        if(r.ok)winLevel();else failLevel(r.msg);
+        return;
+      }
+    }else{ // 3-8: объект движется к финишу
+      b.userData.vy-=.004;b.userData.vy*=.995;
+      b.userData.vx+=(SPD-b.userData.vx)*.04;
+      b.position.x+=b.userData.vx;b.position.y+=b.userData.vy;
+    }
+
+    if(L.kind==='nodes'&&cur<12){
+      const n=nodes[cur];
+      if(n){
+        if(b.position.y<=n.surfY&&b.position.x>=n.x-.5&&b.position.x<=n.x+.62){b.position.y=n.surfY;b.userData.vy=0}
+        if(b.position.x>=n.x+.62){
+          if(conf[n.key]===true){
+            cur++;pb.style.width=(cur/12*100)+'%';cnt.textContent=cur+'/12';
+            sparks(b.position,10);tone(700+cur*25,.05);
+            lg.textContent='% '+n.name+' пройден ('+cur+'/12)';
+            if(cur>=12)winLevel();
+          }else{
+            failLevel('Узел '+n.name+' закрыт (false). Нужно true!');
+          }
+        }
+      }
+    }else if(L.kind==='goal'){
+      const n=nodes[nodes.length-1];
+      if(n&&b.position.x>=targetX-0.4){
+        const r=checkGoal();
+        if(r.ok)winLevel();
+        else failLevel(r.msg);
+      }else{
+        // держать на последней платформе
+        const last=nodes[nodes.length-1];
+        if(last&&b.position.y<=last.surfY&&b.position.x>=last.x-.5){b.position.y=last.surfY;b.userData.vy=0}
+      }
+    }
+    if(L.num!==3)trailPts.push(b.position.clone());if(trailPts.length>120)trailPts.shift();trail.geometry.setFromPoints(trailPts);
+  }
+
+  // Анимации победы целей
+  if(winAnim>0){
+    winAnim+=.016;
+    if(L.num===1&&targetObj){targetObj.rotation.y+=.03;if(winAnim>2)winAnim=0}
+    if(L.num===2&&targetObj){
+      const fil=targetObj.children.find(c=>c.geometry.type==='CylinderGeometry'&&c.material.type==='MeshBasicMaterial');
+      if(fil)fil.material.color.setHex(0xffcc22);
+    }
+    if(L.num===3&&targetObj){targetObj.scale.y=Math.min(1,targetObj.scale.y+.05);if(winAnim>2)winAnim=0}
+    if(L.num===4&&targetObj){targetObj.rotation.x+=.06;if(targetObj.rotation.x>1.1)targetObj.rotation.x=1.1}
+    if(L.num===5&&targetObj){const dial=targetObj.children.find(c=>c.geometry.type==='CylinderGeometry');if(dial)dial.rotation.z+=.12;const door=targetObj.children.find(c=>c.position.z>.3);if(door)door.rotation.y=Math.min(1.3,door.rotation.y+.04)}
+    if(L.num===6&&targetObj){const tire=targetObj.children.find(c=>c.geometry.type==='CylinderGeometry');if(tire)tire.rotation.z+=.3}
+    if(L.num===7&&targetObj){targetObj.rotation.y+=.06}
+    if(L.num===8&&targetObj){targetObj.scale.y=Math.min(1,targetObj.scale.y+.06)}
+  }
+
+  if(crash){ball.position.y-=.05;ball.position.x+=.01;if(ball.position.y<-12)crash=false}
+  if(ss.material.opacity>0){
+    ss.material.opacity-=.015;const pa=ss.geometry.attributes.position.array,vl=ss.userData.vel;
+    for(let i=0;i<sn2;i++){pa[i*3]+=vl[i].x;pa[i*3+1]+=vl[i].y;pa[i*3+2]+=vl[i].z;vl[i].y-=.012;vl[i].x*=.98;vl[i].z*=.98}
+    ss.geometry.attributes.position.needsUpdate=true;
+  }
+
+  if(L.num===2){ // сцена 2: камера жёстко наведена на розетку с лампой, без подлёта
+    cam.position.set(targetX,1.4,6.2);
+    cam.lookAt(targetX,0.2,0);
+  }else if(L.num===3&&goalObjs){ // сцена 3: камера на весь водный узел (бак - стакан)
+    const c3x=(goalObjs.tipX+goalObjs.glassX)/2;
+    const c3y=(goalObjs.tipY+goalObjs.glassTopY-1.2)/2;
+    cam.position.set(c3x,c3y+1.2,6.8);
+    cam.lookAt(c3x,c3y,0);
+  }else if(L.num===4&&goalObjs){ // сцена 4: камера следит за обоими объектами + следит за мячом, чтобы движение было видно
+    const midX=(goalObjs.trampEndX+goalObjs.boxX)/2;
+    const followX=ball.position.x*0.9+midX*0.1; // почти следует за мячом
+    const fy=Math.max(0.3,ball.position.y*0.8);
+    cam.position.x+=(followX-cam.position.x)*0.05;
+    cam.position.y+=(fy+0.8-cam.position.y)*0.05;
+    cam.position.z=6.8;
+    cam.lookAt(followX,Math.max(0,fy-0.2),0);
+  }else if(L.num===5&&goalObjs){ // камера на сейф
+    cam.position.set(goalObjs.safeX-0.5,0.6,5.5);
+    cam.lookAt(goalObjs.safeX,0.0,0);
+  }else if(L.num===6&&goalObjs){ // камера на шины/груз
+    cam.position.set(goalObjs.cx,0.4,5.2);
+    cam.lookAt(goalObjs.cx,0.0,0);
+  }else if(L.num===7&&goalObjs){ // камера на каскад ракеток
+    const c7x=goalObjs.cupX-1.4;
+    cam.position.set(c7x,-0.1,6.0);
+    cam.lookAt(c7x,0.1,0);
+  }else if(L.num===8&&goalObjs){ // камера на бассейн и насосы
+    const c8x=goalObjs.cx;
+    cam.position.set(c8x,0.4,5.8);
+    cam.lookAt(c8x,-0.1,0);
+  }else{
+    const tx=ball.position.x*.3;cam.position.x+=(tx-cam.position.x)*.005;cam.lookAt(tx,-1,0);
+  }
+  cmp.render();
+}
+
+window.addEventListener('resize',()=>{const w2=vp.clientWidth,h2=vp.clientHeight;cam.aspect=w2/h2;cam.updateProjectionMatrix();ren.setSize(w2,h2);cmp.setSize(w2,h2)});
+
+loadLevel(0);anim();
+</script>
+</body>
+</html>
