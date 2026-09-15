@@ -6,10 +6,10 @@
 <title>Мастерская Профессора Шестеренкина</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Caveat:wght@400;600;700&family=Marmelad&display=swap" rel="stylesheet">
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
 <style>
-:root{--bg:#34261c;--panel:linear-gradient(150deg,#4a3426,#2a1e16);--border:#6a4a34;--accent:#d6a060;--surface:#5c3f2e;--metal:#9a8068;--dark:#1e1410;--light:#e8dcd0;--ok:#4a8a4a;--bad:#b85040}
+:root{--bg:#34261c;--panel:linear-gradient(150deg,#4a3426,#2a1e16);--border:#6a4a34;--accent:#d6a060;--surface:#5c3f2e;--metal:#9a8068;--dark:#1e1410;--light:#e8dcd0;--ok:#4a8a4a;--bad:#b85040;--blue:#5a8aba}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-family:'Nunito',sans-serif;color:var(--light);display:flex}
 ::-webkit-scrollbar{width:5px}
@@ -113,6 +113,11 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 <body>
 
 <div id="gate"><div class="gb" id="gate-inner"></div></div>
+<div id="lesson-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:99;background:rgba(20,12,8,.92);display:none;justify-content:center;align-items:center;transition:opacity .5s">
+  <div id="lesson-card" style="width:760px;max-height:96vh;overflow-y:auto;background:#f8f2e0;border-radius:10px;padding:48px 56px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.7);font-family:'Caveat','Marmelad',serif;color:#2a1e14;line-height:1.5">
+    <div style="position:absolute;top:0;left:0;right:0;bottom:0;border-radius:10px;background:repeating-linear-gradient(0deg,transparent,transparent 38px,rgba(160,120,60,.05) 38px,rgba(160,120,60,.05) 39px);pointer-events:none;z-index:0"></div>
+  </div>
+</div>
 
 <div id="panel">
   <div class="top">
@@ -213,8 +218,213 @@ window.enterW=function(){
   eng=n;savedName=eng;localStorage.setItem('ws_name',eng);document.getElementById('en').textContent=eng;
   document.getElementById('gate').style.transform='translateY(-105%)';
   lg.textContent='% Добро пожаловать, '+eng+'! Выполните ЦЕЛЬ уровня и запустите механизм.';
+  // Показываем урок профессора (только 1 раз на уровень)
+  const lessonKey='ws_lesson_'+L.num;
+  if(!localStorage.getItem(lessonKey))showLesson(lvlIdx);
 };
 
+/* ---------- КАРТОЧКИ ПРОФЕССОРА ---------- */
+const LESSONS=[
+  {title:'🧪 true и false',sub:'Урок 1: Как компьютер понимает «да» и «нет»',lines:[
+    '💡 Булевы значения — это всего два состояния:',
+    '',
+    '   true  — «истина», «да», «включено», «пуск»',
+    '   false — «ложь», «нет», «выключено», «стоп»',
+    '',
+    '📖 В программировании это 1 бит информации.',
+    '   Как переключатель: вверх — true, вниз — false.',
+    '',
+    '🔧 В этом цехе — конвейер с 12 узлами.',
+    '   Каждый узел: true = пропускает шар, false = стопор.',
+    '   Переключай их в редакторе и смотри, как шар',
+    '   катится по лесенке!',
+    '',
+    '⚡ Интересный факт: название «булевы» — в честь',
+    '   математика Джорджа Буля. Он придумал алгебру логики',
+    '   ещё в XIX веке. Теперь на ней работают все компьютеры!'
+  ]},
+  {title:'🧪 Переменные',sub:'Урок 2: Коробки с именами для данных',lines:[
+    '💡 Переменная — как коробка с этикеткой:',
+    '',
+    '   let voltage = 220;        // коробка «voltage» = 220',
+    '   let name = "Шестеренкин";  // коробка «name» = строка',
+    '   let on = true;             // коробка «on» = true',
+    '',
+    '📖 let — можно переложить (изменить).',
+    '   const — коробка намертво запечатана.',
+    '   var — старый способ, не используй.',
+    '',
+    '🔧 В этом цехе ты меняешь параметры лампочки:',
+    '   voltage, fuse_closed, wire_temp, bulb_power…',
+    '   Каждый — это переменная в коде!',
+    '   Через редактор или чипы — как хочешь.',
+    '',
+    '⚡ Имя переменной: буквы, $, _, но не цифра первой.',
+    '   Без пробелов. Стиль: camelCase (первая маленькая).'
+  ]},
+  {title:'🧪 Сравнения',sub:'Урок 3: Код умеет сравнивать числа и строки',lines:[
+    '💡 Операторы сравнения всегда возвращают true/false:',
+    '',
+    '   >   больше    (10 > 5  → true)',
+    '   <   меньше    (3 < 1   → false)',
+    '   >=  больше или равно',
+    '   <=  меньше или равно',
+    '   === строго равно  (2 === "2" → false)',
+    '   !== строго не равно',
+    '',
+    '🔧 В этом цехе жёлоб наклонится только если',
+    '   pipe_angle от 15 до 35. Код проверяет:',
+    '   pipe_angle >= 15 && pipe_angle <= 35.',
+    '',
+    '⚡ Важно: == не проверяет тип (2=="2" → true).',
+    '   Всегда используй === — это безопаснее!',
+    '',
+    '   Числа сравнивай как числа, строки — как строки.'
+  ]},
+  {title:'🧪 Логические операторы',sub:'Урок 4: && (И), || (ИЛИ), ! (НЕ)',lines:[
+    '💡 Три кита булевой логики:',
+    '',
+    '   && (И) — true, только если ВСЁ true',
+    '      true && true → true',
+    '      true && false → false',
+    '',
+    '   || (ИЛИ) — true, если хоть ОДНО true',
+    '      false || true → true',
+    '      false || false → false',
+    '',
+    '   ! (НЕ) — переворачивает значение',
+    '      !true → false, !false → true',
+    '',
+    '🔧 В этом цехе ловушка сработает если:',
+    '   trap_door_active == true',
+    '   И trigger_x между 4.2 и 4.7.',
+    '   Два условия — два &&.',
+    '',
+    '⚡ !!x — двойное НЕ = превращает в true/false!'
+  ]},
+  {title:'🧪 Условия if/else',sub:'Урок 5: Код принимает решения',lines:[
+    '💡 if — как стрелочный переводчик на рельсах:',
+    '',
+    '   if (code === "ОТКРЫТЬ") {',
+    '       дверь_открыта();',
+    '   } else {',
+    '       сирена_включена();',
+    '   }',
+    '',
+    '   Если условие true — выполняется первый блок.',
+    '   Если false — второй (или ничего, если else нет).',
+    '',
+    '🔧 В этом цехе сейф проверяет твой код через if:',
+    '   верный пароль → дверь открывается,',
+    '   неверный → сирена и красная лампа.',
+    '',
+    '⚡ Можно цепочкой: if … else if … else.',
+    '   Не путай = (присвоить) и === (сравнить)!'
+  ]},
+  {title:'🧪 Функции',sub:'Урок 6: Станки для обработки данных',lines:[
+    '💡 Функция — как станок: даёшь сырьё, получаешь деталь.',
+    '',
+    '   function add(a, b) {',
+    '       return a + b;',
+    '   }',
+    '   let sum = add(10, 5);  // sum = 15',
+    '',
+    '📖 Параметры (a, b) — что кладём в станок.',
+    '   return — результат на выходе.',
+    '',
+    '🔧 В этом цехе шины крутятся если speed больше 8:',
+    '   функция вращения получает wheel_speed.',
+    '   Больше 8 — груз падает и уезжает.',
+    '',
+    '⚡ Стрелочные функции (современный стиль):',
+    '   const f = (x) => x * 2;  // коротко и ясно'
+  ]},
+  {title:'🧪 Объекты',sub:'Урок 7: Всё в одном ящике',lines:[
+    '💡 Объект собирает данные под одной крышей:',
+    '',
+    '   let config = {',
+    '       voltage: 220,',
+    '       fuse: true,',
+    '       name: "Лампа"',
+    '   };',
+    '',
+    '📖 Доступ через точку: config.voltage → 220',
+    '   Можно менять: config.voltage = 300;',
+    '',
+    '🔧 В каждом цехе у тебя объект конфигурации:',
+    '   LIGHT_CONFIG = { voltage: 220, fuse: true, … }',
+    '   Именно его ты редактируешь в окне кода!',
+    '',
+    '⚡ Объекты можно вкладывать:',
+    '   config.settings.power = true;  // цепочка свойств',
+    '',
+    '   JSON — формат объектов — использует вся сеть!'
+  ]},
+  {title:'🧪 Массивы и циклы',sub:'Урок 8: Списки и конвейеры',lines:[
+    '💡 Массив — нумерованный список:',
+    '',
+    '   let levels = [1, 2, 3, 4, 5, 6, 7, 8];',
+    '   levels[0] = 1, levels[3] = 4.',
+    '',
+    '   🔑 Важно: счёт начинается с НУЛЯ!',
+    '',
+    '💡 Цикл for — перебирает по порядку:',
+    '   for (let i = 0; i < levels.length; i++) {',
+    '       console.log(levels[i]);',
+    '   }',
+    '',
+    '🔧 В финальном цехе оба насоса должны быть true:',
+    '   if (pump_A && pump_B && !drain) { вода_льётся(); }',
+    '',
+    '⚡ Современный перебор — forEach:',
+    '   levels.forEach(l => console.log(l));',
+    '',
+    '   Циклы — сердце любой программы!'
+  ]}
+];
+
+let lessonTimer=null;
+
+function showLesson(idx){
+  const ol=document.getElementById('lesson-overlay');
+  const card=document.getElementById('lesson-card');
+  const Ldata=LESSONS[idx];
+  if(!Ldata)return;
+  const content=Ldata.lines.map(l=>{
+    if(l.startsWith('💡'))return `<div style="color:#b8860a;font-weight:700;font-size:26px;margin-top:10px;letter-spacing:.3px;font-family:'Caveat',serif">${l.replace('💡','✧')}</div>`;
+    if(l.startsWith('📖'))return `<div style="color:#1a6a1a;font-size:23px;margin-top:6px;line-height:1.5;font-family:'Caveat',serif">${l}</div>`;
+    if(l.startsWith('🔧'))return `<div style="color:#b83030;font-size:23px;margin-top:6px;line-height:1.5;font-family:'Caveat',serif">${l}</div>`;
+    if(l.startsWith('⚡'))return `<div style="color:#8a2020;font-size:23px;margin-top:6px;line-height:1.5;font-family:'Caveat',serif">${l}</div>`;
+    if(l.trim()==='')return '<div style="height:6px"></div>';
+    if(l.startsWith('   '))return `<div style="font-size:21px;color:#5a3a2a;padding-left:20px;line-height:1.5;font-family:'Caveat',serif">${l.trim()}</div>`;
+    return `<div style="font-size:22px;color:#4a2a1a;line-height:1.5;font-family:'Caveat',serif">${l}</div>`;
+  }).join('');
+  card.innerHTML=`<div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;padding-bottom:12px;border-bottom:2px solid #c8a050">
+    <div style="width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#5a3a2a,#3a2a1a);border:2px solid #c8a050;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:#c8a050;flex-shrink:0">Ш</div>
+    <div style="text-align:left"><div style="font-size:30px;font-weight:700;color:#2a1e14;letter-spacing:.5px;font-family:'Caveat',serif">${Ldata.title}</div><div style="font-size:20px;color:#8a6a3a;font-weight:600;margin-top:2px;font-family:'Caveat',serif">${Ldata.sub}</div></div>
+  </div>
+  <div style="font-size:22px;line-height:1.5;color:#3a2a1a;text-align:left;padding:6px 0;min-height:0;font-family:'Caveat',serif">${content}</div>
+  <div style="margin-top:8px;padding-top:10px;border-top:2px solid #c8a050;text-align:center">
+    <button class="b2" id="lesson-continue" disabled style="opacity:.5;cursor:default;font-size:20px;padding:14px 24px;font-family:'Caveat',serif;font-weight:700;background:#3a2a1a;border-color:#8a6a3a;color:#c8a050;border-radius:8px">⏳ 60 секунд</button>
+  </div>`;
+  ol.style.display='flex';
+  let sec=60;
+  const btn=document.getElementById('lesson-continue');
+  if(lessonTimer){clearInterval(lessonTimer);lessonTimer=null}
+  lessonTimer=setInterval(()=>{
+    sec--;
+    if(sec<=0){
+      clearInterval(lessonTimer);lessonTimer=null;
+      btn.textContent='Понял! Войти в цех →';
+      btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';
+      btn.style.background='#c8a050';btn.style.borderColor='#c8a050';btn.style.color='#2a1e14';
+      btn.onclick=()=>{
+        localStorage.setItem('ws_lesson_'+L.num,'1');
+        document.getElementById('lesson-overlay').style.display='none';
+      };
+    }else{btn.textContent='⏳ '+sec+' сек'}
+  },1000);
+}
 /* ---------- КОНФИГ/КОД ---------- */
 function initLevel(){
   L=LVLS[lvlIdx];
@@ -464,6 +674,7 @@ function buildActor(){
     const stem=new THREE.Mesh(new THREE.BoxGeometry(.5,.04,.04),M.brass);key.add(stem);
     const ring=new THREE.Mesh(new THREE.TorusGeometry(.07,.015,6,12),M.brass);ring.position.set(-.28,0,0);key.add(ring);
     ball.add(key);actorMat=stem.material;
+    ball.position.z=.64; // перед дверью сейфа (z двери 0.56)
   }else if(l===6){ // грузовой ящик
     const crate=new THREE.Mesh(new THREE.BoxGeometry(.34,.28,.34),M.base);
     ball.add(crate);actorMat=crate.material;
@@ -694,12 +905,12 @@ function addGoalObject(layout){
     const gr6=new THREE.Group();gr6.position.set(c6x-0.4,c6y-0.3,0);
     function makeWheel(){
       const w=new THREE.Group();
-      // ШИНА-ТОР (кольцо резины) — в плоскости колеса (XY), чистая поверхность
+      // ШИНА-ТОР спереди
       const tire=new THREE.Mesh(new THREE.TorusGeometry(.36,.11,14,26),new THREE.MeshStandardMaterial({color:0x181410,roughness:.95}));
-      tire.castShadow=true;w.add(tire);
-      // ОБОД-ЦИЛИНДР — внутри шины, ПОЗАДИ спиц
+      tire.castShadow=true;tire.position.z=.01;w.add(tire);
+      // ОБОД-ЦИЛИНДР сзади
       const disc=new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,.12,18),M.brass);
-      disc.rotation.x=Math.PI/2;w.add(disc);
+      disc.rotation.x=Math.PI/2;disc.position.z=-.01;w.add(disc);
       // Спицы (плоскость XY)
       for(let s=0;s<6;s++){const a=s/6*Math.PI;const spoke=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.24,4),M.copper);spoke.rotation.x=Math.PI/2;spoke.position.set(Math.cos(a)*.14,Math.sin(a)*.14,0);w.add(spoke)}
       const hub=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.16,10),M.copper);hub.rotation.x=Math.PI/2;w.add(hub);
@@ -735,10 +946,10 @@ function addGoalObject(layout){
     for(let j=0;j<4;j++){
       // Ракетка: основание + ручка-кронштейн, наклонена зигзагом
       const padGr=new THREE.Group();
-      const face=new THREE.Mesh(new THREE.BoxGeometry(.85,.045,.4),new THREE.MeshStandardMaterial({color:0x8a6a4a,roughness:.7,metalness:.2}));
+      const face=new THREE.Mesh(new THREE.BoxGeometry(.85,.045,.38),new THREE.MeshStandardMaterial({color:0x8a6a4a,roughness:.7,metalness:.2}));
       padGr.add(face);
-      const edge= new THREE.Mesh(new THREE.BoxGeometry(.85,.05,.02),M.brass);edge.position.z=.21;padGr.add(edge);
-      const edge2= edge.clone();edge2.position.z=-.21;padGr.add(edge2);
+      const edge= new THREE.Mesh(new THREE.BoxGeometry(.85,.05,.02),M.brass);edge.position.set(0,0,.22);padGr.add(edge);
+      const edge2= edge.clone();edge2.position.set(0,0,-.22);padGr.add(edge2);
       const handle=new THREE.Mesh(new THREE.BoxGeometry(.26,.05,.05),M.copper);handle.position.x=.35;handle.rotation.z=.6;padGr.add(handle);
       const bracket=new THREE.Mesh(new THREE.BoxGeometry(.05,.5,.05),M.iron);bracket.position.set(.15,0,0);padGr.add(bracket);
       padGr.position.set(c7x+j*.85,c7y-j*.55,0);
@@ -910,7 +1121,7 @@ function resetScene(){
   else if(L.num===3&&goalObjs){ball.position.set(goalObjs.tipX,goalObjs.tipY+0.2,0);ball.userData.vx=0;ball.userData.vy=0}
   // Сцена 4: старт мяча — на верхней поверхности доски (не тонет)
   else if(L.num===4&&goalObjs){ball.position.set(-3.7,goalObjs.rampTop+0.2,0);ball.userData.flight=false;ball.userData.vy=0}
-  else if(L.num===5&&goalObjs){ball.position.set(-3.0,goalObjs.safeY+0.1,0)}
+  else if(L.num===5&&goalObjs){ball.position.set(-3.0,goalObjs.safeY+0.1,.64)}
   else if(L.num===6&&goalObjs){ball.position.set(goalObjs.cx-1.2,goalObjs.cy+0.6,0)}
   else if(L.num===7&&goalObjs){ball.position.set(goalObjs.cupX-3.5,1.5,0);ball.userData.vx=.04;ball.userData.vy=0;ball.userData.init=false;ball.userData.bounces=0}
   else if(L.num===8&&goalObjs){ball.position.set(goalObjs.cx-1.5,0.6,0)}
@@ -933,7 +1144,7 @@ window.startRun=function(){
   if(L.num===2){ball.position.set(targetX,1.5,0);ball.userData.vx=0;ball.userData.vy=0}
   else if(L.num===3&&goalObjs){ball.position.set(goalObjs.tipX,goalObjs.tipY+0.3,0);ball.userData.vx=0;ball.userData.vy=-0.01}
   else if(L.num===4&&goalObjs){ball.position.set(-3.8,goalObjs.rampTop-Math.tan(goalObjs.rampAngle)*(-3.8-goalObjs.rampX0)+0.15,0);ball.userData.vx=SPD*1.2;ball.userData.vy=0;ball.userData.flight=false}
-  else if(L.num===5&&goalObjs){ball.position.set(-3.0,goalObjs.safeY+0.1,0);ball.userData.vx=SPD*1.2;ball.userData.vy=0}
+  else if(L.num===5&&goalObjs){ball.position.set(-3.0,goalObjs.safeY+0.1,.64);ball.userData.vx=SPD*1.2;ball.userData.vy=0}
   else if(L.num===6&&goalObjs){ball.position.set(goalObjs.cx-1.2,goalObjs.cy+0.6,0);ball.userData.vx=SPD;ball.userData.vy=0}
   else if(L.num===7&&goalObjs){ball.position.set(goalObjs.cupX-3.5,1.5,0);ball.userData.vx=.04;ball.userData.vy=0;ball.userData.init=false;ball.userData.bounces=0}
   else if(L.num===8&&goalObjs){ball.position.set(goalObjs.cx-1.5,0.6,0);ball.userData.vx=SPD;ball.userData.vy=0}
