@@ -64,11 +64,14 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 #ta::-webkit-scrollbar-track{background:var(--dark)}
 #ta::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 
-.chips{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;align-items:stretch;max-height:86px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--border) var(--dark)}
-.chip{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:4px 8px;border-radius:6px;cursor:pointer;transition:.15s;border:1px solid var(--border);background:var(--dark);color:var(--metal);display:flex;flex-direction:column;gap:2px;min-width:64px}
+.chips{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;align-items:stretch;max-height:120px;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--border) var(--dark);padding-right:4px;min-height:0}
+.chip{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;padding:4px 8px;border-radius:6px;cursor:pointer;transition:.15s;border:1px solid var(--border);background:var(--dark);color:var(--metal);display:flex;flex-direction:column;gap:2px;min-width:64px;position:relative}
+.chip::before{content:'';position:absolute;left:0;top:2px;bottom:2px;width:3px;border-radius:2px;background:transparent;transition:.25s}
+.chip.val-good{border-color:var(--ok)}.chip.val-good::before{background:var(--ok)}
+.chip.val-bad-chip{border-color:var(--bad)}.chip.val-bad-chip::before{background:var(--bad)}
 .chip:hover{color:var(--light);background:var(--surface)}
 .chip .pn{font-size:9px;color:var(--metal);text-transform:uppercase;letter-spacing:.5px}
-.chip .pv{font-size:11px;font-weight:700;color:var(--light)}
+.chip .pv{font-size:11px;font-weight:700;color:var(--light);transition:.2s}
 .chip .ph{font-size:8.5px;color:var(--accent);font-style:italic}
 .chip .val-ok{color:var(--ok)}.chip .val-bad{color:var(--bad)}
 .chip.op{display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:6px;min-width:auto}
@@ -76,6 +79,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 .chip .pmn:hover,.chip .ppl:hover{color:var(--light)}
 .chip .ci{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--light);font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 4px;box-sizing:border-box;outline:none}
 .chip .ci:focus{border-color:var(--accent)}
+.chip.flash{animation:chFlash .4s ease-out}
+@keyframes chFlash{0%{box-shadow:0 0 0 2px var(--accent);background:var(--surface)}100%{box-shadow:0 0 0 0 transparent;background:var(--dark)}}
 
 .lg{background:var(--dark);border:1px solid var(--border);border-radius:6px;padding:5px 10px;margin-bottom:6px;min-height:26px;display:flex;align-items:center}
 .lg p{font-family:'JetBrains Mono',monospace;font-size:10px;line-height:1.4;color:var(--metal);white-space:pre-wrap;word-wrap:break-word;max-height:26px;overflow-y:auto}
@@ -145,7 +150,8 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
   <div class="lg"><p id="lg">% Журнал: ожидание запуска...</p></div>
   <div class="pb"><div class="pb-b" id="pb" style="width:0%"></div></div>
   <button class="btn" id="sb" onclick="startRun()">Запустить механизм</button>
-  <button class="btn" id="sb2" onclick="checkExtra()" style="margin-top:6px;display:none">Проверить настройки</button>
+  <button class="btn" id="sb2" onclick="checkExtra2()" style="margin-top:6px;display:none">Проверить настройки</button>
+  <button class="btn" id="sb3" onclick="checkExtra3()" style="margin-top:6px;display:none">Калибровка</button>
 </div>
 
 <div id="vp"></div>
@@ -159,13 +165,13 @@ import*as THREE from'three';import{EffectComposer}from'three/addons/postprocessi
    ============================================================ */
 const LVLS=[
 {num:1,nm:'Конвейер',kind:'nodes',sc:'stair',goal:'Открыть все 12 стопоров',desc:'Шар катится по деревянной лесенке. Каждый узел пропускает шар только если регистр равен true.',task:'Измените регистры 2-12: вместо <span class="h" style="color:var(--bad)">false</span> поставьте <span class="h" style="color:var(--ok)">true</span>.',w:'all',hint:'Смотрите в код: для каждого узла написано false. Замените на true и запустите механизм.'},
-{num:2,nm:'Лампочка',kind:'goal',sc:'abyss',goal:'Зажечь лампочку',desc:'Рельс обрывается над бездной. Вилка падает на стальную плиту с розеткой — лампочка загорится, если напряжение ровно 220 вольт и цепь замкнута.',task:'Подайте <b>220</b> вольт (сейчас 110) и замкните цепь.',ch:'═══ ЦЕХ 2 · ЭНЕРГЕТИКА ═══\nЗадание 1 · СМОТРИ: Что висит над розеткой?\n  Это вилка. Что ей нужно, чтобы попасть в розетку?\nЗадание 2 · НАПРЯЖЕНИЕ: В розетке дома — 220В.\n  Текущее: 110. СКОЛЬКО вписать?\n  Подумай: 110 — это в половину меньше.\nЗадание 3 · ЦЕПЬ: Ток идёт только по ЗАМКНУТОМУ контуру.\n  Что нужно замкнуть? Найди fuse_closed и сделай true.\n  Без замыкания ток не побежит — лампа тёмная.\nЗадание 4 · ЭКСПЕРИМЕНТ: Поставь 300 — и посмотри,\n  как лампа «перегорает». Почему 220 — безопасно?\n  Что для лампы важнее: много вольт или правильный ток?\nЗадание 5 · ФЛАГИ: power_supply уже true.\n  Что будет, если его выключить на секунду?\n  А если оставить true, но не замкнуть цепь?\nЗадание 6 · ЛОГИКА: Собери формулу успеха:\n  напряжение = ? И цепь = ? И питание = ?\n  Все три условия должны быть верными (И).\nЗадание 7 · ВЫВОД: Зажги лампу и проверь, что будет,\n  если изменить только одно число. Сделай вывод:\n  какой параметр — главный, а какой просто «вкл»?',cfg:{LIGHT_CONFIG:{power_supply:{type:'b',v:true,edit:'toggle'},voltage:{type:'n',v:110,step:10,min:0,max:300,edit:'manual'},fuse_closed:{type:'b',v:false,edit:'toggle'},wire_temp:{type:'n',v:25,step:5,min:0,max:200,edit:'manual'},bulb_power:{type:'n',v:60,step:10,min:10,max:200,edit:'manual'},safety_guard:{type:'b',v:true,edit:'toggle'},resistance:{type:'n',v:10,step:1,min:1,max:50,edit:'manual'},current:{type:'n',v:2,step:0.5,min:0,max:10,edit:'manual'},phase_switch:{type:'b',v:false,edit:'toggle'},breaker_reset:{type:'b',v:true,edit:'toggle'}}},check:{voltage:220,fuse_closed:true,power_supply:true},check2:{wire_temp:[30,60],bulb_power:[40,100],safety_guard:true,breaker_reset:true},hint:'Крутите напряжение до 220 и включите предохранитель fuse_closed.'},
-{num:3,nm:'Стакан воды',kind:'goal',sc:'hydra',goal:'Налить воды в стакан',desc:'Бак с краном, под ним поворотный жёлоб, внизу мерный стакан. Вода попадёт в стакан, если кран открыт, а угол жёлоба от 15 до 35 градусов.',task:'Откройте кран и настройте угол жёлоба от <b>15</b> до <b>35</b>.',ch:'═══ ЦЕХ 3 · ГИДРАВЛИКА ═══\nЗадание 1 · СМОТРИ: Найди на сцене бак, кран и стакан.\n  Что должно случиться, чтобы вода дошла до стакана?\nЗадание 2 · КРАН: Сейчас valve_open = false.\n  Логика: false = закрыто, true = открыто.\n  Какой флаг откроет воду? Кликни или впиши true\nЗадание 3 · УГОЛ: Жёлоб наклоняется от 0 до 45°.\n  Вода попадёт в стакан ТОЛЬКО при 15–35°.\n  Попробуй соседние: 10 и 40 — мимо или в цель?\nЗадание 4 · НАБЛЮДЕНИЕ: При 5° вода капает мимо.\n  Почему? Жёлоб слишком пологий — струя не долетает.\nЗадание 5 · ГРАНИЦА: Попробуй ровно 15 и ровно 35.\n  Входит ли само число в диапазон? Проверь оба!\nЗадание 6 · УСПЕХ: Поставь 25, запусти, посчитай капли.\n  Сколько капель нужно в стакан? (их считает игра)\nЗадание 7 · ТИП: Угол — это ЧИСЛО (int), а не текст.\n  Можно ли вписать «двадцать»? Что случится?\n  Проверь границы чипа −/+ и введи число сам.',cfg:{FLUID_CONFIG:{valve_open:{type:'b',v:false,edit:'toggle'},pipe_angle:{type:'n',v:5,step:5,min:0,max:45,edit:'manual'},flow_pressure:{type:'n',v:2,step:1,min:0,max:10,edit:'manual'},tank_level:{type:'n',v:80,step:5,min:0,max:100,edit:'manual'},drip_rate:{type:'n',v:5,step:1,min:1,max:20,edit:'manual'},filter_open:{type:'b',v:true,edit:'toggle'},nozzle_size:{type:'n',v:4,step:1,min:1,max:10,edit:'manual'},hose_length:{type:'n',v:5,step:1,min:1,max:15,edit:'manual'},pump_rpm:{type:'n',v:30,step:5,min:0,max:100,edit:'manual'},spill_sensor:{type:'b',v:false,edit:'toggle'}}},check:{valve_open:true,pipe_angle:[15,35]},check2:{flow_pressure:[3,7],tank_level:[60,100],filter_open:true,spill_sensor:false},hint:'Открой valve_open и поднимай pipe_angle до 15-35.'},
-{num:4,nm:'Ящик',kind:'goal',sc:'jump',goal:'Поймать шар в ящик',desc:'Крутой трамплин обрывается над пропастью. Мяч летит по баллистической параболе — крышка ящика захлопнется, если ловушка активна и датчик стоит в зоне 4.2-4.7.',task:'Включите ловушку и поставьте датчик в зону <b>4.2-4.7</b>.',ch:'═══ ЦЕХ 4 · БАЛЛИСТИКА ═══\nЗадание 1 · СМОТРИ: Где трамплин, где ящик?\n  Как мяч должен попасть в ящик? Что ему мешает?\nЗадание 2 · ЛОВУШКА: Сейчас trap_door_active = false.\n  Логика: false = крышка не готова, true = ждёт мяч.\n  Что включить, чтобы ловушка сработала?\nЗадание 3 · ДАТЧИК: trigger_x = 1.2 — это СЛИШКОМ рано.\n  Мяч летит по дуге и входит в ящик в зоне 4.2–4.7.\n  Поставь середину зоны: 4.4 или 4.5.\nЗадание 4 · ПОЧЕМУ: Почему нельзя поставить датчик 9?\n  Подумай: мяч уже пролетит мимо ящика к тому моменту.\nЗадание 5 · ОШИБКА: Оставь 1.2 и запусти.\n  Что произойдёт? Крышка захлопнется рано — мяч мимо.\nЗадание 6 · ГРАНИЦЫ: Попробуй 4.2 и 4.7.\n  Срабатывает ли ровно на краю зоны? Проверь.\nЗадание 7 · ТОЧНОСТЬ: Это координата X с шагом 0.5.\n  Почему 4.5 лучше, чем 4.7? Что будет на 4.8?\n  Подбери значение, при котором мяч ТОЧНО в ящике.',cfg:{CATCH_CONFIG:{trap_door_active:{type:'b',v:false,edit:'manual'},trigger_x:{type:'n',v:1.2,step:0.5,min:0,max:6,edit:'manual'},catch_speed:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},latch_spring:{type:'n',v:7,step:1,min:0,max:10,edit:'manual'},auto_reset:{type:'b',v:false,edit:'toggle'},beep_alarm:{type:'b',v:false,edit:'toggle'},net_tension:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},drop_height:{type:'n',v:3,step:1,min:0,max:8,edit:'manual'},wind_comp:{type:'b',v:false,edit:'toggle'},return_timer:{type:'n',v:2,step:1,min:1,max:8,edit:'manual'}}},check:{trap_door_active:true,trigger_x:[4.2,4.7]},check2:{catch_speed:[4,8],latch_spring:[5,9],wind_comp:true,return_timer:[2,5]},hint:'Активируй ловушку и подвигай trigger_x до 4.2-4.7.'},
-{num:5,nm:'Сейф',kind:'goal',sc:'safe',goal:'Раскодировать сейф',desc:'Рельс упирается в бронированный сейф с латунным лимбом. Дверь откроется, если пароль-строка верный и включён байпас.',task:'Напишите код-слово и включите байпас.',ch:'═══ ЦЕХ 5 · КРИПТОГРАФИЯ ═══\nЗадание 1 · СМОТРИ: Что закрывает путь?\n  Это сейф с лимбом. Что нужно, чтобы он открылся?\nЗадание 2 · ПАРОЛЬ: Сейчас code = «ЗАКРЫТЬ».\n  Замок ждёт слово-команду. Это антоним к «ЗАКРЫТЬ».\n  Догадайся и впиши слово в поле в кавычках.\nЗадание 3 · РЕГИСТР: Строки чувствительны к регистру.\n  Попробуй написать слово маленькими — не сработает!\n  Верхний регистр важен: слово должно быть ЗАГЛАВНЫМ.\nЗадание 4 · БАЙПАС: bypass_system = false.\n  Это аварийный обход защиты. Какой флаг включить?\nЗадание 5 · КОМБО: Работает ли пароль БЕЗ байпаса?\n  А байпас БЕЗ пароля? Проверь оба варианта.\nЗадание 6 · ЛОГИКА: Сколько условий нужно ОДНОВРЕМЕННО?\n  Вспомни: логическое И — оба должны быть верными.\nЗадание 7 · ВЫВОД: Если дверь не открывается — что\n  проверять первым? Пароль или байпас? Запиши порядок:',cfg:{SAFE_CONFIG:{code:{type:'s',v:'ЗАКРЫТЬ',opts:['ОТКРЫТЬ','ЗАКРЫТЬ'],edit:'manual'},bypass_system:{type:'b',v:false,edit:'toggle'},alarm_volume:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},lock_attempts:{type:'n',v:3,step:1,min:1,max:10,edit:'manual'},red_light:{type:'b',v:true,edit:'toggle'},power_backup:{type:'b',v:false,edit:'toggle'},bolt_time:{type:'n',v:2,step:1,min:1,max:8,edit:'manual'},dial_speed:{type:'n',v:4,step:1,min:1,max:10,edit:'manual'},keypad_lock:{type:'b',v:false,edit:'toggle'},siren_mode:{type:'b',v:false,edit:'toggle'}}},check:{code:'ОТКРЫТЬ',bypass_system:true},check2:{alarm_volume:[3,7],lock_attempts:[3,6],power_backup:true,keypad_lock:false},hint:'Слово-команда — антоним к «ЗАКРЫТЬ». Впиши его и включи байпас.'},
-{num:6,nm:'Шины',kind:'goal',sc:'tire',goal:'Раскрутить шины и сбросить груз',desc:'Скат обрывается над двумя шинами-валиками. Второе колесо заблокировано канатом. Груз уедет, если скорость больше 8 и канат снят.',task:'Разгоните шину выше <b>8</b> и снимите канат.',ch:'═══ ЦЕХ 6 · МЕХАНИКА ═══\nЗадание 1 · СМОТРИ: Найди шины и груз.\n  Почему груз не едет? Что его держит?\nЗадание 2 · СКОРОСТЬ: Сейчас wheel_speed = 3.\n  Шина закрутится ТОЛЬКО при скорости > 8.\n  Попробуй 8 — крутится или нет? А 9?\nЗадание 3 · ПОРОГ: Число 8 — это ПОРОГ (threshold).\n  Что значит «больше 8»? Почему 9 уже работает?\n  А если вписать 8.5 — меньше или больше повезёт?\nЗадание 4 · КАНАТ: unclog_rope = false — канат держит колесо.\n  Логика: true = канат срезан, колесо свободно.\n  Какой флаг освободит вторую шину?\nЗадание 5 · ЦЕПОЧКА: Что произойдёт первым?\n  Канат исчезнет ИЛИ шины начнут крутиться?\n  Наблюдай на сцене — какое событие ведущее?\nЗадание 6 · ГРУЗ: При пуске груз висит над шиной.\n  Когда он начнёт падать? Связано ли с вращением?\nЗадание 7 · ЛОГИКА: Груз уедет, когда true ОБА условия.\n  Обведи: это И (AND) или ИЛИ (OR)? \n  Впиши скорость сам и переключи канат кнопкой — докажи.',cfg:{GEAR_CONFIG:{wheel_speed:{type:'n',v:3,step:1,min:0,max:12,edit:'manual'},unclog_rope:{type:'b',v:false,edit:'toggle'},axle_heat:{type:'n',v:40,step:5,min:0,max:200,edit:'manual'},conveyor_grip:{type:'n',v:6,step:1,min:0,max:10,edit:'manual'},auto_brake:{type:'b',v:false,edit:'toggle'},friction_lube:{type:'b',v:false,edit:'toggle'},belt_tension:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},gear_ratio:{type:'n',v:2,step:1,min:1,max:6,edit:'manual'},safety_lock:{type:'b',v:true,edit:'toggle'},motor_boost:{type:'b',v:false,edit:'toggle'}}},check:{wheel_speed:[9,12],unclog_rope:true},check2:{axle_heat:[40,90],conveyor_grip:[5,8],safety_lock:true,motor_boost:true},hint:'Разгони wheel_speed выше 8 (до 9-12) и сними канат unclog_rope.'},
-{num:7,nm:'Пинг-понг',kind:'goal',sc:'paddle',goal:'Шарик в цель',desc:'В пустоте каскадом висят 4 наклонные ракетки. Белый шарик пружинит по ним в чашку, если упругость от 0.7 до 0.95.',task:'Настройте упругость от <b>0.7</b> до <b>0.95</b>.',ch:'═══ ЦЕХ 7 · УПРУГОСТЬ ═══\nЗадание 1 · СМОТРИ: Что висит в воздухе?\n  Это ракетки каскадом. Как шарик попадёт в чашку?\nЗадание 2 · КОЭФФИЦИЕНТ: bounciness — это от 0 до 1.\n  0 = не отскакивает, 1 = отскок на 100% высоты.\n  Сейчас 0.4 — слишком «мягко». Шарик не допрыгивает.\nЗадание 3 · ДИАПАЗОН: Нужно 0.7–0.95.\n  Попробуй 0.8 — как пружина. Почему не 1.0?\n  Что будет при 0.95? А при 0.7? Найди границы.\nЗадание 4 · ДРОБЬ: Это float (дробное число)!\n  В чём разница с int? Как меняется одним шагом 0.1?\n  Впиши 0.75 — сработает ли? А 0.68?\nЗадание 5 · ВЕТЕР: wind_force = 0 — оставь ноль!\n  Если добавить ветер, шарик улетит в сторону.\n  Попробуй 0.5 — как меняется траектория?\nЗадание 6 · ПРОГНОЗ: Посчитай, сколько раз шарик\n  отскочит до чашки по 4 ракеткам. Запусти — сверься!\nЗадание 7 · ВЫВОД: Какой параметр управляет высотой\n  отскока, а какой — отклонением вбок? Запиши:',cfg:{PINGPONG_CONFIG:{bounciness:{type:'n',v:0.4,step:0.1,min:0,max:1,edit:'manual'},wind_force:{type:'n',v:0,step:0.1,min:0,max:1,edit:'manual'},table_friction:{type:'n',v:3,step:1,min:0,max:10,edit:'manual'},ball_mass:{type:'n',v:3,step:1,min:1,max:10,edit:'manual'},spin_effect:{type:'n',v:0,step:1,min:0,max:10,edit:'manual'},net_height:{type:'n',v:4,step:1,min:0,max:10,edit:'manual'},paddle_angle:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},air_drag:{type:'n',v:2,step:1,min:0,max:10,edit:'manual'},sweet_spot:{type:'b',v:false,edit:'toggle'},edge_guard:{type:'b',v:true,edit:'toggle'}}},check:{bounciness:[0.7,0.95],wind_force:0},check2:{table_friction:[2,5],ball_mass:[2,5],edge_guard:true,sweet_spot:true},hint:'Подними bounciness до 0.7-0.95, ветер оставь 0.'},
-{num:8,nm:'Водопад',kind:'goal',sc:'pipe',goal:'Вода в нужное место',desc:'Трубная магистраль с двумя насосами (А и Б). Вода попадёт в бассейн, только если оба насоса включены, а слив закрыт.',task:'Включите оба насоса и закройте слив.',ch:'═══ ЦЕХ 8 · ФИНАЛ ═══\nЗадание 1 · СМОТРИ: Найди два насоса и бассейн.\n  Куда должна попасть вода? Из чего она течёт?\nЗадание 2 · ДВА НАСОСА: pump_A и pump_B = false.\n  Вода пойдёт ТОЛЬКО когда true ОБА. Почему?\n  Один насос не создаст нужного давления.\nЗадание 3 · ЛОГИКА И: Это логическое И (AND):\n  A И B. Вспомни: если один false — результат false.\n  Меняется ли картинка, если включить только А?\nЗадание 4 · СЛИВ: drain_system = true — слив ОТКРЫТ.\n  Вода утекает! Какой флаг ЗАКРОЕТ слив?\n  Как узнать, что слив закрыт? Посмотри на бассейн.\nЗадание 5 · ПОРЯДОК: Включи сначала А, потом Б.\n  Вода пошла только после второго? Сверься!\nЗадание 6 · ЭКСПЕРИМЕНТ: Включи оба, но открой слив.\n  Что происходит с уровнем воды? Убывает или стоит?\nЗадание 7 · ПОБЕДА: Сколько условий в одной строке?\n  (Насос А) И (Насос Б) И (слив закрыт) — три!\n  Найди в коде все три и переведи в верное состояние.\n  Докажи: измени ровно одно — и вода не пойдёт.',cfg:{FINAL_CONFIG:{pump_A_power:{type:'b',v:false,edit:'toggle'},pump_B_power:{type:'b',v:false,edit:'toggle'},drain_system:{type:'b',v:true,edit:'toggle'},water_tank:{type:'n',v:50,step:5,min:0,max:100,edit:'manual'},pressure_psi:{type:'n',v:30,step:5,min:0,max:100,edit:'manual'},filter_flow:{type:'n',v:8,step:1,min:1,max:10,edit:'manual'},vapor_vent:{type:'n',v:3,step:1,min:0,max:10,edit:'manual'},pipe_capacity:{type:'n',v:6,step:1,min:1,max:12,edit:'manual'},relief_valve:{type:'b',v:true,edit:'toggle'},water_recirc:{type:'b',v:false,edit:'toggle'}}},check:{pump_A_power:true,pump_B_power:true,drain_system:false},check2:{water_tank:[60,90],pressure_psi:[40,70],relief_valve:true,water_recirc:true},hint:'Включи pump_A и pump_B, а drain_system переведи в false (закрыть слив).'}
+{num:2,nm:'Лампочка',kind:'goal',sc:'abyss',goal:'Зажечь лампочку',desc:'Рельс обрывается над бездной. Вилка падает на стальную плиту с розеткой — лампочка загорится, если напряжение ровно 220 вольт и цепь замкнута.',task:'Подайте <b>220</b> вольт (сейчас 110) и замкните цепь.',ch:'═══ ЦЕХ 2 · ЭНЕРГЕТИКА ═══\n1 ● СМОТРИ: вилка падает в розетку, лампа ждёт тока.\n  Что ей нужно: сколько вольт и замкнутая цепь.\n2 ● НАСТРОЙ: voltage → 220, fuse_closed → true (⇄).\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Лампа зажглась? Это этап 1 — главная задача.\n4 ● ЭКСПЕРИМЕНТ: поставь voltage = 300, запусти.\n  Лампа перегорает. Верни 220 и убедись, что работает.\n5 ● НАСТРОЙ: wire_temp впиши 45, breaker_reset → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: resistance → 10, current → 2.0,\n  затем нажми «Калибровка» (этап 3). Идеально!',cfg:{LIGHT_CONFIG:{power_supply:{type:'b',v:true,edit:'toggle'},voltage:{type:'n',v:110,step:10,min:0,max:300,edit:'manual'},fuse_closed:{type:'b',v:false,edit:'toggle'},wire_temp:{type:'n',v:25,step:5,min:0,max:200,edit:'manual'},bulb_power:{type:'n',v:60,step:10,min:10,max:200,edit:'manual'},safety_guard:{type:'b',v:true,edit:'toggle'},resistance:{type:'n',v:10,step:1,min:1,max:50,edit:'manual'},current:{type:'n',v:2,step:0.5,min:0,max:10,edit:'manual'},phase_switch:{type:'b',v:false,edit:'toggle'},breaker_reset:{type:'b',v:true,edit:'toggle'}}},check:{voltage:220,fuse_closed:true,power_supply:true},check2:{wire_temp:[30,60],bulb_power:[40,100],safety_guard:true,breaker_reset:true},check3:{resistance:[8,15],current:[1.5,3]},hint:'Крутите напряжение до 220 и включите предохранитель fuse_closed.'},
+{num:3,nm:'Стакан воды',kind:'goal',sc:'hydra',goal:'Налить воды в стакан',desc:'Бак с краном, под ним поворотный жёлоб, внизу мерный стакан. Вода попадёт в стакан, если кран открыт, а угол жёлоба от 15 до 35 градусов.',task:'Откройте кран и настройте угол жёлоба от <b>15</b> до <b>35</b>.',ch:'═══ ЦЕХ 3 · ГИДРАВЛИКА ═══\n1 ● СМОТРИ: бак с водой, кран закрыт, стакан пуст.\n  Вода польётся, если открыть кран и наклонить жёлоб.\n2 ● НАСТРОЙ: valve_open → true, pipe_angle → 25.\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Капли наполнят стакан — это этап 1.\n4 ● ЭКСПЕРИМЕНТ: поставь pipe_angle = 5, запусти.\n  Вода льётся мимо. Верни 25 — убедись, что работает.\n5 ● НАСТРОЙ: flow_pressure → 5, filter_open → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: nozzle_size → 4, pump_rpm → 50,\n  затем нажми «Калибровка» (этап 3). Идеально!',cfg:{FLUID_CONFIG:{valve_open:{type:'b',v:false,edit:'toggle'},pipe_angle:{type:'n',v:5,step:5,min:0,max:45,edit:'manual'},flow_pressure:{type:'n',v:2,step:1,min:0,max:10,edit:'manual'},tank_level:{type:'n',v:80,step:5,min:0,max:100,edit:'manual'},drip_rate:{type:'n',v:5,step:1,min:1,max:20,edit:'manual'},filter_open:{type:'b',v:true,edit:'toggle'},nozzle_size:{type:'n',v:4,step:1,min:1,max:10,edit:'manual'},hose_length:{type:'n',v:5,step:1,min:1,max:15,edit:'manual'},pump_rpm:{type:'n',v:30,step:5,min:0,max:100,edit:'manual'},spill_sensor:{type:'b',v:false,edit:'toggle'}}},check:{valve_open:true,pipe_angle:[15,35]},check2:{flow_pressure:[3,7],tank_level:[60,100],filter_open:true,spill_sensor:false},check3:{nozzle_size:[3,6],pump_rpm:[40,60]},hint:'Открой valve_open и поднимай pipe_angle до 15-35.'},
+{num:4,nm:'Ящик',kind:'goal',sc:'jump',goal:'Поймать шар в ящик',desc:'Крутой трамплин обрывается над пропастью. Мяч летит по баллистической параболе — крышка ящика захлопнется, если ловушка активна и датчик стоит в зоне 4.2-4.7.',task:'Включите ловушку и поставьте датчик в зону <b>4.2-4.7</b>.',ch:'═══ ЦЕХ 4 · БАЛЛИСТИКА ═══\n1 ● СМОТРИ: трамплин, ящик с крышкой.\n  Мяч летит по параболе — крышка должна захлопнуться.\n2 ● НАСТРОЙ: trap_door_active → true, trigger_x → 4.5.\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Мяч пойман — этап 1 пройден.\n4 ● ЭКСПЕРИМЕНТ: поставь trigger_x = 1.2, запусти.\n  Крышка хлопает рано — мяч мимо. Верни 4.5.\n5 ● НАСТРОЙ: catch_speed → 6, wind_comp → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: net_tension → 5, drop_height → 3,\n  затем нажми «Калибровка» (этап 3). Отлично!',cfg:{CATCH_CONFIG:{trap_door_active:{type:'b',v:false,edit:'manual'},trigger_x:{type:'n',v:1.2,step:0.5,min:0,max:6,edit:'manual'},catch_speed:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},latch_spring:{type:'n',v:7,step:1,min:0,max:10,edit:'manual'},auto_reset:{type:'b',v:false,edit:'toggle'},beep_alarm:{type:'b',v:false,edit:'toggle'},net_tension:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},drop_height:{type:'n',v:3,step:1,min:0,max:8,edit:'manual'},wind_comp:{type:'b',v:false,edit:'toggle'},return_timer:{type:'n',v:2,step:1,min:1,max:8,edit:'manual'}}},check:{trap_door_active:true,trigger_x:[4.2,4.7]},check2:{catch_speed:[4,8],latch_spring:[5,9],wind_comp:true,return_timer:[2,5]},check3:{net_tension:[4,7],drop_height:[2,5]},hint:'Активируй ловушку и подвигай trigger_x до 4.2-4.7.'},
+{num:5,nm:'Сейф',kind:'goal',sc:'safe',goal:'Раскодировать сейф',desc:'Рельс упирается в бронированный сейф с латунным лимбом. Дверь откроется, если пароль-строка верный и включён байпас.',task:'Напишите код-слово и включите байпас.',ch:'═══ ЦЕХ 5 · КРИПТОГРАФИЯ ═══\n1 ● СМОТРИ: сейф с лимбом, ключ едет слева.\n  Дверь откроется, если назвать пароль и отключить защиту.\n2 ● НАСТРОЙ: code → «ОТКРЫТЬ», bypass_system → true.\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Ключ доезжает, дверь открывается — этап 1.\n4 ● ЭКСПЕРИМЕНТ: напиши пароль маленькими буквами.\n  Не работает! Верни «ОТКРЫТЬ» — регистр важен.\n5 ● НАСТРОЙ: alarm_volume → 5, power_backup → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: bolt_time → 3, dial_speed → 4,\n  затем нажми «Калибровка» (этап 3). Идеально!',cfg:{SAFE_CONFIG:{code:{type:'s',v:'ЗАКРЫТЬ',opts:['ОТКРЫТЬ','ЗАКРЫТЬ'],edit:'manual'},bypass_system:{type:'b',v:false,edit:'toggle'},alarm_volume:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},lock_attempts:{type:'n',v:3,step:1,min:1,max:10,edit:'manual'},red_light:{type:'b',v:true,edit:'toggle'},power_backup:{type:'b',v:false,edit:'toggle'},bolt_time:{type:'n',v:2,step:1,min:1,max:8,edit:'manual'},dial_speed:{type:'n',v:4,step:1,min:1,max:10,edit:'manual'},keypad_lock:{type:'b',v:false,edit:'toggle'},siren_mode:{type:'b',v:false,edit:'toggle'}}},check:{code:'ОТКРЫТЬ',bypass_system:true},check2:{alarm_volume:[3,7],lock_attempts:[3,6],power_backup:true,keypad_lock:false},check3:{bolt_time:[2,4],dial_speed:[3,6]},hint:'Слово-команда — антоним к «ЗАКРЫТЬ». Впиши его и включи байпас.'},
+{num:6,nm:'Шины',kind:'goal',sc:'tire',goal:'Раскрутить шины и сбросить груз',desc:'Скат обрывается над двумя шинами-валиками. Второе колесо заблокировано канатом. Груз уедет, если скорость больше 8 и канат снят.',task:'Разгоните шину выше <b>8</b> и снимите канат.',ch:'═══ ЦЕХ 6 · МЕХАНИКА ═══\n1 ● СМОТРИ: шины, канат на второй, груз сверху.\n  Груз уедет, если скорость > 8 и канат снят.\n2 ● НАСТРОЙ: wheel_speed → 10, unclog_rope → true.\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Шины крутятся, груз падает — этап 1.\n4 ● ЭКСПЕРИМЕНТ: оставь wheel_speed3, канат сними.\n  Груз не уедет — скорость мала. Верни 10.\n5 ● НАСТРОЙ: axle_heat → 60, safety_lock → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: belt_tension → 5, gear_ratio → 3,\n  затем нажми «Калибровка» (этап 3). Идеально!',cfg:{GEAR_CONFIG:{wheel_speed:{type:'n',v:3,step:1,min:0,max:12,edit:'manual'},unclog_rope:{type:'b',v:false,edit:'toggle'},axle_heat:{type:'n',v:40,step:5,min:0,max:200,edit:'manual'},conveyor_grip:{type:'n',v:6,step:1,min:0,max:10,edit:'manual'},auto_brake:{type:'b',v:false,edit:'toggle'},friction_lube:{type:'b',v:false,edit:'toggle'},belt_tension:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},gear_ratio:{type:'n',v:2,step:1,min:1,max:6,edit:'manual'},safety_lock:{type:'b',v:true,edit:'toggle'},motor_boost:{type:'b',v:false,edit:'toggle'}}},check:{wheel_speed:[9,12],unclog_rope:true},check2:{axle_heat:[40,90],conveyor_grip:[5,8],safety_lock:true,motor_boost:true},check3:{belt_tension:[4,7],gear_ratio:[2,4]},hint:'Разгони wheel_speed выше 8 (до 9-12) и сними канат unclog_rope.'},
+{num:7,nm:'Пинг-понг',kind:'goal',sc:'paddle',goal:'Шарик в цель',desc:'В пустоте каскадом висят 4 наклонные ракетки. Белый шарик пружинит по ним в чашку, если упругость от 0.7 до 0.95.',task:'Настройте упругость от <b>0.7</b> до <b>0.95</b>.',ch:'═══ ЦЕХ 7 · УПРУГОСТЬ ═══\n1 ● СМОТРИ: 4 ракетки каскадом, внизу чашка.\n  Шарик пружинит по ним — нужна упругость 0.7–0.95.\n2 ● НАСТРОЙ: bounciness → 0.8, wind_force → 0.\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Шарик отскакивает и падает в чашку — этап 1.\n4 ● ЭКСПЕРИМЕНТ: поставь bounciness = 0.4, запусти.\n  Шарик не допрыгивает. Верни 0.8.\n5 ● НАСТРОЙ: table_friction → 4, edge_guard → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: paddle_angle → 5, air_drag → 2,\n  затем нажми «Калибровка» (этап 3). Идеально!',cfg:{PINGPONG_CONFIG:{bounciness:{type:'n',v:0.4,step:0.1,min:0,max:1,edit:'manual'},wind_force:{type:'n',v:0,step:0.1,min:0,max:1,edit:'manual'},table_friction:{type:'n',v:3,step:1,min:0,max:10,edit:'manual'},ball_mass:{type:'n',v:3,step:1,min:1,max:10,edit:'manual'},spin_effect:{type:'n',v:0,step:1,min:0,max:10,edit:'manual'},net_height:{type:'n',v:4,step:1,min:0,max:10,edit:'manual'},paddle_angle:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},air_drag:{type:'n',v:2,step:1,min:0,max:10,edit:'manual'},sweet_spot:{type:'b',v:false,edit:'toggle'},edge_guard:{type:'b',v:true,edit:'toggle'}}},check:{bounciness:[0.7,0.95],wind_force:0},check2:{table_friction:[2,5],ball_mass:[2,5],edge_guard:true,sweet_spot:true},check3:{paddle_angle:[4,7],air_drag:[1,3]},hint:'Подними bounciness до 0.7-0.95, ветер оставь 0.'},
+174: {num:8,nm:'Водопад',kind:'goal',sc:'pipe',goal:'Вода в нужное место',desc:'Трубная магистраль с двумя насосами (А и Б). Вода попадёт в бассейн, только если оба насоса включены, а слив закрыт.',task:'Включите оба насоса и закройте слив.',ch:'═══ ЦЕХ 8 · ФИНАЛ ═══\n1 ● СМОТРИ: два насоса, лейка над бассейном.\n  Вода пойдёт, когда true ОБА насоса и слив закрыт.\n2 ● НАСТРОЙ: pump_A → true, pump_B → true, drain_system → false.\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Лейка льёт воду, уровень растёт — этап 1.\n4 ● ЭКСПЕРИМЕНТ: выключи pump_A, запусти.\n  Воды нет — нужны оба. Верни true.\n5 ● НАСТРОЙ: water_tank → 75, relief_valve → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: vapor_vent → 3, pipe_capacity → 6,\n  затем нажми «Калибровка» (этап 3). Финально!',cfg:{FINAL_CONFIG:{pump_A_power:{type:'b',v:false,edit:'toggle'},pump_B_power:{type:'b',v:false,edit:'toggle'},drain_system:{type:'b',v:true,edit:'toggle'},water_tank:{type:'n',v:50,step:5,min:0,max:100,edit:'manual'},pressure_psi:{type:'n',v:30,step:5,min:0,max:100,edit:'manual'},filter_flow:{type:'n',v:8,step:1,min:1,max:10,edit:'manual'},vapor_vent:{type:'n',v:3,step:1,min:0,max:10,edit:'manual'},pipe_capacity:{type:'n',v:6,step:1,min:1,max:12,edit:'manual'},relief_valve:{type:'b',v:true,edit:'toggle'},water_recirc:{type:'b',v:false,edit:'toggle'}}},check:{pump_A_power:true,pump_B_power:true,drain_system:false},check2:{water_tank:[60,90],pressure_psi:[40,70],relief_valve:true,water_recirc:true},check3:{vapor_vent:[2,5],pipe_capacity:[5,8]},hint:'Включи pump_A и pump_B, а drain_system переведи в false (закрыть слив).'}
 ];
 
 const KEYS=["1_СТАРТ","2_ВЕНТ","3_МАГН","4_ОПТИ","5_ПОРШ","6_РЕДУ","7_МОСТ","8_ЛИФТ","9_ПРЕС","10_КЛАП","11_ВОРО","12_АКСЕ"];
@@ -224,7 +230,7 @@ function codeText(){
   return line+'\n'+ck+' = {\n'+body+'\n};';
 }
 function esc2(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
-function hc(t){return esc2(t).replace(/([A-Z_]{3,}_CONFIG)/g,'<span class="kw">$1</span>').replace(/(\{|\}|;|,)/g,'<span class="op">$1</span>').replace(/("[^"]*")/g,'<span class="st">$1</span>').replace(/(\/\/.*)/g,'<span class="cm">$1</span>').replace(/\btrue\b/g,'<span class="tr">true</span>').replace(/\bfalse\b/g,'<span class="fa">false</span>').replace(/(^|\s)(\d+\.?\d*)(\s|$)/g,'$1<span class="br">$2</span>$3')}
+function hc(t){return esc2(t).replace(/([A-Z_]{3,}_CONFIG)/g,'<span class="kw">$1</span>').replace(/(\{|\}|;|,)/g,'<span class="op">$1</span>').replace(/("[^"]*")/g,'<span class="st">$1</span>').replace(/(\/\/.*)/g,'<span class="cm">$1</span>').replace(/\btrue\b/g,'<span class="tr">true</span>').replace(/\bfalse\b/g,'<span class="fa">false</span>').replace(/\b(\d+\.?\d*)\b/g,'<span class="br">$1</span>')}
 function sync(){hl.innerHTML=hc(ta.value)+'\n';ln.innerHTML=Array.from({length:Math.max(ta.value.split('\n').length,15)},(_,i)=>i+1).join('<br>')}
 ta.addEventListener('input',sync);
 ta.addEventListener('scroll',function(){
@@ -240,16 +246,22 @@ function rebuildEdit(){
   if(L.kind==='nodes'){
     for(let i=1;i<=12;i++){
       const k=KEYS[i-1];
-      const t=document.createElement('span');t.className='chip';t.innerHTML='<span class="pn">Узел '+i+'</span><span class="pv '+(conf[k]?'val-ok':'val-bad')+'">'+(conf[k]?'true':'false')+'</span>';t.onclick=()=>{conf[k]=!conf[k];rebuildEdit()};
+      const t=document.createElement('span');t.className='chip'+(conf[k]?' val-good':' val-bad-chip');t.innerHTML='<span class="pn">Узел '+i+'</span><span class="pv '+(conf[k]?'val-ok':'val-bad')+'">'+(conf[k]?'true':'false')+'</span>';t.onclick=()=>{conf[k]=!conf[k];rebuildEdit()};
       chips.appendChild(t);
     }
   }else{
     const ck=Object.keys(L.cfg)[0];const defs=L.cfg[ck];const chval=L.check||{};
     Object.keys(defs).forEach(k=>{
       const d=defs[k];const box=document.createElement('span');box.className='chip';
-      // что вводить в поле (плейсхолдер)
-      let phTxt='';
       const e=chval[k];
+      let phTxt='';
+      // статус-индикатор слева
+      const setChipStatus=()=>{
+        const cv=conf[ck][k];
+        const ok=d.type==='b'?cv===e:(Array.isArray(e)?cv>=e[0]&&cv<=e[1]:cv===e);
+        box.className='chip'+(ok?' val-good':e!==undefined?' val-bad-chip':'');
+      };
+      setChipStatus();
       if(d.type==='b'){phTxt=e!==undefined?('введи '+(e?'true':'false')):'введи true или false'}
       else if(d.type==='n'){phTxt=Array.isArray(e)?('введи от '+e[0]+' до '+e[1]):('введи '+(e!==undefined?e:'значение'))}
       else if(d.type==='s'){phTxt=e!==undefined?'введи текст и Enter':'введи текст и Enter'}
@@ -260,6 +272,7 @@ function rebuildEdit(){
       const inp=document.createElement('input');inp.type='text';inp.className='ci';
       inp.placeholder=phTxt;
       inp.value=(d.type==='s')?'"'+conf[ck][k]+'"':String(conf[ck][k]);
+      const flashChip=()=>{box.classList.remove('flash');void box.offsetWidth;box.classList.add('flash')};
       const commit=()=>{
         const raw=inp.value.trim().replace(/^"|"$/g,'');
         if(d.type==='b'){
@@ -273,6 +286,7 @@ function rebuildEdit(){
         inp.value=(d.type==='s')?'"'+conf[ck][k]+'"':String(conf[ck][k]);
         inp.classList.toggle('val-ok',cfgOk(d,conf[ck][k],e));
         inp.classList.toggle('val-bad',!cfgOk(d,conf[ck][k],e));
+        setChipStatus();
       };
       const cfgOk=(dd,v,target)=>{
         if(Array.isArray(target))return v>=target[0]&&v<=target[1];
@@ -280,20 +294,20 @@ function rebuildEdit(){
       };
       inp.classList.toggle('val-ok',cfgOk(d,conf[ck][k],e));
       inp.classList.toggle('val-bad',!cfgOk(d,conf[ck][k],e));
-      inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();commit();}});
+      inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();commit();flashChip();}});
       inp.addEventListener('blur',commit);
       box.appendChild(inp);
       // КНОПКИ рядом с полем: bool — переключатель, число — −/+
       if(d.type==='b'){
         const tg=document.createElement('span');tg.className='pmn';tg.textContent='⇄';
         tg.title='переключить true/false';
-        tg.onclick=()=>{conf[ck][k]=!conf[ck][k];ta.value=codeText();sync();inp.value=conf[ck][k]?'true':'false';inp.classList.toggle('val-ok',cfgOk(d,conf[ck][k],e));inp.classList.toggle('val-bad',!cfgOk(d,conf[ck][k],e));};
+        tg.onclick=()=>{conf[ck][k]=!conf[ck][k];ta.value=codeText();sync();inp.value=conf[ck][k]?'true':'false';inp.classList.toggle('val-ok',cfgOk(d,conf[ck][k],e));inp.classList.toggle('val-bad',!cfgOk(d,conf[ck][k],e));flashChip();setChipStatus();};
         box.appendChild(tg);
       }else if(d.type==='n'){
         const mn=document.createElement('span');mn.className='pmn';mn.textContent='−';
-        mn.onclick=()=>{conf[ck][k]=Math.max(d.min,Math.round((conf[ck][k]-d.step)*10)/10);ta.value=codeText();sync();inp.value=String(conf[ck][k]);};
+        mn.onclick=()=>{conf[ck][k]=Math.max(d.min,Math.round((conf[ck][k]-d.step)*10)/10);ta.value=codeText();sync();inp.value=String(conf[ck][k]);setChipStatus();};
         const pl=document.createElement('span');pl.className='ppl';pl.textContent='+';
-        pl.onclick=()=>{conf[ck][k]=Math.min(d.max,Math.round((conf[ck][k]+d.step)*10)/10);ta.value=codeText();sync();inp.value=String(conf[ck][k]);};
+        pl.onclick=()=>{conf[ck][k]=Math.min(d.max,Math.round((conf[ck][k]+d.step)*10)/10);ta.value=codeText();sync();inp.value=String(conf[ck][k]);setChipStatus();};
         box.appendChild(mn);box.appendChild(pl);
       }else{ // строка — только ручной ввод, без подсказки и перебора
         // цикл вариантов убран: пароль надо написать самому
@@ -337,25 +351,31 @@ function checkGoal(){
 }
 
 // Вторая кнопка: проверка дополнительных (экспериментальных) настроек
-function checkExtra(){
+function checkExtra2(){
+  doCheck(L.check2,'Доп. настройки в норме! Эксперимент готов.');
+}
+// Третья кнопка: калибровка (check3)
+function checkExtra3(){
+  doCheck(L.check3,'Калибровка пройдена! Параметры идеальны.');
+}
+function doCheck(data,okMsg){
   if(!eng){showGate();return}
   if(run||crash)return;
   if(!parseC())return;
-  const ch2=L.check2;
-  if(!ch2||L.kind==='nodes'){lg.textContent='% Для этого уровня нет доп. настроек.';return}
+  if(!data||L.kind==='nodes'){lg.textContent='% Для этого этапа нет проверок.';return}
   const ck=Object.keys(L.cfg)[0];const c=conf[ck]||{};
-  const keys=Object.keys(ch2);
+  const keys=Object.keys(data);
   for(const k of keys){
-    const expect=ch2[k];const got=c[k];
+    const expect=data[k];const got=c[k];
     if(Array.isArray(expect)){
-      if(!(got>=expect[0]&&got<=expect[1]))return(bad2(shortKey(k),got,expect[0]+'-'+expect[1]));
-    }else{if(got!==expect)return bad2(shortKey(k),got,expect)}
+      if(!(got>=expect[0]&&got<=expect[1]))return(badMsg(shortKey(k),got,expect[0]+'-'+expect[1]));
+    }else{if(got!==expect)return badMsg(shortKey(k),got,expect)}
   }
-  lg.textContent='% Доп. настройки в норме! Эксперимент готов.';
+  lg.textContent='% '+okMsg;
   lg.style.color='';
 }
-function bad2(name,got,want){
-  lg.textContent='% Доп. настройка "'+name+'" = '+got+'. Нужно: '+want;
+function badMsg(name,got,want){
+  lg.textContent='% Параметр "'+name+'" = '+got+'. Нужно: '+want;
   lg.style.color='var(--bad)';
   return false;
 }
@@ -364,12 +384,12 @@ function bad2(name,got,want){
 const vp=document.getElementById('vp'),vw=vp.clientWidth,vh=vp.clientHeight;
 const sc=new THREE.Scene();sc.background=new THREE.Color(0x34261c);
 const cam=new THREE.PerspectiveCamera(36,vw/vh,0.1,60);cam.position.set(-0.3,3.8,16);cam.lookAt(0,-1.2,0);
-const ren=new THREE.WebGLRenderer({antialias:true});ren.setSize(vw,vh);ren.setPixelRatio(Math.min(devicePixelRatio,2));
-ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=.9;
+const ren=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});ren.setSize(vw,vh);ren.setPixelRatio(Math.min(devicePixelRatio,1.5));
+ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=.8;
 vp.appendChild(ren.domElement);
 const cmp=new EffectComposer(ren);cmp.addPass(new RenderPass(sc,cam));
-const bl=new UnrealBloomPass(new THREE.Vector2(vw,vh),.3,.2,.1);bl.threshold=.15;bl.strength=.3;bl.radius=.3;cmp.addPass(bl);
-const sa=new SSAOPass(sc,cam,vw,vh);sa.kernelRadius=5;sa.minDistance=.005;sa.maxDistance=.1;cmp.addPass(sa);
+const bl=new UnrealBloomPass(new THREE.Vector2(vw,vh),.25,.15,.08);bl.threshold=.2;bl.strength=.25;bl.radius=.25;cmp.addPass(bl);
+const sa=new SSAOPass(sc,cam,vw,vh);sa.kernelRadius=3;sa.minDistance=.01;sa.maxDistance=.15;cmp.addPass(sa);
 cmp.addPass(new OutputPass());
 sc.add(new THREE.AmbientLight(0x5a4a3a,.5));
 sc.add(new THREE.HemisphereLight(0xd0c0a8,0x2a1e14,.35));
@@ -472,7 +492,7 @@ function sceneLayout(){
 function clearObjects(){
   nodes.forEach(n=>sc.remove(n.g));nodes.length=0;
   deco.forEach(d=>sc.remove(d));deco.length=0;
-  sc.children.filter(c=>c.userData&&(c.userData.isPipe||c.userData.isFin||c.userData.isGoal||c.userData.isWater||c.userData.isDrop)).forEach(c=>sc.remove(c));
+  sc.children.filter(c=>c.userData&&(c.userData.isPipe||c.userData.isFin||c.userData.isGoal||c.userData.isWater||c.userData.isDrop||c.userData.isWaterTop||c.userData.isJet||c.userData.isChute)).forEach(c=>sc.remove(c));
   waterDrops.forEach(d=>sc.remove(d));waterDrops.length=0;
   targetObj=null;goalReached=false;dropTimer=0;waterCaptured=0;waterMissed=0;
 }
@@ -497,20 +517,24 @@ function addGoalObject(layout){
     // Патрон лампы (латунный, крупный)
     const socket=new THREE.Mesh(new THREE.CylinderGeometry(.22,.26,.3,14),M.copper);
     socket.position.set(1.1,0.0,0);gr.add(socket);
-    // Стеклянная колба — крупная, заметная
-    const glass=new THREE.Mesh(new THREE.SphereGeometry(.45,20,20),new THREE.MeshStandardMaterial({color:0xffffff,transparent:true,opacity:.18,roughness:.05}));
+    // Стеклянная колба — крупная, заметная, с лёгким отливом
+    const glass=new THREE.Mesh(new THREE.SphereGeometry(.45,20,20),new THREE.MeshStandardMaterial({color:0xfaf8f0,transparent:true,opacity:.14,roughness:.05,metalness:.1}));
     glass.position.set(1.1,.55,0);gr.add(glass);
     // Вольфрамовая нить (толстая, витая) — будет вспыхивать
     const fil=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.18,8),new THREE.MeshBasicMaterial({color:0x33220a}));
     fil.position.set(1.1,.42,0);gr.add(fil);
+    // Свечение вокруг нити (невидимо в выкл состоянии)
+    const glowFil=new THREE.Mesh(new THREE.SphereGeometry(.15,12,12),new THREE.MeshBasicMaterial({color:0xffdd44,transparent:true,opacity:0}));
+    glowFil.position.set(1.1,.42,0);gr.add(glowFil);
     // Торчащие из колбы провода к розетке
     const wireMat=new THREE.MeshStandardMaterial({color:0x1a1410,roughness:.8});
     const w1=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.9,6),wireMat);w1.position.set(.55,-.2,-.2);w1.rotation.z=-0.6;gr.add(w1);
     const w2=w1.clone();w2.position.set(.55,-.2,.2);w2.rotation.z=-0.6;w2.position.z=-.2;gr.add(w2);
-    gr.userData={isGoal:true,hasSocket:true,platePos:plate.position.y};sc.add(gr);targetObj=gr;obj.fil=fil;obj.hasFil=true;
+    gr.userData={isGoal:true,hasSocket:true,platePos:plate.position.y};sc.add(gr);targetObj=gr;obj.fil=fil;obj.glowFil=glowFil;obj.hasFil=true;
 }else if(L.num===3){
     // ============ СЦЕНА 3: ВОДОНАПОРНАЯ СТАНЦИЯ (живая вода) ============
     const matWater=new THREE.MeshStandardMaterial({color:0x2f8fd8,roughness:.1,metalness:.05,transparent:true,opacity:.9});
+    const matWaterShimmer=new THREE.MeshStandardMaterial({color:0x3a9ad8,roughness:.1,metalness:.05,transparent:true,opacity:.6});
     // --- БАК (с крышкой, хомутами, ножками и манометром сбоку) ---
     const bgl=new THREE.Group();
     const tankBody=new THREE.Mesh(new THREE.CylinderGeometry(.55,.55,1.1,24),new THREE.MeshStandardMaterial({color:0x546a7a,roughness:.5,metalness:.5}));
@@ -558,12 +582,15 @@ function addGoalObject(layout){
     glass3.position.set(.37,-.15,0);sc.add(glass3);deco.push(glass3);
     const rim3=new THREE.Mesh(new THREE.TorusGeometry(.28,.015,6,20),new THREE.MeshStandardMaterial({color:0xd0e0f0}));rim3.rotation.x=Math.PI/2;rim3.position.set(.37,.2,0);sc.add(rim3);deco.push(rim3);
     const base3=new THREE.Mesh(new THREE.CylinderGeometry(.3,.34,.08,22),M.iron);base3.position.set(.37,-.45,0);sc.add(base3);deco.push(base3);
-    // Вода в стакане: растёт от ДНА (fill 0..0.6), без рисок
+    // Вода в стакане: растёт от ДНА (fill 0..0.6), с поверхностным слоем для ряби
     const water3=new THREE.Mesh(new THREE.CylinderGeometry(.25,.21,1,20),matWater);
     water3.position.set(.37,-.5,0);water3.scale.y=.06;water3.userData={isWater:true,fill:0};sc.add(water3);targetObj=water3;
+    // Поверхностный слой воды (тонкий диск сверху — для ряби)
+    const waterTop=new THREE.Mesh(new THREE.CircleGeometry(.23,20),matWaterShimmer);
+    waterTop.rotation.x=-Math.PI/2;waterTop.position.set(.37,-0.44,0);waterTop.userData={isWaterTop:true};sc.add(waterTop);deco.push(waterTop);
     // Ключевые точки физики
     goalObjs={tipX:-1.2,tipY:1.38,chutePivotX:-1.2,chutePivotY:1.3,chuteLen:1.2,
-      glassX:0.37,glassTopY:0.2,glassBottomY:-0.5,water:water3,tankWater:tankWater};
+      glassX:0.37,glassTopY:0.2,glassBottomY:-0.5,water:water3,waterTop:waterTop,tankWater:tankWater};
     targetX=goalObjs.glassX;
   }else if(L.num===4){
     // ============ СЦЕНА 4: БАЛЛИСТИЧЕСКИЙ ТРАМПЛИН + ЯЩИК ============
@@ -750,6 +777,9 @@ function addGoalObject(layout){
     // Вода в бассейне: цилиндр высотой 1, растёт от ДНА (яркая, заметная)
     const water8=new THREE.Mesh(new THREE.CylinderGeometry(.37,.37,1,20),new THREE.MeshStandardMaterial({color:0x2f8fd8,roughness:.1,metalness:.05,transparent:true,opacity:.9}));
     water8.position.set(c8x+0.95,c8y-0.53,0);water8.scale.y=.05;water8.userData={isWater:true,fill:0};sc.add(water8);targetObj=water8;
+    // Поверхностный слой
+    const waterTop8=new THREE.Mesh(new THREE.CircleGeometry(.35,20),new THREE.MeshStandardMaterial({color:0x4a9ad8,roughness:.1,metalness:.05,transparent:true,opacity:.5}));
+    waterTop8.rotation.x=-Math.PI/2;waterTop8.position.set(c8x+0.95,c8y-0.50,0);waterTop8.userData={isWaterTop:true};sc.add(waterTop8);deco.push(waterTop8);
     // ЛЕЙКА-ВОРОНКА над бассейном, подвешена на трубе
     const can8=new THREE.Group();can8.position.set(c8x+0.95,c8y-0.05,0);
     const canBody=new THREE.Mesh(new THREE.CylinderGeometry(.14,.1,.22,14),M.copper);canBody.position.y=.16;can8.add(canBody);
@@ -761,7 +791,7 @@ function addGoalObject(layout){
     // Струя воды (тонкий полупрозрачный цилиндр) из лейки вниз — видна при работе
     const jet8=new THREE.Mesh(new THREE.CylinderGeometry(.045,.055,.5,10),new THREE.MeshStandardMaterial({color:0x4a9ad8,transparent:true,opacity:.55,roughness:.1}));
     jet8.position.set(c8x+0.95,c8y-0.25,-0.05);jet8.userData={isJet:true};sc.add(jet8);deco.push(jet8);
-    goalObjs={water:water8,cx:c8x,cy:c8y,jet:jet8,canY:c8y-0.05};
+    goalObjs={water:water8,waterTop:waterTop8,cx:c8x,cy:c8y,jet:jet8,canY:c8y-0.05};
     targetX=c8x+1.2;
   }
   return obj;
@@ -829,7 +859,7 @@ sg2.setAttribute('position',new THREE.BufferAttribute(sp2,3));
 const ss=new THREE.Points(sg2,new THREE.PointsMaterial({color:0xe0b86a,size:.04,transparent:true,opacity:0,blending:THREE.AdditiveBlending,depthWrite:false}));
 ss.userData={vel:sv2};sc.add(ss);
 const trailPts=[];const trailGeo=new THREE.BufferGeometry();
-const trail=new THREE.Line(trailGeo,new THREE.LineBasicMaterial({color:0xceb07a,transparent:true,opacity:.2}));sc.add(trail);
+const trail=new THREE.Line(trailGeo,new THREE.LineBasicMaterial({color:0xceb07a,transparent:true,opacity:.25}));sc.add(trail);
 
 let actx=null;
 function tone(f,d,t){f=f||800;d=d||.08;t=t||'sine';if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g2=actx.createGain();o.type=t;o.frequency.value=f;g2.gain.setValueAtTime(.05,actx.currentTime);g2.gain.exponentialRampToValueAtTime(.001,actx.currentTime+d);o.connect(g2);g2.connect(actx.destination);o.start();o.stop(actx.currentTime+d)}
@@ -850,9 +880,11 @@ function loadLevel(idx){
   document.getElementById('pv').style.display=lvlIdx===0?'none':'inline';
   document.getElementById('nx').textContent=lvlIdx>=7?'Финал':'Далее';
   cnt.textContent=L.kind==='nodes'?'0/12':L.goal;
-  // Вторая кнопка: показываем, если есть доп. настройки (check2)
-  const sb2=document.getElementById('sb2');
+  // Вторая и третья кнопки: показываем по наличию check2/check3
+const sb2=document.getElementById('sb2');
   if(sb2){sb2.style.display=(L.check2&&L.kind!=='nodes')?'block':'none';}
+  const sb3=document.getElementById('sb3');
+  if(sb3){sb3.style.display=(L.check3&&L.kind!=='nodes')?'block':'none';}
   resetScene();rebuildEdit();showGate();
 }
 document.getElementById('pv').onclick=()=>{if(lvlIdx>0)loadLevel(lvlIdx-1)};
@@ -860,6 +892,8 @@ document.getElementById('nx').onclick=()=>{if(lvlIdx<7)loadLevel(lvlIdx+1)};
 
 function resetScene(){
   run=false;crash=false;cur=0;winAnim=0;
+  waterDrops.forEach(d=>sc.remove(d));waterDrops.length=0;
+  dropTimer=0;waterCaptured=0;waterMissed=0;
   clearObjects();buildScene();buildActor();
   if(L.num===2){ball.position.set(targetX,1.5,0);ball.userData.vx=0;ball.userData.vy=0}
   else if(L.num===3&&goalObjs){ball.position.set(goalObjs.tipX,goalObjs.tipY+0.2,0);ball.userData.vx=0;ball.userData.vy=0}
@@ -867,7 +901,7 @@ function resetScene(){
   else if(L.num===4&&goalObjs){ball.position.set(-3.7,goalObjs.rampTop+0.2,0);ball.userData.flight=false;ball.userData.vy=0}
   else if(L.num===5&&goalObjs){ball.position.set(-3.0,goalObjs.safeY+0.1,0)}
   else if(L.num===6&&goalObjs){ball.position.set(goalObjs.cx-1.2,goalObjs.cy+0.6,0)}
-  else if(L.num===7&&goalObjs){ball.position.set(goalObjs.cupX-3.0,1.8,0)}
+  else if(L.num===7&&goalObjs){ball.position.set(goalObjs.cupX-4.2,1.8,0);ball.userData.vx=.02;ball.userData.vy=0}
   else if(L.num===8&&goalObjs){ball.position.set(goalObjs.cx-1.5,0.6,0)}
   else{ball.position.set(-6.5,4,0)}
   ball.userData.vx=0;ball.userData.vy=0;setActorColor(0x8a6a4a);
@@ -881,12 +915,16 @@ window.startRun=function(){
   if(run||crash)return;
   if(!parseC())return;
   cur=0;run=true;crash=false;lg.style.color='';
+  // сброс воды/таймеров
+  waterDrops.forEach(d=>sc.remove(d));waterDrops.length=0;
+  dropTimer=0;waterCaptured=0;waterMissed=0;
+  if(goalObjs){goalObjs.runT=0;if(goalObjs.water){goalObjs.water.userData.fill=0;goalObjs.water.scale.y=.06;const wy=L.num===3?(-0.5+0.03):(-0.53+0.03);goalObjs.water.position.y=wy;}}
   if(L.num===2){ball.position.set(targetX,1.5,0);ball.userData.vx=0;ball.userData.vy=0}
   else if(L.num===3&&goalObjs){ball.position.set(goalObjs.tipX,goalObjs.tipY+0.3,0);ball.userData.vx=0;ball.userData.vy=-0.01}
   else if(L.num===4&&goalObjs){ball.position.set(-3.8,goalObjs.rampTop-Math.tan(goalObjs.rampAngle)*(-3.8-goalObjs.rampX0)+0.15,0);ball.userData.vx=SPD*1.2;ball.userData.vy=0;ball.userData.flight=false}
   else if(L.num===5&&goalObjs){ball.position.set(-3.0,goalObjs.safeY+0.1,0);ball.userData.vx=SPD*1.2;ball.userData.vy=0}
   else if(L.num===6&&goalObjs){ball.position.set(goalObjs.cx-1.2,goalObjs.cy+0.6,0);ball.userData.vx=SPD;ball.userData.vy=0}
-  else if(L.num===7&&goalObjs){ball.position.set(goalObjs.cupX-3.0,1.8,0);ball.userData.vx=0;ball.userData.vy=0}
+  else if(L.num===7&&goalObjs){ball.position.set(goalObjs.cupX-4.2,1.8,0);ball.userData.vx=.02;ball.userData.vy=0}
   else if(L.num===8&&goalObjs){ball.position.set(goalObjs.cx-1.5,0.6,0);ball.userData.vx=SPD;ball.userData.vy=0}
   else{ball.position.set(-6.5,4,0);ball.userData.vx=SPD;ball.userData.vy=0}
   setActorColor(0x8a6a4a);
@@ -931,6 +969,25 @@ function anim(){
   requestAnimationFrame(anim);time+=.016;const t=time;
   du.rotation.y+=.0002;
 
+  // ---- Idle-анимации сцен ----
+  if(L.num===7&&goalObjs&&goalObjs.pads){
+    goalObjs.pads.forEach((p,i)=>{if(!run)p.rotation.z=(i%2===0?.18:-.18)+Math.sin(t*0.8+i)*.02});
+  }
+  if(L.num===6&&goalObjs&&goalObjs.wheelA&&!run)goalObjs.wheelA.rotation.z+=Math.sin(t*2)*.003;
+  if(L.num===6&&goalObjs&&goalObjs.wheelB&&!run)goalObjs.wheelB.rotation.z+=Math.sin(t*2.1)*.003;
+  if(L.num===2&&targetObj){
+    const filIdle=targetObj.children.find(c=>c.geometry&&c.geometry.type==='CylinderGeometry'&&c.material.type==='MeshBasicMaterial');
+    if(filIdle&&!run&&!winAnim)filIdle.material.color.setHex(0x33220a);
+  }
+  // water shimmer idle for scene 3 & 8
+  if(L.num===3&&goalObjs&&goalObjs.tankWater&&!run){
+    goalObjs.tankWater.position.y=-0.05+Math.sin(t*1.5)*0.008;
+    if(goalObjs.waterTop){const wt=goalObjs.waterTop;wt.material.opacity=.25+Math.sin(t*2.5)*.1}
+  }
+  if(L.num===8&&goalObjs&&goalObjs.waterTop&&!run){
+    goalObjs.waterTop.material.opacity=.2+Math.sin(t*2)*.08;
+  }
+
   if(L.kind==='nodes'){
     nodes.forEach((n,i)=>{
       const a=conf[n.key]===true;
@@ -955,6 +1012,12 @@ function anim(){
       actorExtra.tennis.rotation.x+=.15;
       actorExtra.tennis.rotation.z+=.08;
     }
+    // ---- вращение шарика пинг-понга ----
+    if(L.num===7&&b.children.length){
+      const pp=b.children[0];
+      if(pp.geometry&&pp.geometry.type==='SphereGeometry')pp.rotation.x+=.05;
+      if(pp.geometry&&pp.geometry.type==='SphereGeometry')pp.rotation.z+=.03;
+    }
     // ---- СЦЕНАРИИ ДВИЖЕНИЯ ----
     if(L.num===1||L.kind==='nodes'){ // 1: шар катится по лесенке
       b.userData.vy-=.004;b.userData.vy*=.995;
@@ -977,10 +1040,17 @@ function anim(){
       if(chute3)chute3.rotation.z=-ang*Math.PI/180;
       // вода в баке колышется
       if(goalObjs.tankWater)goalObjs.tankWater.position.y=-0.05+Math.sin(t*2)*0.01;
-      // генерируем капли из крана
+      // поверхность воды в стакане — рябь
+      if(goalObjs.waterTop){
+        const wt=goalObjs.waterTop;
+        wt.scale.x=1+Math.sin(t*3)*.08;
+        wt.scale.y=1+Math.cos(t*3.7)*.08;
+        wt.material.opacity=.4+Math.sin(t*4)*.15;
+      }
+      // генерируем капли из крана — с мерцанием
       dropTimer++;
       if(dropTimer%14===0&&waterDrops.length<50){
-        const dr=new THREE.Mesh(new THREE.SphereGeometry(.07,10,10),M.water);
+        const dr=new THREE.Mesh(new THREE.SphereGeometry(.07,10,10),new THREE.MeshStandardMaterial({color:0x4a9ad8,roughness:.2,metalness:0,transparent:true,opacity:.85}));
         dr.position.set(goalObjs.tipX,goalObjs.tipY,0);
         dr.userData={vx:0,vy:0,onChute:false};sc.add(dr);waterDrops.push(dr);
       }
@@ -1026,13 +1096,15 @@ function anim(){
         if(dr.position.x>=goalObjs.glassX-0.32&&dr.position.x<=goalObjs.glassX+0.32&&dr.position.y<=goalObjs.glassTopY&&dr.position.y>=goalObjs.glassBottomY){
           sc.remove(dr);waterDrops.splice(i,1);waterCaptured++;
           // вода заполняет стакан от ДНА: масштаб считаем от текущего fill
-          if(goalObjs.water){
+if(goalObjs.water){
             const w=goalObjs.water;
             const f=Math.min(.55,w.userData.fill+.045);
             w.userData.fill=f;
-            const h=0.06+f*1.0; // высота воды от 0.06 до ~0.6
+            const h=0.06+f*1.0;
             w.scale.y=Math.max(.06,h);
             w.position.y=goalObjs.glassBottomY+h/2;
+            // поверхность воды следует за уровнем
+            if(goalObjs.waterTop){goalObjs.waterTop.position.y=goalObjs.glassBottomY+h}
           }
           if(waterCaptured===12){
             const r=checkGoal();
@@ -1061,21 +1133,21 @@ function anim(){
       if(!b.userData.flight){ // на доске
         b.userData.vx+=(SPD*1.4-b.userData.vx)*.04;
         b.position.x+=b.userData.vx;
-        // поверхность наклонной доски (центр на −3.0, наклон −0.32 вниз вправо)
         const surfY=goalObjs.rampTop-Math.tan(goalObjs.rampAngle)*(b.position.x-goalObjs.rampX0);
-        // мяч радиусом 0.2 — центр на surfY+0.2 (касается, не тонет)
         const targetY=surfY+0.2;
         b.position.y+=(targetY-b.position.y)*0.6;
-        if(b.position.x>=goalObjs.trampEndX){ // слетел с края — подброс в полёт
-          b.userData.flight=true;b.userData.vx=.05;b.userData.vy=.05;
+        if(b.position.x>=goalObjs.trampEndX){
+          b.userData.flight=true;b.userData.vx=.065;b.userData.vy=.12;
         }
       }else{ // свободный полёт по параболе
-        b.userData.vy-=.005;b.userData.vy*=.998;
-        b.userData.vx*=.998;
+        b.userData.vy-=.009;
         b.position.x+=b.userData.vx;b.position.y+=b.userData.vy;
+        b.userData.vx*=.998;
       }
-      // проверка попадания в ящик
-      if(b.position.x>=goalObjs.boxX-0.4&&b.position.x<=goalObjs.boxX+0.4&&b.position.y<=goalObjs.boxTopY+0.1){
+      // проверка попадания в ящик — широкая зона ловли
+      const inBoxX=b.position.x>=goalObjs.boxX-0.7&&b.position.x<=goalObjs.boxX+0.6;
+      const inBoxY=b.position.y<=goalObjs.boxTopY+0.4;
+      if(inBoxX&&inBoxY){
         if(lidOk){
           winLevel();sparks(b.position,20);lg.textContent='% Мяч пойман! Крышка захлопнулась.';
           b.position.y=-99;
@@ -1146,16 +1218,15 @@ function anim(){
     }else if(L.num===7&&goalObjs){ // 7: шарик пинг-понга падает по каскаду
       const g7=conf.PINGPONG_CONFIG||{};
       const bounce=Math.min(Math.max(g7.bounciness||0.4,0),1);
-      // честная гравитация: vy растёт вниз (без множителя каждый кадр)
-      b.userData.vy-=.005;
+      if(!b.userData.vy&&!b.userData.bounces){b.userData.vy=-.02} // initial nudge down
+      b.userData.vy-=.006;
       b.position.y+=b.userData.vy;
-      b.position.x+=.014;
-      // отскок от ракетки (упругость применяется ТОЛЬКО в момент удара)
+      b.position.x+=.022;
       if(goalObjs.pads){
         goalObjs.pads.forEach((p,i)=>{
-          if(Math.abs(b.position.x-p.position.x)<.32&&b.position.y<=p.position.y+.06&&b.userData.vy<0){
-            b.userData.vy=.05*bounce;
-            b.position.x+=.12;
+          if(Math.abs(b.position.x-p.position.x)<.38&&b.position.y<=p.position.y+.08&&b.userData.vy<0){
+            b.userData.vy=.07*bounce;
+            b.position.x+=.08;
             b.userData.bounces=(b.userData.bounces||0)+1;
           }
         });
@@ -1185,6 +1256,14 @@ function anim(){
         const h=0.06+f*0.9;
         goalObjs.water.scale.y=Math.max(.06,h);
         goalObjs.water.position.y=-0.53+h/2;
+        // поверхность воды — рябь
+        if(goalObjs.waterTop){
+          const wt=goalObjs.waterTop;
+          wt.scale.x=1+Math.sin(t*2.5)*.06;
+          wt.scale.y=1+Math.cos(t*3.2)*.06;
+          wt.position.y=-0.53+h/2;
+          wt.material.opacity=.3+Math.sin(t*3)*.15;
+        }
       }
       // после 2 сек — оцениваем код
       if(goalObjs.runT>2.0){
@@ -1234,14 +1313,15 @@ function anim(){
     if(L.num===1&&targetObj){targetObj.rotation.y+=.03;if(winAnim>2)winAnim=0}
     if(L.num===2&&targetObj){
       const fil=targetObj.children.find(c=>c.geometry.type==='CylinderGeometry'&&c.material.type==='MeshBasicMaterial');
-      if(fil)fil.material.color.setHex(0xffcc22);
+      const glow=targetObj.children.find(c=>c.material&&c.material.type==='MeshBasicMaterial'&&c.material.color.getHex()===0xffdd44);
+      if(fil){fil.material.color.setHex(0xffcc22);if(glow){glow.material.opacity=.5+Math.sin(winAnim*8)*.3;glow.scale.setScalar(1+Math.sin(winAnim*8)*.2)}}
     }
     if(L.num===3&&targetObj){targetObj.scale.y=Math.min(1,targetObj.scale.y+.05);if(winAnim>2)winAnim=0}
     if(L.num===4&&targetObj){targetObj.rotation.x+=.06;if(targetObj.rotation.x>1.1)targetObj.rotation.x=1.1}
     if(L.num===5&&targetObj){const dial=targetObj.children.find(c=>c.geometry.type==='CylinderGeometry');if(dial)dial.rotation.z+=.12;const door=targetObj.children.find(c=>c.position.z>.3);if(door)door.rotation.y=Math.min(1.3,door.rotation.y+.04)}
     if(L.num===6&&targetObj){const tire=targetObj.children.find(c=>c.geometry.type==='CylinderGeometry');if(tire)tire.rotation.z+=.3}
     if(L.num===7&&targetObj){targetObj.rotation.y+=.06}
-    if(L.num===8&&targetObj){targetObj.scale.y=Math.min(1,targetObj.scale.y+.06)}
+    if(L.num===8&&targetObj){targetObj.scale.y=Math.min(1,targetObj.scale.y+.06);if(goalObjs.waterTop)goalObjs.waterTop.material.opacity=.6+Math.sin(winAnim*6)*.3}
   }
 
   if(crash){ball.position.y-=.05;ball.position.x+=.01;if(ball.position.y<-12)crash=false}
@@ -1251,40 +1331,61 @@ function anim(){
     ss.geometry.attributes.position.needsUpdate=true;
   }
 
-  if(L.num===2){ // сцена 2: камера жёстко наведена на розетку с лампой, без подлёта
-    cam.position.set(targetX,1.4,6.2);
-    cam.lookAt(targetX,0.2,0);
-  }else if(L.num===3&&goalObjs){ // сцена 3: камера на весь водный узел (бак - стакан)
-    const c3x=(goalObjs.tipX+goalObjs.glassX)/2;
-    const c3y=(goalObjs.tipY+goalObjs.glassTopY-1.2)/2;
-    cam.position.set(c3x,c3y+1.2,6.8);
-    cam.lookAt(c3x,c3y,0);
-  }else if(L.num===4&&goalObjs){ // сцена 4: камера следит за обоими объектами + следит за мячом, чтобы движение было видно
+  /* ---------- КАМЕРА ---------- */
+function updateCamera(t){
+  if(L.num===2){
+    const tx=targetX;
+    cam.position.x+=(tx-cam.position.x)*.06;
+    cam.position.y+=(1.4-cam.position.y)*.06;
+    cam.position.z+=(6.2-cam.position.z)*.06;
+    cam.lookAt(tx,0.2,0);
+  }else if(L.num===3&&goalObjs){
+    const cx=(goalObjs.tipX+goalObjs.glassX)/2;
+    const cy=(goalObjs.tipY+goalObjs.glassTopY-1.2)/2;
+    cam.position.x+=(cx-cam.position.x)*.06;
+    cam.position.y+=(cy+1.2-cam.position.y)*.06;
+    cam.position.z+=(6.8-cam.position.z)*.06;
+    cam.lookAt(cx,cy,0);
+  }else if(L.num===4&&goalObjs){
     const midX=(goalObjs.trampEndX+goalObjs.boxX)/2;
-    const followX=ball.position.x*0.9+midX*0.1; // почти следует за мячом
-    const fy=Math.max(0.3,ball.position.y*0.8);
-    cam.position.x+=(followX-cam.position.x)*0.05;
-    cam.position.y+=(fy+0.8-cam.position.y)*0.05;
-    cam.position.z=6.8;
-    cam.lookAt(followX,Math.max(0,fy-0.2),0);
-  }else if(L.num===5&&goalObjs){ // камера на сейф
-    cam.position.set(goalObjs.safeX-0.5,0.6,5.5);
-    cam.lookAt(goalObjs.safeX,0.0,0);
-  }else if(L.num===6&&goalObjs){ // камера на шины/груз
-    cam.position.set(goalObjs.cx,0.4,5.2);
-    cam.lookAt(goalObjs.cx,0.0,0);
-  }else if(L.num===7&&goalObjs){ // камера на каскад ракеток
-    const c7x=goalObjs.cupX-1.4;
-    cam.position.set(c7x,-0.1,6.0);
-    cam.lookAt(c7x,0.1,0);
-  }else if(L.num===8&&goalObjs){ // камера на бассейн и насосы
-    const c8x=goalObjs.cx;
-    cam.position.set(c8x,0.4,5.8);
-    cam.lookAt(c8x,-0.1,0);
+    const followX=ball.position.x*0.7+midX*0.3;
+    const fy=Math.max(0.3,ball.position.y*0.6);
+    const tx=cam.position.x+(followX+0.3-cam.position.x)*.04;
+    const ty=cam.position.y+(fy+0.6-cam.position.y)*.04;
+    cam.position.set(tx,ty,6.8);
+    cam.lookAt(tx*0.6+followX*0.4,Math.max(-0.2,fy-0.3),0);
+  }else if(L.num===5&&goalObjs){
+    const sx=goalObjs.safeX;
+    cam.position.x+=((sx-0.5)-cam.position.x)*.06;
+    cam.position.y+=(0.6-cam.position.y)*.06;
+    cam.position.z+=(5.5-cam.position.z)*.06;
+    cam.lookAt(sx,0.0,0);
+  }else if(L.num===6&&goalObjs){
+    const cx=goalObjs.cx;
+    cam.position.x+=((cx-0.2)-cam.position.x)*.06;
+    cam.position.y+=(0.4-cam.position.y)*.06;
+    cam.position.z+=(5.2-cam.position.z)*.06;
+    cam.lookAt(cx+0.3,0.0,0);
+  }else if(L.num===7&&goalObjs){
+    const cx=goalObjs.cupX-1.4;
+    cam.position.x+=(cx-cam.position.x)*.06;
+    cam.position.y+=(-0.1-cam.position.y)*.06;
+    cam.position.z+=(6.0-cam.position.z)*.06;
+    cam.lookAt(cx+0.3,0.1,0);
+  }else if(L.num===8&&goalObjs){
+    const cx=goalObjs.cx;
+    cam.position.x+=((cx+0.2)-cam.position.x)*.06;
+    cam.position.y+=(0.5-cam.position.y)*.06;
+    cam.position.z+=(5.8-cam.position.z)*.06;
+    cam.lookAt(cx+0.5,-0.1,0);
   }else{
-    const tx=ball.position.x*.3;cam.position.x+=(tx-cam.position.x)*.005;cam.lookAt(tx,-1,0);
+    const tx=ball.position.x*.3;
+    cam.position.x+=(tx-cam.position.x)*.005;
+    cam.lookAt(tx,-1,0);
   }
-  cmp.render();
+}
+updateCamera(t);
+cmp.render();
 }
 
 window.addEventListener('resize',()=>{const w2=vp.clientWidth,h2=vp.clientHeight;cam.aspect=w2/h2;cam.updateProjectionMatrix();ren.setSize(w2,h2);cmp.setSize(w2,h2)});
