@@ -189,24 +189,12 @@ const lg=document.getElementById('lg'),sb=document.getElementById('sb'),chs=docu
 /* ---------- ИМЯ ---------- */
 let savedName=localStorage.getItem('ws_name');
 if(savedName){eng=savedName;document.getElementById('en').textContent=eng}
-const FACTS=[
-  '🔲 true и false — это булевы значения. Названы в честь математика Джорджа Буля (XIX век)',
-  '🔲 1 бит = одно значение true/false. В 1 байте помещается 8 булевых флагов',
-  '🔲 В языке JavaScript есть «ленивые» операторы: && и || вычисляют вторую часть только если надо',
-  '🔲 false == 0 и true == 1 в JS при нестрогом сравнении, но false !== 0 строго',
-  '🔲 Пустая строка "", 0, null, undefined и NaN — всё это «falsy» (ложноподобные) значения',
-  '🔲 Оператор !!x превращает любое значение в true или false («двойное отрицание»)',
-  '🔲 Булева алгебра — основа всех микросхем: транзисторы работают как ключи true/false',
-  '🔲 Логические схемы И (AND), ИЛИ (OR), НЕ (NOT) можно собрать из одних лишь NAND-элементов'
-];
 function showGate(){
   const gi=document.getElementById('gate-inner');
   const nameSec=savedName?`<p style="font-size:11px;color:var(--metal);margin-bottom:8px">С возвращением, <b style="color:var(--light)">${savedName}</b>!</p><button class="b2 sm" onclick="window.resetName()">Другое имя</button>`
     :`<label for="si">Подпись юного инженера</label><input type="text" id="si" placeholder="Ваше имя..." maxlength="16" autocomplete="off"/>`;
-  const fact=FACTS[Math.floor(Math.random()*FACTS.length)];
   gi.innerHTML=`<h1>Мастерская <span>Шестеренкина</span></h1><div class="slv">Уровень ${L.num} &middot; ${L.nm}</div>
-  <div class="sd">${L.desc}</div><div class="spat">ЦЕЛЬ: ${L.goal}</div>
-  <div style="font-size:10px;color:var(--accent);background:var(--dark);border-radius:6px;padding:6px 10px;margin-bottom:8px;line-height:1.5;border:1px solid var(--border);font-family:'JetBrains Mono',monospace">${fact}</div>${nameSec}
+  <div class="sd">${L.desc}</div><div class="spat">ЦЕЛЬ: ${L.goal}</div>${nameSec}
   <button class="b2" onclick="window.enterW()">${savedName?'Продолжить':'Войти в мастерскую'}</button>`;
   document.getElementById('gate').style.transform='translateY(0)';
   if(!savedName)setTimeout(()=>{const si=document.getElementById('si');if(si)si.focus()},150);
@@ -218,92 +206,82 @@ window.enterW=function(){
   eng=n;savedName=eng;localStorage.setItem('ws_name',eng);document.getElementById('en').textContent=eng;
   document.getElementById('gate').style.transform='translateY(-105%)';
   lg.textContent='% Добро пожаловать, '+eng+'! Выполните ЦЕЛЬ уровня и запустите механизм.';
-  // Показываем урок профессора (только 1 раз на уровень)
-  const lessonKey='ws_lesson_'+L.num;
-  if(!localStorage.getItem(lessonKey))showLesson(lvlIdx);
+  // Справочник профессора — каждый раз при входе на уровень
+  showLesson(lvlIdx);
 };
 
 /* ---------- КАРТОЧКИ ПРОФЕССОРА ---------- */
 const LESSONS=[
-  {title:'🧪 true и false',sub:'Урок 1: Как компьютер понимает «да» и «нет»',lines:[
-    '💡 Булевы значения — это всего два состояния:',
+  {title:'true и false',sub:'Урок 1: Как компьютер понимает «да» и «нет»',lines:[
+    '✧ <b>Булевы значения</b> — это всего два состояния:',
     '',
-    '   true  — «истина», «да», «включено», «пуск»',
-    '   false — «ложь», «нет», «выключено», «стоп»',
+    '   <u>true</u>  — «истина», «да», «включено», «пуск»',
+    '   <u>false</u> — «ложь», «нет», «выключено», «стоп»',
     '',
-    '📖 В программировании это 1 бит информации.',
+    '📖 В программировании это <b>1 бит</b> информации.',
     '   Как переключатель: вверх — true, вниз — false.',
     '',
-    '🔧 В этом цехе — конвейер с 12 узлами.',
-    '   Каждый узел: true = пропускает шар, false = стопор.',
-    '   Переключай их в редакторе и смотри, как шар',
-    '   катится по лесенке!',
+    '🔧 В этом цехе — конвейер с <b>12 узлами</b>. Каждый:',
+    '   true = пропускает шар, false = стопор.',
+    '   Переключай в редакторе и смотри результат!',
     '',
-    '⚡ Интересный факт: название «булевы» — в честь',
-    '   математика Джорджа Буля. Он придумал алгебру логики',
-    '   ещё в XIX веке. Теперь на ней работают все компьютеры!'
-  ]},
-  {title:'🧪 Переменные',sub:'Урок 2: Коробки с именами для данных',lines:[
-    '💡 Переменная — как коробка с этикеткой:',
+    '⚡ Название «булевы» — в честь математика',
+    '   <b>Джорджа Буля</b>. Он создал алгебру логики в XIX веке!'
+  ],quiz:'Какая геометрическая фигура символизирует <b>false</b> в конвейере?',opts:['Стопор','Шестерёнка','Рельса','Молоток'],ans:0},
+  {title:'Переменные',sub:'Урок 2: Коробки с именами для данных',lines:[
+    '✧ <b>Переменная</b> — как коробка с этикеткой:',
     '',
     '   let voltage = 220;        // коробка «voltage» = 220',
     '   let name = "Шестеренкин";  // коробка «name» = строка',
     '   let on = true;             // коробка «on» = true',
     '',
-    '📖 let — можно переложить (изменить).',
-    '   const — коробка намертво запечатана.',
-    '   var — старый способ, не используй.',
+    '📖 <b>let</b> — можно переложить (изменить).',
+    '   <b>const</b> — коробка намертво запечатана.',
+    '   <u>var</u> — старый способ, не используй.',
     '',
     '🔧 В этом цехе ты меняешь параметры лампочки:',
     '   voltage, fuse_closed, wire_temp, bulb_power…',
-    '   Каждый — это переменная в коде!',
-    '   Через редактор или чипы — как хочешь.',
+    '   Каждый — это <b>переменная в коде</b>!',
     '',
-    '⚡ Имя переменной: буквы, $, _, но не цифра первой.',
-    '   Без пробелов. Стиль: camelCase (первая маленькая).'
-  ]},
-  {title:'🧪 Сравнения',sub:'Урок 3: Код умеет сравнивать числа и строки',lines:[
-    '💡 Операторы сравнения всегда возвращают true/false:',
+    '⚡ Имя: буквы, $, _, <u>но не цифра первой</u>.',
+    '   Без пробелов. Стиль: <b>camelCase</b>.'
+  ],quiz:'Как объявить переменную, которую можно изменить?',opts:['let','const','var','bool'],ans:0},
+  {title:'Сравнения',sub:'Урок 3: Код умеет сравнивать числа и строки',lines:[
+    '✧ Операторы сравнения всегда возвращают true/false:',
     '',
-    '   >   больше    (10 > 5  → true)',
-    '   <   меньше    (3 < 1   → false)',
-    '   >=  больше или равно',
-    '   <=  меньше или равно',
-    '   === строго равно  (2 === "2" → false)',
-    '   !== строго не равно',
+    '   <b>&gt;</b>  больше    (10 > 5  → true)',
+    '   <b>&lt;</b>  меньше    (3 < 1   → false)',
+    '   <b>&gt;=</b> больше или равно',
+    '   <b>&lt;=</b> меньше или равно',
+    '   <b>===</b> строго равно  (2 === "2" → false)',
+    '   <b>!==</b> строго не равно',
     '',
-    '🔧 В этом цехе жёлоб наклонится только если',
-    '   pipe_angle от 15 до 35. Код проверяет:',
-    '   pipe_angle >= 15 && pipe_angle <= 35.',
+    '🔧 Жёлоб наклонится только если pipe_angle',
+    '   <u>от 15 до 35</u>: >= 15 && <= 35.',
     '',
-    '⚡ Важно: == не проверяет тип (2=="2" → true).',
-    '   Всегда используй === — это безопаснее!',
+    '⚡ <b>Важно:</b> == не проверяет тип (2=="2" → true).',
+    '   Всегда используй <b>===</b> — это безопаснее!'
+  ],quiz:'Что вернёт выражение <b>5 === "5"</b>?',opts:['true','false','undefined','ошибку'],ans:1},
+  {title:'Логические операторы',sub:'Урок 4: && (И), || (ИЛИ), ! (НЕ)',lines:[
+    '✧ Три кита булевой логики:',
     '',
-    '   Числа сравнивай как числа, строки — как строки.'
-  ]},
-  {title:'🧪 Логические операторы',sub:'Урок 4: && (И), || (ИЛИ), ! (НЕ)',lines:[
-    '💡 Три кита булевой логики:',
-    '',
-    '   && (И) — true, только если ВСЁ true',
+    '   <b>&&</b> (И) — true, только если <u>всё</u> true',
     '      true && true → true',
     '      true && false → false',
     '',
-    '   || (ИЛИ) — true, если хоть ОДНО true',
+    '   <b>||</b> (ИЛИ) — true, если <u>хоть одно</u> true',
     '      false || true → true',
-    '      false || false → false',
     '',
-    '   ! (НЕ) — переворачивает значение',
-    '      !true → false, !false → true',
+    '   <b>!</b> (НЕ) — переворачивает значение',
+    '      !true → false,  !false → true',
     '',
-    '🔧 В этом цехе ловушка сработает если:',
-    '   trap_door_active == true',
-    '   И trigger_x между 4.2 и 4.7.',
-    '   Два условия — два &&.',
+    '🔧 Ловушка сработает если trap_door_active = true',
+    '   <b>И</b> trigger_x между 4.2 и 4.7 — два &&.',
     '',
-    '⚡ !!x — двойное НЕ = превращает в true/false!'
-  ]},
-  {title:'🧪 Условия if/else',sub:'Урок 5: Код принимает решения',lines:[
-    '💡 if — как стрелочный переводчик на рельсах:',
+    '⚡ <b>!!x</b> — двойное НЕ = превращает в true/false!'
+  ],quiz:'Что вернёт <b>true && false</b>?',opts:['true','false','undefined','null'],ans:1},
+  {title:'Условия if/else',sub:'Урок 5: Код принимает решения',lines:[
+    '✧ <b>if</b> — как стрелочный переводчик на рельсах:',
     '',
     '   if (code === "ОТКРЫТЬ") {',
     '       дверь_открыта();',
@@ -311,36 +289,33 @@ const LESSONS=[
     '       сирена_включена();',
     '   }',
     '',
-    '   Если условие true — выполняется первый блок.',
-    '   Если false — второй (или ничего, если else нет).',
+    '📖 Если условие <b>true</b> — первый блок,',
+    '   если <b>false</b> — второй (или ничего).',
     '',
-    '🔧 В этом цехе сейф проверяет твой код через if:',
-    '   верный пароль → дверь открывается,',
-    '   неверный → сирена и красная лампа.',
+    '🔧 Сейф проверяет твой пароль через if:',
+    '   верный → дверь открывается, неверный → сирена.',
     '',
-    '⚡ Можно цепочкой: if … else if … else.',
-    '   Не путай = (присвоить) и === (сравнить)!'
-  ]},
-  {title:'🧪 Функции',sub:'Урок 6: Станки для обработки данных',lines:[
-    '💡 Функция — как станок: даёшь сырьё, получаешь деталь.',
+    '⚡ Не путай <b>=</b> (присвоить) и <b>===</b> (сравнить)!'
+  ],quiz:'Что делает <b>else</b>?',opts:['Выполняется если if true','Выполняется если if false','Завершает программу','Создаёт цикл'],ans:1},
+  {title:'Функции',sub:'Урок 6: Станки для обработки данных',lines:[
+    '✧ <b>Функция</b> — как станок: сырьё на вход, деталь на выход.',
     '',
-    '   function add(a, b) {',
+    '   function <u>add</u>(a, b) {',
     '       return a + b;',
     '   }',
-    '   let sum = add(10, 5);  // sum = 15',
+    '   let sum = <u>add</u>(10, 5);  // sum = 15',
     '',
-    '📖 Параметры (a, b) — что кладём в станок.',
-    '   return — результат на выходе.',
+    '📖 <b>Параметры</b> (a, b) — что кладём в станок.',
+    '   <b>return</b> — результат на выходе.',
     '',
-    '🔧 В этом цехе шины крутятся если speed больше 8:',
-    '   функция вращения получает wheel_speed.',
-    '   Больше 8 — груз падает и уезжает.',
+    '🔧 Скорость шины wheel_speed передаётся в функцию',
+    '   вращения. Больше 8 — груз уезжает!',
     '',
-    '⚡ Стрелочные функции (современный стиль):',
+    '⚡ Стрелочные функции (<u>современный стиль</u>):',
     '   const f = (x) => x * 2;  // коротко и ясно'
-  ]},
-  {title:'🧪 Объекты',sub:'Урок 7: Всё в одном ящике',lines:[
-    '💡 Объект собирает данные под одной крышей:',
+  ],quiz:'Что делает <b>return</b> в функции?',opts:['Печатает результат','Возвращает значение и выходит','Повторяет код','Создаёт переменную'],ans:1},
+  {title:'Объекты',sub:'Урок 7: Всё в одном ящике',lines:[
+    '✧ <b>Объект</b> собирает данные под одной крышей:',
     '',
     '   let config = {',
     '       voltage: 220,',
@@ -348,63 +323,60 @@ const LESSONS=[
     '       name: "Лампа"',
     '   };',
     '',
-    '📖 Доступ через точку: config.voltage → 220',
+    '📖 Доступ через <b>точку</b>: config.voltage → 220',
     '   Можно менять: config.voltage = 300;',
     '',
     '🔧 В каждом цехе у тебя объект конфигурации:',
-    '   LIGHT_CONFIG = { voltage: 220, fuse: true, … }',
-    '   Именно его ты редактируешь в окне кода!',
+    '   LIGHT_CONFIG = { voltage, fuse, … }',
+    '   Его ты редактируешь в окне кода!',
     '',
-    '⚡ Объекты можно вкладывать:',
-    '   config.settings.power = true;  // цепочка свойств',
-    '',
-    '   JSON — формат объектов — использует вся сеть!'
-  ]},
-  {title:'🧪 Массивы и циклы',sub:'Урок 8: Списки и конвейеры',lines:[
-    '💡 Массив — нумерованный список:',
+    '⚡ Объекты можно <b>вкладывать</b>:',
+    '   config.settings.power = true;  // цепочка свойств'
+  ],quiz:'Как обратиться к свойству <b>voltage</b> объекта config?',opts:['config[voltage]','config.voltage','voltage.config','config→voltage'],ans:1},
+  {title:'Массивы и циклы',sub:'Урок 8: Списки и конвейеры',lines:[
+    '✧ <b>Массив</b> — нумерованный список:',
     '',
     '   let levels = [1, 2, 3, 4, 5, 6, 7, 8];',
     '   levels[0] = 1, levels[3] = 4.',
+    '   <u>Счёт с НУЛЯ!</u>',
     '',
-    '   🔑 Важно: счёт начинается с НУЛЯ!',
-    '',
-    '💡 Цикл for — перебирает по порядку:',
+    '📖 <b>Цикл for</b> — перебирает по порядку:',
     '   for (let i = 0; i < levels.length; i++) {',
     '       console.log(levels[i]);',
     '   }',
     '',
-    '🔧 В финальном цехе оба насоса должны быть true:',
-    '   if (pump_A && pump_B && !drain) { вода_льётся(); }',
+    '🔧 Финальный цех: оба насоса pump_A <b>&&</b> pump_B',
+    '   должны быть true — проверка массива условий.',
     '',
-    '⚡ Современный перебор — forEach:',
-    '   levels.forEach(l => console.log(l));',
-    '',
-    '   Циклы — сердце любой программы!'
-  ]}
+    '⚡ <b>forEach</b> — современный перебор:',
+    '   levels.forEach(l => console.log(l));'
+  ],quiz:'С какого индекса начинается массив в JavaScript?',opts:['С 1','С 0','С -1','С любого'],ans:1}
 ];
 
-let lessonTimer=null;
+let lessonTimer=null, lessonAnswer=null;
 
 function showLesson(idx){
   const ol=document.getElementById('lesson-overlay');
   const card=document.getElementById('lesson-card');
   const Ldata=LESSONS[idx];
   if(!Ldata)return;
+  const fmt=s=>s.replace(/<b>(.*?)<\/b>/g,'<b style="font-weight:700;color:#2a1e14">$1</b>').replace(/<u>(.*?)<\/u>/g,'<u style="text-decoration:underline;text-decoration-color:#c8a050;text-underline-offset:3px;text-decoration-thickness:2px">$1</u>');
   const content=Ldata.lines.map(l=>{
-    if(l.startsWith('💡'))return `<div style="color:#b8860a;font-weight:700;font-size:26px;margin-top:10px;letter-spacing:.3px;font-family:'Caveat',serif">${l.replace('💡','✧')}</div>`;
-    if(l.startsWith('📖'))return `<div style="color:#1a6a1a;font-size:23px;margin-top:6px;line-height:1.5;font-family:'Caveat',serif">${l}</div>`;
-    if(l.startsWith('🔧'))return `<div style="color:#b83030;font-size:23px;margin-top:6px;line-height:1.5;font-family:'Caveat',serif">${l}</div>`;
-    if(l.startsWith('⚡'))return `<div style="color:#8a2020;font-size:23px;margin-top:6px;line-height:1.5;font-family:'Caveat',serif">${l}</div>`;
-    if(l.trim()==='')return '<div style="height:6px"></div>';
-    if(l.startsWith('   '))return `<div style="font-size:21px;color:#5a3a2a;padding-left:20px;line-height:1.5;font-family:'Caveat',serif">${l.trim()}</div>`;
-    return `<div style="font-size:22px;color:#4a2a1a;line-height:1.5;font-family:'Caveat',serif">${l}</div>`;
+    if(l.startsWith('✧'))return `<div style="color:#b8860a;font-weight:700;font-size:28px;margin-top:12px">${fmt(l)}</div>`;
+    if(l.startsWith('📖'))return `<div style="color:#1a6a1a;font-size:24px;margin-top:8px;line-height:1.4">${fmt(l)}</div>`;
+    if(l.startsWith('🔧'))return `<div style="color:#b83030;font-size:24px;margin-top:8px;line-height:1.4">${fmt(l)}</div>`;
+    if(l.startsWith('⚡'))return `<div style="color:#8a2020;font-size:24px;margin-top:8px;line-height:1.4">${fmt(l)}</div>`;
+    if(l.trim()==='')return '<div style="height:4px"></div>';
+    if(l.startsWith('   '))return `<div style="font-size:22px;color:#5a3a2a;padding-left:24px;line-height:1.45;font-family:'Caveat',serif">${fmt(l.trim())}</div>`;
+    return `<div style="font-size:23px;color:#4a2a1a;line-height:1.45">${fmt(l)}</div>`;
   }).join('');
   card.innerHTML=`<div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;padding-bottom:12px;border-bottom:2px solid #c8a050">
-    <div style="width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,#5a3a2a,#3a2a1a);border:2px solid #c8a050;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:800;color:#c8a050;flex-shrink:0">Ш</div>
-    <div style="text-align:left"><div style="font-size:30px;font-weight:700;color:#2a1e14;letter-spacing:.5px;font-family:'Caveat',serif">${Ldata.title}</div><div style="font-size:20px;color:#8a6a3a;font-weight:600;margin-top:2px;font-family:'Caveat',serif">${Ldata.sub}</div></div>
+    <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#5a3a2a,#3a2a1a);border:2px solid #c8a050;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#c8a050;flex-shrink:0">Ш</div>
+    <div style="text-align:left"><div style="font-size:32px;font-weight:700;color:#2a1e14;font-family:'Caveat',serif">${Ldata.title}</div><div style="font-size:21px;color:#8a6a3a;font-weight:600;margin-top:2px;font-family:'Caveat',serif">${Ldata.sub}</div></div>
   </div>
-  <div style="font-size:22px;line-height:1.5;color:#3a2a1a;text-align:left;padding:6px 0;min-height:0;font-family:'Caveat',serif">${content}</div>
+  <div style="font-size:23px;line-height:1.45;color:#3a2a1a;text-align:left;padding:6px 0;font-family:'Caveat',serif">${content}</div>
   <div style="margin-top:8px;padding-top:10px;border-top:2px solid #c8a050;text-align:center">
+    <div style="font-size:18px;color:#8a6a3a;font-family:'Caveat',serif;margin-bottom:6px">⏳ Изучи конспект курса. Продолжить через 60 секунд:</div>
     <button class="b2" id="lesson-continue" disabled style="opacity:.5;cursor:default;font-size:20px;padding:14px 24px;font-family:'Caveat',serif;font-weight:700;background:#3a2a1a;border-color:#8a6a3a;color:#c8a050;border-radius:8px">⏳ 60 секунд</button>
   </div>`;
   ol.style.display='flex';
@@ -415,15 +387,101 @@ function showLesson(idx){
     sec--;
     if(sec<=0){
       clearInterval(lessonTimer);lessonTimer=null;
-      btn.textContent='Понял! Войти в цех →';
+      btn.textContent='Понял! Начать уровень →';
       btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';
       btn.style.background='#c8a050';btn.style.borderColor='#c8a050';btn.style.color='#2a1e14';
       btn.onclick=()=>{
-        localStorage.setItem('ws_lesson_'+L.num,'1');
         document.getElementById('lesson-overlay').style.display='none';
       };
     }else{btn.textContent='⏳ '+sec+' сек'}
   },1000);
+}
+
+/* ---------- ПРОВЕРКА ПОСЛЕ УРОВНЯ ---------- */
+let quizData=null;
+
+function showQuiz(){
+  const ol=document.getElementById('lesson-overlay');
+  const card=document.getElementById('lesson-card');
+  // собираем вопросы из всех пройденных уровней
+  const pool=[];
+  for(let i=0;i<=lvlIdx;i++)if(LESSONS[i]&&LESSONS[i].quiz)pool.push({lesson:i,q:LESSONS[i].quiz});
+  const count=Math.min(pool.length,4);
+  const chosen=pool.sort(()=>Math.random()-.5).slice(0,count);
+  quizData=chosen.map(c=>({q:c.q,ans:null,lesson:c.lesson}));
+  const fmt=s=>s.replace(/<b>(.*?)<\/b>/g,'<b style="font-weight:700;color:#2a1e14">$1</b>').replace(/<u>(.*?)<\/u>/g,'<u style="text-decoration:underline;text-decoration-color:#c8a050;text-underline-offset:3px;text-decoration-thickness:2px">$1</u>');
+  const qHtml=quizData.map((item,qi)=>{
+    const q=item.q;
+    const optsHtml=q.opts.map((o,i)=>`<label style="display:block;padding:8px 14px;background:#eae0c8;border:1px solid #c8a050;border-radius:6px;margin:5px 0;cursor:pointer;font-size:18px;font-family:'Caveat',serif;color:#3a2a1a;transition:.2s" onmouseover="this.style.borderColor='#8a6a3a';this.style.background='#e0d4b8'" onmouseout="this.style.borderColor='#c8a050';this.style.background='#eae0c8'"><input type="radio" name="quiz_${qi}" value="${i}" style="margin-right:8px;width:14px;height:14px">${o}</label>`).join('');
+    return `<div style="margin-top:${qi>0?'14':'6'}px;padding-top:${qi>0?'10':'0'}px;border-top:${qi>0?'1px solid #d4c8a0':'none'}">
+      <div style="font-size:18px;color:#2a1e14;font-weight:600;font-family:'Caveat',serif;margin-bottom:4px"><span style="color:#c8a050">Вопрос ${qi+1}.</span> ${fmt(q.q)}</div>
+      <div>${optsHtml}</div>
+      <div id="qfb_${qi}" style="font-size:18px;margin-top:4px;font-family:'Caveat',serif;display:none"></div>
+    </div>`;
+  }).join('');
+  card.innerHTML=`<div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;padding-bottom:12px;border-bottom:2px solid #c8a050">
+    <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#5a3a2a,#3a2a1a);border:2px solid #c8a050;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#c8a050;flex-shrink:0">Ш</div>
+    <div style="text-align:left"><div style="font-size:28px;font-weight:700;color:#2a1e14;font-family:'Caveat',serif">Проверка знаний</div><div style="font-size:18px;color:#8a6a3a;font-weight:600;margin-top:2px;font-family:'Caveat',serif">Ответь на вопросы, чтобы перейти дальше</div></div>
+  </div>
+  ${qHtml}
+  <div style="margin-top:14px;padding-top:12px;border-top:2px solid #c8a050;text-align:center">
+    <div id="quiz-feedback" style="font-size:20px;margin-bottom:6px;font-family:'Caveat',serif;display:none"></div>
+    <button class="b2" style="font-size:20px;padding:14px 24px;font-family:'Caveat',serif;font-weight:700;background:#c8a050;border-color:#c8a050;color:#2a1e14;border-radius:8px;cursor:pointer" onclick="submitQuiz()">Проверить ответы</button>
+  </div>`;
+  ol.style.display='flex';
+  quizData.forEach((_,qi)=>{
+    document.querySelectorAll(`input[name="quiz_${qi}"]`).forEach(r=>r.addEventListener('change',()=>{quizData[qi].ans=parseInt(r.value)}));
+  });
+}
+function submitQuiz(){
+  const missing=quizData.some(d=>d.ans===null);
+  if(missing){
+    const fb=document.getElementById('quiz-feedback');
+    fb.style.display='block';fb.innerHTML='❓ <b>Ответь на все вопросы!</b>';fb.style.color='#b83030';
+    return;
+  }
+  let correct=0;
+  quizData.forEach((d,i)=>{
+    const fb=document.getElementById('qfb_'+i);
+    fb.style.display='block';
+    if(d.ans===d.q.ans){fb.innerHTML='✅ Верно!';correct++}
+    else{fb.innerHTML='❌ Правильно: '+d.q.opts[d.q.ans];}
+  });
+  const fb=document.getElementById('quiz-feedback');fb.style.display='block';
+  if(correct===quizData.length){
+    fb.innerHTML='✅ <b>Всё верно!</b> Ты усвоил теорию, инженер!';
+    fb.style.color='#1a6a1a';
+    setTimeout(()=>{
+      document.getElementById('lesson-overlay').style.display='none';
+      unblockNext();
+      loadLevel(lvlIdx+1);
+    },1500);
+  }else{
+    fb.innerHTML='❌ <b>Есть ошибки.</b> Исправь и нажми "Проверить" снова.';
+    fb.style.color='#b83030';
+    quizData.forEach((d,i)=>{
+      if(d.ans!==d.q.ans){
+        document.querySelectorAll(`input[name="quiz_${i}"]`).forEach(r=>r.checked=false);
+        d.ans=null;
+      }
+    });
+  }
+}
+function finishLesson(idx){
+  if(lessonTimer){clearInterval(lessonTimer);lessonTimer=null}
+  const fb=document.getElementById('quiz-feedback');fb.style.display='block';
+  const q=LESSONS[idx].quiz;
+  if(lessonAnswer===null){fb.innerHTML='❓ <b>Выбери вариант!</b>';fb.style.color='#b83030';return}
+  if(lessonAnswer===q.ans){
+    fb.innerHTML='✅ <b>Верно!</b> Ты усвоил урок, инженер!';
+    fb.style.color='#1a6a1a';
+    localStorage.setItem('ws_lesson_'+L.num,'1');
+    setTimeout(()=>{document.getElementById('lesson-overlay').style.display='none'},1500);
+  }else{
+    fb.innerHTML='❌ <b>Не совсем.</b> Правильный ответ: '+q.opts[q.ans];
+    fb.style.color='#b83030';
+    setTimeout(()=>{fb.style.display='none';document.querySelectorAll('input[name="quiz"]').forEach(r=>r.checked=false);lessonAnswer=null},3000);
+  }
 }
 /* ---------- КОНФИГ/КОД ---------- */
 function initLevel(){
@@ -1108,9 +1166,20 @@ const sb2=document.getElementById('sb2');
   const sb3=document.getElementById('sb3');
   if(sb3){sb3.style.display=(L.check3&&L.kind!=='nodes')?'block':'none';}
   resetScene();rebuildEdit();showGate();
+  unblockNext();
 }
 document.getElementById('pv').onclick=()=>{if(lvlIdx>0)loadLevel(lvlIdx-1)};
-document.getElementById('nx').onclick=()=>{if(lvlIdx<7)loadLevel(lvlIdx+1)};
+document.getElementById('nx').onclick=()=>{
+  if(lvlIdx>=7)return;
+  // проверяем пройден ли текущий уровень
+  const doneKey='ws_done_'+L.num;
+  if(!localStorage.getItem(doneKey)){
+    lg.textContent='% Сначала выполни ЦЕЛЬ и пройди проверку знаний!';
+    lg.style.color='var(--bad)';
+    return;
+  }
+  loadLevel(lvlIdx+1);
+};
 
 function resetScene(){
   run=false;crash=false;cur=0;winAnim=0;
@@ -1120,7 +1189,7 @@ function resetScene(){
   if(L.num===2){ball.position.set(targetX,1.5,0);ball.userData.vx=0;ball.userData.vy=0}
   else if(L.num===3&&goalObjs){ball.position.set(goalObjs.tipX,goalObjs.tipY+0.2,0);ball.userData.vx=0;ball.userData.vy=0}
   // Сцена 4: старт мяча — на верхней поверхности доски (не тонет)
-  else if(L.num===4&&goalObjs){ball.position.set(-3.7,goalObjs.rampTop+0.2,0);ball.userData.flight=false;ball.userData.vy=0}
+  else if(L.num===4&&goalObjs){ball.position.set(-3.7,goalObjs.rampTop-Math.tan(goalObjs.rampAngle)*(-3.7-goalObjs.rampX0)+0.2,0);ball.userData.flight=false;ball.userData.vy=0}
   else if(L.num===5&&goalObjs){ball.position.set(-3.0,goalObjs.safeY+0.1,.64)}
   else if(L.num===6&&goalObjs){ball.position.set(goalObjs.cx-1.2,goalObjs.cy+0.6,0)}
   else if(L.num===7&&goalObjs){ball.position.set(goalObjs.cupX-3.5,1.5,0);ball.userData.vx=.04;ball.userData.vy=0;ball.userData.init=false;ball.userData.bounces=0}
@@ -1176,7 +1245,14 @@ function winLevel(){
   lg.textContent='% Победа! Цель "'+L.goal+'" достигнута за '+fmt(tms)+'!';
   sb.textContent='Готово!';chs.textContent='УСПЕХ';chs.style.color='var(--ok)';chd.className='chn-d ok';pb.style.width='100%';tone(1000,.3);
   cnt.textContent='УСПЕХ';
-  astTxt.innerHTML='Отлично! Цель достигнута. '+(lvlIdx<7?'<b style="color:var(--accent);cursor:pointer" onclick="document.getElementById(\'nx\').click()">Далее</b>':'Это был финальный уровень мастерской!');
+  astTxt.innerHTML='Отлично! Цель достигнута. '+(lvlIdx<7?'<b style="color:var(--accent);cursor:pointer" onclick="showQuiz()">Проверка знаний →</b>':'Это был финальный уровень мастерской!');
+  // блокируем кнопку "Далее" до прохождения проверки
+  document.getElementById('nx').disabled=true;
+  document.getElementById('nx').style.opacity='.4';
+}
+function unblockNext(){
+  document.getElementById('nx').disabled=false;
+  document.getElementById('nx').style.opacity='1';
 }
 function failLevel(msg){
   run=false;crash=true;setActorColor(0x1a1410);sparks(ball.position,30);clearInterval(tint);
