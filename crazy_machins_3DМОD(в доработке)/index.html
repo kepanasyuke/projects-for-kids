@@ -165,13 +165,13 @@ import*as THREE from'three';import{EffectComposer}from'three/addons/postprocessi
    ============================================================ */
 const LVLS=[
 {num:1,nm:'Конвейер',kind:'nodes',sc:'stair',goal:'Открыть все 12 стопоров',desc:'Шар катится по деревянной лесенке. Каждый узел пропускает шар только если регистр равен true.',task:'Измените регистры 2-12: вместо <span class="h" style="color:var(--bad)">false</span> поставьте <span class="h" style="color:var(--ok)">true</span>.',w:'all',hint:'Смотрите в код: для каждого узла написано false. Замените на true и запустите механизм.'},
-{num:2,nm:'Лампочка',kind:'goal',sc:'abyss',goal:'Зажечь лампочку',desc:'Рельс обрывается над бездной. Вилка падает на стальную плиту с розеткой — лампочка загорится, если напряжение ровно 220 вольт и цепь замкнута.',task:'Подайте <b>220</b> вольт (сейчас 110) и замкните цепь.',ch:'═══ ЦЕХ 2 · ЭНЕРГЕТИКА ═══\n1 ● СМОТРИ: вилка падает в розетку, лампа ждёт тока.\n  Что ей нужно: сколько вольт и замкнутая цепь.\n2 ● НАСТРОЙ: voltage → 220, fuse_closed → true (⇄).\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Лампа зажглась? Это этап 1 — главная задача.\n4 ● ЭКСПЕРИМЕНТ: поставь voltage = 300, запусти.\n  Лампа перегорает. Верни 220 и убедись, что работает.\n5 ● НАСТРОЙ: wire_temp впиши 45, breaker_reset → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: resistance → 10, current → 2.0,\n  затем нажми «Калибровка» (этап 3). Идеально!',cfg:{LIGHT_CONFIG:{power_supply:{type:'b',v:true,edit:'toggle'},voltage:{type:'n',v:110,step:10,min:0,max:300,edit:'manual'},fuse_closed:{type:'b',v:false,edit:'toggle'},wire_temp:{type:'n',v:25,step:5,min:0,max:200,edit:'manual'},bulb_power:{type:'n',v:60,step:10,min:10,max:200,edit:'manual'},safety_guard:{type:'b',v:true,edit:'toggle'},resistance:{type:'n',v:10,step:1,min:1,max:50,edit:'manual'},current:{type:'n',v:2,step:0.5,min:0,max:10,edit:'manual'},phase_switch:{type:'b',v:false,edit:'toggle'},breaker_reset:{type:'b',v:true,edit:'toggle'}}},check:{voltage:220,fuse_closed:true,power_supply:true},check2:{wire_temp:[30,60],bulb_power:[40,100],safety_guard:true,breaker_reset:true},check3:{resistance:[8,15],current:[1.5,3]},hint:'Крутите напряжение до 220 и включите предохранитель fuse_closed.'},
-{num:3,nm:'Стакан воды',kind:'goal',sc:'hydra',goal:'Налить воды в стакан',desc:'Бак с краном, под ним поворотный жёлоб, внизу мерный стакан. Вода попадёт в стакан, если кран открыт, а угол жёлоба от 15 до 35 градусов.',task:'Откройте кран и настройте угол жёлоба от <b>15</b> до <b>35</b>.',ch:'═══ ЦЕХ 3 · ГИДРАВЛИКА ═══\n1 ● СМОТРИ: бак с водой, кран закрыт, стакан пуст.\n  Вода польётся, если открыть кран и наклонить жёлоб.\n2 ● НАСТРОЙ: valve_open → true, pipe_angle → 25.\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Капли наполнят стакан — это этап 1.\n4 ● ЭКСПЕРИМЕНТ: поставь pipe_angle = 5, запусти.\n  Вода льётся мимо. Верни 25 — убедись, что работает.\n5 ● НАСТРОЙ: flow_pressure → 5, filter_open → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: nozzle_size → 4, pump_rpm → 50,\n  затем нажми «Калибровка» (этап 3). Идеально!',cfg:{FLUID_CONFIG:{valve_open:{type:'b',v:false,edit:'toggle'},pipe_angle:{type:'n',v:5,step:5,min:0,max:45,edit:'manual'},flow_pressure:{type:'n',v:2,step:1,min:0,max:10,edit:'manual'},tank_level:{type:'n',v:80,step:5,min:0,max:100,edit:'manual'},drip_rate:{type:'n',v:5,step:1,min:1,max:20,edit:'manual'},filter_open:{type:'b',v:true,edit:'toggle'},nozzle_size:{type:'n',v:4,step:1,min:1,max:10,edit:'manual'},hose_length:{type:'n',v:5,step:1,min:1,max:15,edit:'manual'},pump_rpm:{type:'n',v:30,step:5,min:0,max:100,edit:'manual'},spill_sensor:{type:'b',v:false,edit:'toggle'}}},check:{valve_open:true,pipe_angle:[15,35]},check2:{flow_pressure:[3,7],tank_level:[60,100],filter_open:true,spill_sensor:false},check3:{nozzle_size:[3,6],pump_rpm:[40,60]},hint:'Открой valve_open и поднимай pipe_angle до 15-35.'},
-{num:4,nm:'Ящик',kind:'goal',sc:'jump',goal:'Поймать шар в ящик',desc:'Крутой трамплин обрывается над пропастью. Мяч летит по баллистической параболе — крышка ящика захлопнется, если ловушка активна и датчик стоит в зоне 4.2-4.7.',task:'Включите ловушку и поставьте датчик в зону <b>4.2-4.7</b>.',ch:'═══ ЦЕХ 4 · БАЛЛИСТИКА ═══\n1 ● СМОТРИ: трамплин, ящик с крышкой.\n  Мяч летит по параболе — крышка должна захлопнуться.\n2 ● НАСТРОЙ: trap_door_active → true, trigger_x → 4.5.\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Мяч пойман — этап 1 пройден.\n4 ● ЭКСПЕРИМЕНТ: поставь trigger_x = 1.2, запусти.\n  Крышка хлопает рано — мяч мимо. Верни 4.5.\n5 ● НАСТРОЙ: catch_speed → 6, wind_comp → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: net_tension → 5, drop_height → 3,\n  затем нажми «Калибровка» (этап 3). Отлично!',cfg:{CATCH_CONFIG:{trap_door_active:{type:'b',v:false,edit:'manual'},trigger_x:{type:'n',v:1.2,step:0.5,min:0,max:6,edit:'manual'},catch_speed:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},latch_spring:{type:'n',v:7,step:1,min:0,max:10,edit:'manual'},auto_reset:{type:'b',v:false,edit:'toggle'},beep_alarm:{type:'b',v:false,edit:'toggle'},net_tension:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},drop_height:{type:'n',v:3,step:1,min:0,max:8,edit:'manual'},wind_comp:{type:'b',v:false,edit:'toggle'},return_timer:{type:'n',v:2,step:1,min:1,max:8,edit:'manual'}}},check:{trap_door_active:true,trigger_x:[4.2,4.7]},check2:{catch_speed:[4,8],latch_spring:[5,9],wind_comp:true,return_timer:[2,5]},check3:{net_tension:[4,7],drop_height:[2,5]},hint:'Активируй ловушку и подвигай trigger_x до 4.2-4.7.'},
-{num:5,nm:'Сейф',kind:'goal',sc:'safe',goal:'Раскодировать сейф',desc:'Рельс упирается в бронированный сейф с латунным лимбом. Дверь откроется, если пароль-строка верный и включён байпас.',task:'Напишите код-слово и включите байпас.',ch:'═══ ЦЕХ 5 · КРИПТОГРАФИЯ ═══\n1 ● СМОТРИ: сейф с лимбом, ключ едет слева.\n  Дверь откроется, если назвать пароль и отключить защиту.\n2 ● НАСТРОЙ: code → «ОТКРЫТЬ», bypass_system → true.\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Ключ доезжает, дверь открывается — этап 1.\n4 ● ЭКСПЕРИМЕНТ: напиши пароль маленькими буквами.\n  Не работает! Верни «ОТКРЫТЬ» — регистр важен.\n5 ● НАСТРОЙ: alarm_volume → 5, power_backup → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: bolt_time → 3, dial_speed → 4,\n  затем нажми «Калибровка» (этап 3). Идеально!',cfg:{SAFE_CONFIG:{code:{type:'s',v:'ЗАКРЫТЬ',opts:['ОТКРЫТЬ','ЗАКРЫТЬ'],edit:'manual'},bypass_system:{type:'b',v:false,edit:'toggle'},alarm_volume:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},lock_attempts:{type:'n',v:3,step:1,min:1,max:10,edit:'manual'},red_light:{type:'b',v:true,edit:'toggle'},power_backup:{type:'b',v:false,edit:'toggle'},bolt_time:{type:'n',v:2,step:1,min:1,max:8,edit:'manual'},dial_speed:{type:'n',v:4,step:1,min:1,max:10,edit:'manual'},keypad_lock:{type:'b',v:false,edit:'toggle'},siren_mode:{type:'b',v:false,edit:'toggle'}}},check:{code:'ОТКРЫТЬ',bypass_system:true},check2:{alarm_volume:[3,7],lock_attempts:[3,6],power_backup:true,keypad_lock:false},check3:{bolt_time:[2,4],dial_speed:[3,6]},hint:'Слово-команда — антоним к «ЗАКРЫТЬ». Впиши его и включи байпас.'},
+{num:2,nm:'Лампочка',kind:'goal',sc:'abyss',goal:'Зажечь лампочку',desc:'Рельс обрывается над бездной. Вилка падает на стальную плиту с розеткой — лампочка загорится, если напряжение ровно 220 вольт и цепь замкнута.',task:'Подайте <b>220</b> вольт (сейчас 110) и замкните цепь.',ch:'═══ ЦЕХ 2 · ЭНЕРГЕТИКА ═══\n1 ● Запись Шестерёнкина: «Вилка упала в розетку.\n  Лампа не горит — нет 220В или цепь разомкнута».\n2 ● Настрой voltage: впиши 220. Настрой fuse_closed:\n  нажми ⇄ — стало true (цепь замкнута).\n3 ● Запусти «Запустить механизм». Лампа зажглась!\n  Первая загадка решена. (этап 1)\n4 ● Опыт: поставь voltage = 300, запусти.\n  Лампа «перегорает». Почему? Верни 220.\n5 ● Настрой wire_temp → 45, breaker_reset → true.\n6 ● Проверь: нажми «Проверить настройки» (этап 2).\n7 ● Калибровка: resistance → 10, current → 2.0.\n  Нажми «Калибровка». Параметры идеальны!',cfg:{LIGHT_CONFIG:{power_supply:{type:'b',v:true,edit:'toggle'},voltage:{type:'n',v:110,step:10,min:0,max:300,edit:'manual'},fuse_closed:{type:'b',v:false,edit:'toggle'},wire_temp:{type:'n',v:25,step:5,min:0,max:200,edit:'manual'},bulb_power:{type:'n',v:60,step:10,min:10,max:200,edit:'manual'},safety_guard:{type:'b',v:true,edit:'toggle'},resistance:{type:'n',v:10,step:1,min:1,max:50,edit:'manual'},current:{type:'n',v:2,step:0.5,min:0,max:10,edit:'manual'},phase_switch:{type:'b',v:false,edit:'toggle'},breaker_reset:{type:'b',v:true,edit:'toggle'}}},check:{voltage:220,fuse_closed:true,power_supply:true},check2:{wire_temp:[30,60],bulb_power:[40,100],safety_guard:true,breaker_reset:true},check3:{resistance:[8,15],current:[1.5,3]},hint:'Крутите напряжение до 220 и включите предохранитель fuse_closed.'},
+{num:3,nm:'Стакан воды',kind:'goal',sc:'hydra',goal:'Налить воды в стакан',desc:'Бак с краном, под ним поворотный жёлоб, внизу мерный стакан. Вода попадёт в стакан, если кран открыт, а угол жёлоба от 15 до 35 градусов.',task:'Откройте кран и настройте угол жёлоба от <b>15</b> до <b>35</b>.',ch:'═══ ЦЕХ 3 · ГИДРАВЛИКА ═══\n1 ● Запись №2: «Бак полон, кран закрыт.\n  Вода не течёт — нужен открытый вентиль\n  и правильный наклон лотка, чтобы струя\n  попала прямо в стакан».\n2 ● Открой valve_open: нажми ⇄ → true.\n  pipe_angle поставь 25 — между 15 и 35.\n3 ● Запусти «Запустить механизм». Капли наполняют\n  стакан. (этап 1)\n4 ● Опыт: поставь pipe_angle = 5, запусти.\n  Вода льётся мимо. Верни 25.\n5 ● Настрой flow_pressure → 5, filter_open → true.\n6 ● Проверь: нажми «Проверить настройки» (этап 2).\n7 ● Калибровка: nozzle_size → 4, pump_rpm → 50.\n  Затем «Калибровка» (этап 3). Отлично!',cfg:{FLUID_CONFIG:{valve_open:{type:'b',v:false,edit:'toggle'},pipe_angle:{type:'n',v:5,step:5,min:0,max:45,edit:'manual'},flow_pressure:{type:'n',v:2,step:1,min:0,max:10,edit:'manual'},tank_level:{type:'n',v:80,step:5,min:0,max:100,edit:'manual'},drip_rate:{type:'n',v:5,step:1,min:1,max:20,edit:'manual'},filter_open:{type:'b',v:true,edit:'toggle'},nozzle_size:{type:'n',v:4,step:1,min:1,max:10,edit:'manual'},hose_length:{type:'n',v:5,step:1,min:1,max:15,edit:'manual'},pump_rpm:{type:'n',v:30,step:5,min:0,max:100,edit:'manual'},spill_sensor:{type:'b',v:false,edit:'toggle'}}},check:{valve_open:true,pipe_angle:[15,35]},check2:{flow_pressure:[3,7],tank_level:[60,100],filter_open:true,spill_sensor:false},check3:{nozzle_size:[3,6],pump_rpm:[40,60]},hint:'Открой valve_open и поднимай pipe_angle до 15-35.'},
+{num:4,nm:'Ящик',kind:'goal',sc:'jump',goal:'Поймать шар в ящик',desc:'Крутой трамплин обрывается над пропастью. Мяч летит по баллистической параболе — крышка ящика захлопнется, если ловушка активна и датчик стоит в зоне 4.2-4.7.',task:'Включите ловушку и поставьте датчик в зону <b>4.2-4.7</b>.',ch:'═══ ЦЕХ 4 · БАЛЛИСТИКА ═══\n1 ● Запись №3: «Мяч летит с трамплина в пустоту.\n  Ящик ловит его, но крышка должна захлопнуться\n  в нужный момент. Датчик срабатывает в зоне 4.2–4.7».\n2 ● Настрой trap_door_active: впиши true.\n  trigger_x поставь 4.5 — середина зоны.\n3 ● Запусти «Запустить механизм». Мяч летит\n  по параболе, крышка хлоп — мяч в ящике! (этап 1)\n4 ● Опыт: поставь trigger_x = 1.2, запусти.\n  Крышка закрывается рано — мяч падает мимо.\n5 ● Настрой catch_speed → 6, wind_comp → true.\n6 ● Проверь: нажми «Проверить настройки» (этап 2).\n7 ● Калибровка: net_tension → 5, drop_height → 3.\n  Затем «Калибровка» (этап 3). Отлично!',cfg:{CATCH_CONFIG:{trap_door_active:{type:'b',v:false,edit:'manual'},trigger_x:{type:'n',v:1.2,step:0.5,min:0,max:6,edit:'manual'},catch_speed:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},latch_spring:{type:'n',v:7,step:1,min:0,max:10,edit:'manual'},auto_reset:{type:'b',v:false,edit:'toggle'},beep_alarm:{type:'b',v:false,edit:'toggle'},net_tension:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},drop_height:{type:'n',v:3,step:1,min:0,max:8,edit:'manual'},wind_comp:{type:'b',v:false,edit:'toggle'},return_timer:{type:'n',v:2,step:1,min:1,max:8,edit:'manual'}}},check:{trap_door_active:true,trigger_x:[4.2,4.7]},check2:{catch_speed:[4,8],latch_spring:[5,9],wind_comp:true,return_timer:[2,5]},check3:{net_tension:[4,7],drop_height:[2,5]},hint:'Активируй ловушку и подвигай trigger_x до 4.2-4.7.'},
+{num:5,nm:'Сейф',kind:'goal',sc:'safe',goal:'Раскодировать сейф',desc:'Рельс упирается в бронированный сейф с латунным лимбом. Дверь откроется, если пароль-строка верный и включён байпас.',task:'Напишите код-слово и включите байпас.',ch:'═══ ЦЕХ 5 · КРИПТОГРАФИЯ ═══\n1 ● Запись №4: «Сейф заперт, лимб ждёт команду.\n  Пароль — антоним к «ЗАКРЫТЬ». Плюс нужен\n  аварийный обход защиты — bypass_system».\n2 ● Впиши в поле code: "ОТКРЫТЬ". Настрой\n  bypass_system: нажми ⇄ → true.\n3 ● Запусти «Запустить механизм». Ключ едет,\n  дверь открывается. (этап 1)\n4 ● Опыт: напиши пароль маленькими буквами.\n  Не работает — регистр важен. Верни «ОТКРЫТЬ».\n5 ● Настрой alarm_volume → 5, power_backup → true.\n6 ● Проверь: нажми «Проверить настройки» (этап 2).\n7 ● Калибровка: bolt_time → 3, dial_speed → 4.\n  Нажми «Калибровка» (этап 3). Цех пройден!',cfg:{SAFE_CONFIG:{code:{type:'s',v:'ЗАКРЫТЬ',opts:['ОТКРЫТЬ','ЗАКРЫТЬ'],edit:'manual'},bypass_system:{type:'b',v:false,edit:'toggle'},alarm_volume:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},lock_attempts:{type:'n',v:3,step:1,min:1,max:10,edit:'manual'},red_light:{type:'b',v:true,edit:'toggle'},power_backup:{type:'b',v:false,edit:'toggle'},bolt_time:{type:'n',v:2,step:1,min:1,max:8,edit:'manual'},dial_speed:{type:'n',v:4,step:1,min:1,max:10,edit:'manual'},keypad_lock:{type:'b',v:false,edit:'toggle'},siren_mode:{type:'b',v:false,edit:'toggle'}}},check:{code:'ОТКРЫТЬ',bypass_system:true},check2:{alarm_volume:[3,7],lock_attempts:[3,6],power_backup:true,keypad_lock:false},check3:{bolt_time:[2,4],dial_speed:[3,6]},hint:'Слово-команда — антоним к «ЗАКРЫТЬ». Впиши его и включи байпас.'},
 {num:6,nm:'Шины',kind:'goal',sc:'tire',goal:'Раскрутить шины и сбросить груз',desc:'Скат обрывается над двумя шинами-валиками. Второе колесо заблокировано канатом. Груз уедет, если скорость больше 8 и канат снят.',task:'Разгоните шину выше <b>8</b> и снимите канат.',ch:'═══ ЦЕХ 6 · МЕХАНИКА ═══\n1 ● СМОТРИ: шины, канат на второй, груз сверху.\n  Груз уедет, если скорость > 8 и канат снят.\n2 ● НАСТРОЙ: wheel_speed → 10, unclog_rope → true.\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Шины крутятся, груз падает — этап 1.\n4 ● ЭКСПЕРИМЕНТ: оставь wheel_speed3, канат сними.\n  Груз не уедет — скорость мала. Верни 10.\n5 ● НАСТРОЙ: axle_heat → 60, safety_lock → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: belt_tension → 5, gear_ratio → 3,\n  затем нажми «Калибровка» (этап 3). Идеально!',cfg:{GEAR_CONFIG:{wheel_speed:{type:'n',v:3,step:1,min:0,max:12,edit:'manual'},unclog_rope:{type:'b',v:false,edit:'toggle'},axle_heat:{type:'n',v:40,step:5,min:0,max:200,edit:'manual'},conveyor_grip:{type:'n',v:6,step:1,min:0,max:10,edit:'manual'},auto_brake:{type:'b',v:false,edit:'toggle'},friction_lube:{type:'b',v:false,edit:'toggle'},belt_tension:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},gear_ratio:{type:'n',v:2,step:1,min:1,max:6,edit:'manual'},safety_lock:{type:'b',v:true,edit:'toggle'},motor_boost:{type:'b',v:false,edit:'toggle'}}},check:{wheel_speed:[9,12],unclog_rope:true},check2:{axle_heat:[40,90],conveyor_grip:[5,8],safety_lock:true,motor_boost:true},check3:{belt_tension:[4,7],gear_ratio:[2,4]},hint:'Разгони wheel_speed выше 8 (до 9-12) и сними канат unclog_rope.'},
 {num:7,nm:'Пинг-понг',kind:'goal',sc:'paddle',goal:'Шарик в цель',desc:'В пустоте каскадом висят 4 наклонные ракетки. Белый шарик пружинит по ним в чашку, если упругость от 0.7 до 0.95.',task:'Настройте упругость от <b>0.7</b> до <b>0.95</b>.',ch:'═══ ЦЕХ 7 · УПРУГОСТЬ ═══\n1 ● СМОТРИ: 4 ракетки каскадом, внизу чашка.\n  Шарик пружинит по ним — нужна упругость 0.7–0.95.\n2 ● НАСТРОЙ: bounciness → 0.8, wind_force → 0.\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Шарик отскакивает и падает в чашку — этап 1.\n4 ● ЭКСПЕРИМЕНТ: поставь bounciness = 0.4, запусти.\n  Шарик не допрыгивает. Верни 0.8.\n5 ● НАСТРОЙ: table_friction → 4, edge_guard → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: paddle_angle → 5, air_drag → 2,\n  затем нажми «Калибровка» (этап 3). Идеально!',cfg:{PINGPONG_CONFIG:{bounciness:{type:'n',v:0.4,step:0.1,min:0,max:1,edit:'manual'},wind_force:{type:'n',v:0,step:0.1,min:0,max:1,edit:'manual'},table_friction:{type:'n',v:3,step:1,min:0,max:10,edit:'manual'},ball_mass:{type:'n',v:3,step:1,min:1,max:10,edit:'manual'},spin_effect:{type:'n',v:0,step:1,min:0,max:10,edit:'manual'},net_height:{type:'n',v:4,step:1,min:0,max:10,edit:'manual'},paddle_angle:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},air_drag:{type:'n',v:2,step:1,min:0,max:10,edit:'manual'},sweet_spot:{type:'b',v:false,edit:'toggle'},edge_guard:{type:'b',v:true,edit:'toggle'}}},check:{bounciness:[0.7,0.95],wind_force:0},check2:{table_friction:[2,5],ball_mass:[2,5],edge_guard:true,sweet_spot:true},check3:{paddle_angle:[4,7],air_drag:[1,3]},hint:'Подними bounciness до 0.7-0.95, ветер оставь 0.'},
-174: {num:8,nm:'Водопад',kind:'goal',sc:'pipe',goal:'Вода в нужное место',desc:'Трубная магистраль с двумя насосами (А и Б). Вода попадёт в бассейн, только если оба насоса включены, а слив закрыт.',task:'Включите оба насоса и закройте слив.',ch:'═══ ЦЕХ 8 · ФИНАЛ ═══\n1 ● СМОТРИ: два насоса, лейка над бассейном.\n  Вода пойдёт, когда true ОБА насоса и слив закрыт.\n2 ● НАСТРОЙ: pump_A → true, pump_B → true, drain_system → false.\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Лейка льёт воду, уровень растёт — этап 1.\n4 ● ЭКСПЕРИМЕНТ: выключи pump_A, запусти.\n  Воды нет — нужны оба. Верни true.\n5 ● НАСТРОЙ: water_tank → 75, relief_valve → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: vapor_vent → 3, pipe_capacity → 6,\n  затем нажми «Калибровка» (этап 3). Финально!',cfg:{FINAL_CONFIG:{pump_A_power:{type:'b',v:false,edit:'toggle'},pump_B_power:{type:'b',v:false,edit:'toggle'},drain_system:{type:'b',v:true,edit:'toggle'},water_tank:{type:'n',v:50,step:5,min:0,max:100,edit:'manual'},pressure_psi:{type:'n',v:30,step:5,min:0,max:100,edit:'manual'},filter_flow:{type:'n',v:8,step:1,min:1,max:10,edit:'manual'},vapor_vent:{type:'n',v:3,step:1,min:0,max:10,edit:'manual'},pipe_capacity:{type:'n',v:6,step:1,min:1,max:12,edit:'manual'},relief_valve:{type:'b',v:true,edit:'toggle'},water_recirc:{type:'b',v:false,edit:'toggle'}}},check:{pump_A_power:true,pump_B_power:true,drain_system:false},check2:{water_tank:[60,90],pressure_psi:[40,70],relief_valve:true,water_recirc:true},check3:{vapor_vent:[2,5],pipe_capacity:[5,8]},hint:'Включи pump_A и pump_B, а drain_system переведи в false (закрыть слив).'}
+{num:8,nm:'Водопад',kind:'goal',sc:'pipe',goal:'Вода в нужное место',desc:'Трубная магистраль с двумя насосами (А и Б). Вода попадёт в бассейн, только если оба насоса включены, а слив закрыт.',task:'Включите оба насоса и закройте слив.',ch:'═══ ЦЕХ 8 · ФИНАЛ ═══\n1 ● Запись №1: Два насоса, общая магистраль.\n  Профессор Шестерёнкин: «Вода пойдёт, только если\n  оба насоса работают вместе. Одиночка не пройдёт».\n2 ● Настрой pump_A и pump_B: нажми ⇄ → true.\n  drain_system переведи в false — слив закрыт.\n3 ● Запусти «Запустить механизм». Лейка льёт,\n  уровень воды растёт. Цель достигнута! (этап 1)\n4 ● Опыт: выключи один насос, запусти снова.\n  Воды нет. Вывод: И (AND) — оба должны быть true.\n5 ● Настрой water_tank → 75, relief_valve → true.\n6 ● Проверь: нажми «Проверить настройки» (этап 2).\n7 ● Калибровка: vapor_vent → 3, pipe_capacity → 6,\n  затем «Калибровка» (этап 3). Цех пройден!',cfg:{FINAL_CONFIG:{pump_A_power:{type:'b',v:false,edit:'toggle'},pump_B_power:{type:'b',v:false,edit:'toggle'},drain_system:{type:'b',v:true,edit:'toggle'},water_tank:{type:'n',v:50,step:5,min:0,max:100,edit:'manual'},pressure_psi:{type:'n',v:30,step:5,min:0,max:100,edit:'manual'},filter_flow:{type:'n',v:8,step:1,min:1,max:10,edit:'manual'},vapor_vent:{type:'n',v:3,step:1,min:0,max:10,edit:'manual'},pipe_capacity:{type:'n',v:6,step:1,min:1,max:12,edit:'manual'},relief_valve:{type:'b',v:true,edit:'toggle'},water_recirc:{type:'b',v:false,edit:'toggle'}}},check:{pump_A_power:true,pump_B_power:true,drain_system:false},check2:{water_tank:[60,90],pressure_psi:[40,70],relief_valve:true,water_recirc:true},check3:{vapor_vent:[2,5],pipe_capacity:[5,8]},hint:'Включи pump_A и pump_B, а drain_system переведи в false (закрыть слив).'}
 ];
 
 const KEYS=["1_СТАРТ","2_ВЕНТ","3_МАГН","4_ОПТИ","5_ПОРШ","6_РЕДУ","7_МОСТ","8_ЛИФТ","9_ПРЕС","10_КЛАП","11_ВОРО","12_АКСЕ"];
@@ -184,12 +184,24 @@ const lg=document.getElementById('lg'),sb=document.getElementById('sb'),chs=docu
 /* ---------- ИМЯ ---------- */
 let savedName=localStorage.getItem('ws_name');
 if(savedName){eng=savedName;document.getElementById('en').textContent=eng}
+const FACTS=[
+  '🔲 true и false — это булевы значения. Названы в честь математика Джорджа Буля (XIX век)',
+  '🔲 1 бит = одно значение true/false. В 1 байте помещается 8 булевых флагов',
+  '🔲 В языке JavaScript есть «ленивые» операторы: && и || вычисляют вторую часть только если надо',
+  '🔲 false == 0 и true == 1 в JS при нестрогом сравнении, но false !== 0 строго',
+  '🔲 Пустая строка "", 0, null, undefined и NaN — всё это «falsy» (ложноподобные) значения',
+  '🔲 Оператор !!x превращает любое значение в true или false («двойное отрицание»)',
+  '🔲 Булева алгебра — основа всех микросхем: транзисторы работают как ключи true/false',
+  '🔲 Логические схемы И (AND), ИЛИ (OR), НЕ (NOT) можно собрать из одних лишь NAND-элементов'
+];
 function showGate(){
   const gi=document.getElementById('gate-inner');
   const nameSec=savedName?`<p style="font-size:11px;color:var(--metal);margin-bottom:8px">С возвращением, <b style="color:var(--light)">${savedName}</b>!</p><button class="b2 sm" onclick="window.resetName()">Другое имя</button>`
     :`<label for="si">Подпись юного инженера</label><input type="text" id="si" placeholder="Ваше имя..." maxlength="16" autocomplete="off"/>`;
+  const fact=FACTS[Math.floor(Math.random()*FACTS.length)];
   gi.innerHTML=`<h1>Мастерская <span>Шестеренкина</span></h1><div class="slv">Уровень ${L.num} &middot; ${L.nm}</div>
-  <div class="sd">${L.desc}</div><div class="spat">ЦЕЛЬ: ${L.goal}</div>${nameSec}
+  <div class="sd">${L.desc}</div><div class="spat">ЦЕЛЬ: ${L.goal}</div>
+  <div style="font-size:10px;color:var(--accent);background:var(--dark);border-radius:6px;padding:6px 10px;margin-bottom:8px;line-height:1.5;border:1px solid var(--border);font-family:'JetBrains Mono',monospace">${fact}</div>${nameSec}
   <button class="b2" onclick="window.enterW()">${savedName?'Продолжить':'Войти в мастерскую'}</button>`;
   document.getElementById('gate').style.transform='translateY(0)';
   if(!savedName)setTimeout(()=>{const si=document.getElementById('si');if(si)si.focus()},150);
@@ -389,21 +401,21 @@ ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;ren.toneMap
 vp.appendChild(ren.domElement);
 const cmp=new EffectComposer(ren);cmp.addPass(new RenderPass(sc,cam));
 const bl=new UnrealBloomPass(new THREE.Vector2(vw,vh),.25,.15,.08);bl.threshold=.2;bl.strength=.25;bl.radius=.25;cmp.addPass(bl);
-const sa=new SSAOPass(sc,cam,vw,vh);sa.kernelRadius=3;sa.minDistance=.01;sa.maxDistance=.15;cmp.addPass(sa);
+const sa=new SSAOPass(sc,cam,vw,vh);sa.kernelRadius=2;sa.minDistance=.02;sa.maxDistance=.2;cmp.addPass(sa);
 cmp.addPass(new OutputPass());
 sc.add(new THREE.AmbientLight(0x5a4a3a,.5));
 sc.add(new THREE.HemisphereLight(0xd0c0a8,0x2a1e14,.35));
 const sun=new THREE.DirectionalLight(0xffeedd,.85);sun.position.set(6,14,10);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);
-sun.shadow.camera.near=.5;sun.shadow.camera.far=40;sun.shadow.bias=-.0005;sc.add(sun);
+sun.shadow.camera.near=.5;sun.shadow.camera.far=40;sun.shadow.bias=-.001;sc.add(sun);
 const fl=new THREE.DirectionalLight(0x8a7055,.25);fl.position.set(-8,4,-6);sc.add(fl);
 
 const cv=document.createElement('canvas');cv.width=512;cv.height=512;const cx=cv.getContext('2d');
 cx.fillStyle='#3a2a1e';cx.fillRect(0,0,512,512);
 for(let i=0;i<2000;i++){cx.fillStyle=`rgba(80,60,40,${.03+Math.random()*.07})`;cx.fillRect(Math.random()*512,Math.random()*512,2+Math.random()*6,1+Math.random()*4)}
 const ft=new THREE.CanvasTexture(cv);ft.wrapS=ft.wrapT=THREE.RepeatWrapping;ft.repeat.set(8,4);
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(50,22),new THREE.MeshStandardMaterial({map:ft,roughness:.85,metalness:.05}));
-floor.rotation.x=-Math.PI/2;floor.position.set(1.5,-5.8,0);floor.receiveShadow=true;sc.add(floor);
-const grid=new THREE.GridHelper(50,25,0x5a3a2a,0x3a2a1e);grid.position.set(1.5,-5.78,0);sc.add(grid);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(50,22),new THREE.MeshStandardMaterial({map:ft,roughness:.85,metalness:.05,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1}));
+floor.rotation.x=-Math.PI/2;floor.position.set(1.5,-5.86,0);floor.receiveShadow=true;sc.add(floor);
+const grid=new THREE.GridHelper(50,25,0x5a3a2a,0x3a2a1e);grid.position.set(1.5,-5.7,0);sc.add(grid);
 
 const env=new THREE.CubeTextureLoader().setPath('https://threejs.org/examples/textures/cube/SwedishRoyalCastle/').load(['px.jpg','nx.jpg','py.jpg','ny.jpg','pz.jpg','nz.jpg']);
 const ball=new THREE.Group();
@@ -818,20 +830,19 @@ function buildScene(){
     const pg=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),36,.012,6,false);
     const pm=new THREE.Mesh(pg,new THREE.MeshStandardMaterial({color:0x8a7a6a,roughness:.3,metalness:.5}));pm.userData={isPipe:true};sc.add(pm);
   }else if(L.num===2){
-    // сцена 2 — ступенек нет: только обрыв, падающая вилка, розетка и лампа
-    // узлы не строим, шар-актёр падает прямо в розетку
+    // сцена 2 — пустой обрыв, вилка падает в розетку
   }else if(L.num===3){
-    // сцена 3 — ступенек нет: бак, кран, жёлоб, стакан. Капли воды летят к стакану.
+    // сцена 3 — бак + кран + жёлоб, капли воды
   }else if(L.num===4){
-    // сцена 4 — ступенек нет: трамплин + ящик. Мяч летит по баллистике.
+    // сцена 4 — трамплин + ящик, мяч по баллистике
   }else if(L.num===5){
-    // сцена 5 — ступенек нет: сейф с лимбом, ключ едет слева.
+    // сцена 5 — сейф, ключ слева
   }else if(L.num===6){
-    // сцена 6 — ступенек нет: шины-валики + грузовой ящик.
+    // сцена 6 — шины + груз
   }else if(L.num===7){
-    // сцена 7 — ступенек нет: каскад ракеток, шарик пинг-понга.
+    // сцена 7 — каскад ракеток, шарик пинг-понга
   }else if(L.num===8){
-    // сцена 8 — ступенек нет: трубная магистраль с насосами.
+    // сцена 8 — вода, насосы
   }else{
     // декоративный трек из маленьких платформ
     for(let i=0;i<12;i++){
@@ -901,10 +912,10 @@ function resetScene(){
   else if(L.num===4&&goalObjs){ball.position.set(-3.7,goalObjs.rampTop+0.2,0);ball.userData.flight=false;ball.userData.vy=0}
   else if(L.num===5&&goalObjs){ball.position.set(-3.0,goalObjs.safeY+0.1,0)}
   else if(L.num===6&&goalObjs){ball.position.set(goalObjs.cx-1.2,goalObjs.cy+0.6,0)}
-  else if(L.num===7&&goalObjs){ball.position.set(goalObjs.cupX-4.2,1.8,0);ball.userData.vx=.02;ball.userData.vy=0}
+  else if(L.num===7&&goalObjs){ball.position.set(goalObjs.cupX-3.5,1.5,0);ball.userData.vx=.04;ball.userData.vy=0;ball.userData.init=false;ball.userData.bounces=0}
   else if(L.num===8&&goalObjs){ball.position.set(goalObjs.cx-1.5,0.6,0)}
-  else{ball.position.set(-6.5,4,0)}
-  ball.userData.vx=0;ball.userData.vy=0;setActorColor(0x8a6a4a);
+  else{ball.position.set(-6.5,4,0);ball.userData.vx=SPD;ball.userData.vy=0}
+  setActorColor(0x8a6a4a);
   trailPts.length=0;trail.geometry.setFromPoints([]);
   chs.textContent='ГОТОВО';chs.style.color='';chd.className='chn-d';pb.style.width='0%';
 }
@@ -918,13 +929,13 @@ window.startRun=function(){
   // сброс воды/таймеров
   waterDrops.forEach(d=>sc.remove(d));waterDrops.length=0;
   dropTimer=0;waterCaptured=0;waterMissed=0;
-  if(goalObjs){goalObjs.runT=0;if(goalObjs.water){goalObjs.water.userData.fill=0;goalObjs.water.scale.y=.06;const wy=L.num===3?(-0.5+0.03):(-0.53+0.03);goalObjs.water.position.y=wy;}}
+  if(goalObjs){goalObjs.runT=0;if(goalObjs.water){goalObjs.water.userData.fill=0;goalObjs.water.scale.y=.06;const wy=L.num===3?(-0.5+0.03):(-0.53+0.03);goalObjs.water.position.y=wy;if(goalObjs.waterTop)goalObjs.waterTop.position.y=wy;}}
   if(L.num===2){ball.position.set(targetX,1.5,0);ball.userData.vx=0;ball.userData.vy=0}
   else if(L.num===3&&goalObjs){ball.position.set(goalObjs.tipX,goalObjs.tipY+0.3,0);ball.userData.vx=0;ball.userData.vy=-0.01}
   else if(L.num===4&&goalObjs){ball.position.set(-3.8,goalObjs.rampTop-Math.tan(goalObjs.rampAngle)*(-3.8-goalObjs.rampX0)+0.15,0);ball.userData.vx=SPD*1.2;ball.userData.vy=0;ball.userData.flight=false}
   else if(L.num===5&&goalObjs){ball.position.set(-3.0,goalObjs.safeY+0.1,0);ball.userData.vx=SPD*1.2;ball.userData.vy=0}
   else if(L.num===6&&goalObjs){ball.position.set(goalObjs.cx-1.2,goalObjs.cy+0.6,0);ball.userData.vx=SPD;ball.userData.vy=0}
-  else if(L.num===7&&goalObjs){ball.position.set(goalObjs.cupX-4.2,1.8,0);ball.userData.vx=.02;ball.userData.vy=0}
+  else if(L.num===7&&goalObjs){ball.position.set(goalObjs.cupX-3.5,1.5,0);ball.userData.vx=.04;ball.userData.vy=0;ball.userData.init=false;ball.userData.bounces=0}
   else if(L.num===8&&goalObjs){ball.position.set(goalObjs.cx-1.5,0.6,0);ball.userData.vx=SPD;ball.userData.vy=0}
   else{ball.position.set(-6.5,4,0);ball.userData.vx=SPD;ball.userData.vy=0}
   setActorColor(0x8a6a4a);
@@ -979,13 +990,12 @@ function anim(){
     const filIdle=targetObj.children.find(c=>c.geometry&&c.geometry.type==='CylinderGeometry'&&c.material.type==='MeshBasicMaterial');
     if(filIdle&&!run&&!winAnim)filIdle.material.color.setHex(0x33220a);
   }
-  // water shimmer idle for scene 3 & 8
+  // water shimmer idle for scene 3
   if(L.num===3&&goalObjs&&goalObjs.tankWater&&!run){
     goalObjs.tankWater.position.y=-0.05+Math.sin(t*1.5)*0.008;
-    if(goalObjs.waterTop){const wt=goalObjs.waterTop;wt.material.opacity=.25+Math.sin(t*2.5)*.1}
   }
-  if(L.num===8&&goalObjs&&goalObjs.waterTop&&!run){
-    goalObjs.waterTop.material.opacity=.2+Math.sin(t*2)*.08;
+  if(L.num===8&&goalObjs&&goalObjs.water&&!run){
+    const wt=goalObjs.water;wt.material.opacity=.6+Math.sin(t*2)*.1;
   }
 
   if(L.kind==='nodes'){
@@ -1131,16 +1141,16 @@ if(goalObjs.water){
       }
       // лёгкий мяч катится ПО ПОВЕРХНОСТИ доски, затем слетает с её края
       if(!b.userData.flight){ // на доске
-        b.userData.vx+=(SPD*1.4-b.userData.vx)*.04;
+        b.userData.vx+=(SPD*1.5-b.userData.vx)*.04;
         b.position.x+=b.userData.vx;
         const surfY=goalObjs.rampTop-Math.tan(goalObjs.rampAngle)*(b.position.x-goalObjs.rampX0);
         const targetY=surfY+0.2;
         b.position.y+=(targetY-b.position.y)*0.6;
         if(b.position.x>=goalObjs.trampEndX){
-          b.userData.flight=true;b.userData.vx=.065;b.userData.vy=.12;
+          b.userData.flight=true;b.userData.vx=.15;b.userData.vy=.06;
         }
       }else{ // свободный полёт по параболе
-        b.userData.vy-=.009;
+        b.userData.vy-=.015;
         b.position.x+=b.userData.vx;b.position.y+=b.userData.vy;
         b.userData.vx*=.998;
       }
@@ -1218,15 +1228,16 @@ if(goalObjs.water){
     }else if(L.num===7&&goalObjs){ // 7: шарик пинг-понга падает по каскаду
       const g7=conf.PINGPONG_CONFIG||{};
       const bounce=Math.min(Math.max(g7.bounciness||0.4,0),1);
-      if(!b.userData.vy&&!b.userData.bounces){b.userData.vy=-.02} // initial nudge down
-      b.userData.vy-=.006;
+      if(!b.userData.init){b.userData.vy=-.055;b.userData.init=true;b.userData.hit={}}
+      b.userData.vy-=.003;
       b.position.y+=b.userData.vy;
-      b.position.x+=.022;
+      b.position.x+=.08;
       if(goalObjs.pads){
         goalObjs.pads.forEach((p,i)=>{
-          if(Math.abs(b.position.x-p.position.x)<.38&&b.position.y<=p.position.y+.08&&b.userData.vy<0){
-            b.userData.vy=.07*bounce;
-            b.position.x+=.08;
+          if(!b.userData.hit[i]&&Math.abs(b.position.x-p.position.x)<.5&&Math.abs(b.position.y-p.position.y)<.35&&b.userData.vy<0){
+            b.userData.vy=Math.abs(b.userData.vy*.7)*bounce;
+            b.position.y=p.position.y+.18;
+            b.userData.hit[i]=true;
             b.userData.bounces=(b.userData.bounces||0)+1;
           }
         });
@@ -1280,7 +1291,7 @@ if(goalObjs.water){
     if(L.kind==='nodes'&&cur<12){
       const n=nodes[cur];
       if(n){
-        if(b.position.y<=n.surfY&&b.position.x>=n.x-.5&&b.position.x<=n.x+.62){b.position.y=n.surfY;b.userData.vy=0}
+        if(b.position.y<=n.surfY&&b.position.x>=n.x-.65&&b.position.x<=n.x+.7){b.position.y=n.surfY;b.userData.vy=0}
         if(b.position.x>=n.x+.62){
           if(conf[n.key]===true){
             cur++;pb.style.width=(cur/12*100)+'%';cnt.textContent=cur+'/12';
@@ -1301,7 +1312,7 @@ if(goalObjs.water){
       }else{
         // держать на последней платформе
         const last=nodes[nodes.length-1];
-        if(last&&b.position.y<=last.surfY&&b.position.x>=last.x-.5){b.position.y=last.surfY;b.userData.vy=0}
+        if(last&&b.position.y<=last.surfY&&b.position.x>=last.x-.65){b.position.y=last.surfY;b.userData.vy=0}
       }
     }
     if(L.num!==3)trailPts.push(b.position.clone());if(trailPts.length>120)trailPts.shift();trail.geometry.setFromPoints(trailPts);
