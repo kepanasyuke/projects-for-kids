@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Caveat:wght@400;600;700&family=Marmelad&display=swap" rel="stylesheet">
-<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <style>
 :root{--bg:#34261c;--panel:linear-gradient(150deg,#4a3426,#2a1e16);--border:#6a4a34;--accent:#d6a060;--surface:#5c3f2e;--metal:#9a8068;--dark:#1e1410;--light:#e8dcd0;--ok:#4a8a4a;--bad:#b85040;--blue:#5a8aba}
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -162,29 +162,23 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);font-famil
 <div id="vp"></div>
 
 <script type="module">
-import*as THREE from'three';import{EffectComposer}from'three/addons/postprocessing/EffectComposer.js';import{RenderPass}from'three/addons/postprocessing/RenderPass.js';import{UnrealBloomPass}from'three/addons/postprocessing/UnrealBloomPass.js';import{SSAOPass}from'three/addons/postprocessing/SSAOPass.js';import{OutputPass}from'three/addons/postprocessing/OutputPass.js';
-
-/* ============================================================
-   УРОВНИ: тип 'nodes' — конвейер с 12 узлами true/false (ур.1)
-           тип 'goal'  — цель механизма Crazy Machines (ур.2-8)
-   ============================================================ */
+import*as THREE from'three';import{EffectComposer}from'three/addons/postprocessing/EffectComposer.js';import{RenderPass}from'three/addons/postprocessing/RenderPass.js';import{UnrealBloomPass}from'three/addons/postprocessing/UnrealBloomPass.js';import{OutputPass}from'three/addons/postprocessing/OutputPass.js';
 const LVLS=[
 {num:1,nm:'Конвейер',kind:'nodes',sc:'stair',goal:'Открыть все 12 стопоров',desc:'Шар катится по деревянной лесенке. Каждый узел пропускает шар только если регистр равен true.',task:'Измените регистры 2-12: вместо <span class="h" style="color:var(--bad)">false</span> поставьте <span class="h" style="color:var(--ok)">true</span>.',w:'all',hint:'Смотрите в код: для каждого узла написано false. Замените на true и запустите механизм.'},
-{num:2,nm:'Лампочка',kind:'goal',sc:'abyss',goal:'Зажечь лампочку',desc:'Рельс обрывается над бездной. Вилка падает на стальную плиту с розеткой — лампочка загорится, если напряжение ровно 220 вольт и цепь замкнута.',task:'Подайте <b>220</b> вольт (сейчас 110) и замкните цепь.',ch:'═══ ЦЕХ 2 · ЭНЕРГЕТИКА ═══\n1 ● Запись Шестерёнкина: «Вилка упала в розетку.\n  Лампа не горит — нет 220В или цепь разомкнута».\n2 ● Настрой voltage: впиши 220. Настрой fuse_closed:\n  нажми ⇄ — стало true (цепь замкнута).\n3 ● Запусти «Запустить механизм». Лампа зажглась!\n  Первая загадка решена. (этап 1)\n4 ● Опыт: поставь voltage = 300, запусти.\n  Лампа «перегорает». Почему? Верни 220.\n5 ● Настрой wire_temp → 45, breaker_reset → true.\n6 ● Проверь: нажми «Проверить настройки» (этап 2).\n7 ● Калибровка: resistance → 10, current → 2.0.\n  Нажми «Калибровка». Параметры идеальны!',cfg:{LIGHT_CONFIG:{power_supply:{type:'b',v:true,edit:'toggle'},voltage:{type:'n',v:110,step:10,min:0,max:300,edit:'manual'},fuse_closed:{type:'b',v:false,edit:'toggle'},wire_temp:{type:'n',v:25,step:5,min:0,max:200,edit:'manual'},bulb_power:{type:'n',v:60,step:10,min:10,max:200,edit:'manual'},safety_guard:{type:'b',v:true,edit:'toggle'},resistance:{type:'n',v:10,step:1,min:1,max:50,edit:'manual'},current:{type:'n',v:2,step:0.5,min:0,max:10,edit:'manual'},phase_switch:{type:'b',v:false,edit:'toggle'},breaker_reset:{type:'b',v:true,edit:'toggle'}}},check:{voltage:220,fuse_closed:true,power_supply:true},check2:{wire_temp:[30,60],bulb_power:[40,100],safety_guard:true,breaker_reset:true},check3:{resistance:[8,15],current:[1.5,3]},hint:'Крутите напряжение до 220 и включите предохранитель fuse_closed.'},
-{num:3,nm:'Стакан воды',kind:'goal',sc:'hydra',goal:'Налить воды в стакан',desc:'Бак с краном, под ним поворотный жёлоб, внизу мерный стакан. Вода попадёт в стакан, если кран открыт, а угол жёлоба от 15 до 35 градусов.',task:'Откройте кран и настройте угол жёлоба от <b>15</b> до <b>35</b>.',ch:'═══ ЦЕХ 3 · ГИДРАВЛИКА ═══\n1 ● Запись №2: «Бак полон, кран закрыт.\n  Вода не течёт — нужен открытый вентиль\n  и правильный наклон лотка, чтобы струя\n  попала прямо в стакан».\n2 ● Открой valve_open: нажми ⇄ → true.\n  pipe_angle поставь 25 — между 15 и 35.\n3 ● Запусти «Запустить механизм». Капли наполняют\n  стакан. (этап 1)\n4 ● Опыт: поставь pipe_angle = 5, запусти.\n  Вода льётся мимо. Верни 25.\n5 ● Настрой flow_pressure → 5, filter_open → true.\n6 ● Проверь: нажми «Проверить настройки» (этап 2).\n7 ● Калибровка: nozzle_size → 4, pump_rpm → 50.\n  Затем «Калибровка» (этап 3). Отлично!',cfg:{FLUID_CONFIG:{valve_open:{type:'b',v:false,edit:'toggle'},pipe_angle:{type:'n',v:5,step:5,min:0,max:45,edit:'manual'},flow_pressure:{type:'n',v:2,step:1,min:0,max:10,edit:'manual'},tank_level:{type:'n',v:80,step:5,min:0,max:100,edit:'manual'},drip_rate:{type:'n',v:5,step:1,min:1,max:20,edit:'manual'},filter_open:{type:'b',v:true,edit:'toggle'},nozzle_size:{type:'n',v:4,step:1,min:1,max:10,edit:'manual'},hose_length:{type:'n',v:5,step:1,min:1,max:15,edit:'manual'},pump_rpm:{type:'n',v:30,step:5,min:0,max:100,edit:'manual'},spill_sensor:{type:'b',v:false,edit:'toggle'}}},check:{valve_open:true,pipe_angle:[15,35]},check2:{flow_pressure:[3,7],tank_level:[60,100],filter_open:true,spill_sensor:false},check3:{nozzle_size:[3,6],pump_rpm:[40,60]},hint:'Открой valve_open и поднимай pipe_angle до 15-35.'},
-{num:4,nm:'Ящик',kind:'goal',sc:'jump',goal:'Поймать шар в ящик',desc:'Крутой трамплин обрывается над пропастью. Мяч летит по баллистической параболе — крышка ящика захлопнется, если ловушка активна и датчик стоит в зоне 4.2-4.7.',task:'Включите ловушку и поставьте датчик в зону <b>4.2-4.7</b>.',ch:'═══ ЦЕХ 4 · БАЛЛИСТИКА ═══\n1 ● Запись №3: «Мяч летит с трамплина в пустоту.\n  Ящик ловит его, но крышка должна захлопнуться\n  в нужный момент. Датчик срабатывает в зоне 4.2–4.7».\n2 ● Настрой trap_door_active: впиши true.\n  trigger_x поставь 4.5 — середина зоны.\n3 ● Запусти «Запустить механизм». Мяч летит\n  по параболе, крышка хлоп — мяч в ящике! (этап 1)\n4 ● Опыт: поставь trigger_x = 1.2, запусти.\n  Крышка закрывается рано — мяч падает мимо.\n5 ● Настрой catch_speed → 6, wind_comp → true.\n6 ● Проверь: нажми «Проверить настройки» (этап 2).\n7 ● Калибровка: net_tension → 5, drop_height → 3.\n  Затем «Калибровка» (этап 3). Отлично!',cfg:{CATCH_CONFIG:{trap_door_active:{type:'b',v:false,edit:'manual'},trigger_x:{type:'n',v:1.2,step:0.5,min:0,max:6,edit:'manual'},catch_speed:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},latch_spring:{type:'n',v:7,step:1,min:0,max:10,edit:'manual'},auto_reset:{type:'b',v:false,edit:'toggle'},beep_alarm:{type:'b',v:false,edit:'toggle'},net_tension:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},drop_height:{type:'n',v:3,step:1,min:0,max:8,edit:'manual'},wind_comp:{type:'b',v:false,edit:'toggle'},return_timer:{type:'n',v:2,step:1,min:1,max:8,edit:'manual'}}},check:{trap_door_active:true,trigger_x:[4.2,4.7]},check2:{catch_speed:[4,8],latch_spring:[5,9],wind_comp:true,return_timer:[2,5]},check3:{net_tension:[4,7],drop_height:[2,5]},hint:'Активируй ловушку и подвигай trigger_x до 4.2-4.7.'},
-{num:5,nm:'Сейф',kind:'goal',sc:'safe',goal:'Раскодировать сейф',desc:'Рельс упирается в бронированный сейф с латунным лимбом. Дверь откроется, если пароль-строка верный и включён байпас.',task:'Напишите код-слово и включите байпас.',ch:'═══ ЦЕХ 5 · КРИПТОГРАФИЯ ═══\n1 ● Запись №4: «Сейф заперт, лимб ждёт команду.\n  Пароль — антоним к «ЗАКРЫТЬ». Плюс нужен\n  аварийный обход защиты — bypass_system».\n2 ● Впиши в поле code: "ОТКРЫТЬ". Настрой\n  bypass_system: нажми ⇄ → true.\n3 ● Запусти «Запустить механизм». Ключ едет,\n  дверь открывается. (этап 1)\n4 ● Опыт: напиши пароль маленькими буквами.\n  Не работает — регистр важен. Верни «ОТКРЫТЬ».\n5 ● Настрой alarm_volume → 5, power_backup → true.\n6 ● Проверь: нажми «Проверить настройки» (этап 2).\n7 ● Калибровка: bolt_time → 3, dial_speed → 4.\n  Нажми «Калибровка» (этап 3). Цех пройден!',cfg:{SAFE_CONFIG:{code:{type:'s',v:'ЗАКРЫТЬ',opts:['ОТКРЫТЬ','ЗАКРЫТЬ'],edit:'manual'},bypass_system:{type:'b',v:false,edit:'toggle'},alarm_volume:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},lock_attempts:{type:'n',v:3,step:1,min:1,max:10,edit:'manual'},red_light:{type:'b',v:true,edit:'toggle'},power_backup:{type:'b',v:false,edit:'toggle'},bolt_time:{type:'n',v:2,step:1,min:1,max:8,edit:'manual'},dial_speed:{type:'n',v:4,step:1,min:1,max:10,edit:'manual'},keypad_lock:{type:'b',v:false,edit:'toggle'},siren_mode:{type:'b',v:false,edit:'toggle'}}},check:{code:'ОТКРЫТЬ',bypass_system:true},check2:{alarm_volume:[3,7],lock_attempts:[3,6],power_backup:true,keypad_lock:false},check3:{bolt_time:[2,4],dial_speed:[3,6]},hint:'Слово-команда — антоним к «ЗАКРЫТЬ». Впиши его и включи байпас.'},
-{num:6,nm:'Шины',kind:'goal',sc:'tire',goal:'Раскрутить шины и сбросить груз',desc:'Скат обрывается над двумя шинами-валиками. Второе колесо заблокировано канатом. Груз уедет, если скорость больше 8 и канат снят.',task:'Разгоните шину выше <b>8</b> и снимите канат.',ch:'═══ ЦЕХ 6 · МЕХАНИКА ═══\n1 ● СМОТРИ: шины, канат на второй, груз сверху.\n  Груз уедет, если скорость > 8 и канат снят.\n2 ● НАСТРОЙ: wheel_speed → 10, unclog_rope → true.\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Шины крутятся, груз падает — этап 1.\n4 ● ЭКСПЕРИМЕНТ: оставь wheel_speed3, канат сними.\n  Груз не уедет — скорость мала. Верни 10.\n5 ● НАСТРОЙ: axle_heat → 60, safety_lock → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: belt_tension → 5, gear_ratio → 3,\n  затем нажми «Калибровка» (этап 3). Идеально!',cfg:{GEAR_CONFIG:{wheel_speed:{type:'n',v:3,step:1,min:0,max:12,edit:'manual'},unclog_rope:{type:'b',v:false,edit:'toggle'},axle_heat:{type:'n',v:40,step:5,min:0,max:200,edit:'manual'},conveyor_grip:{type:'n',v:6,step:1,min:0,max:10,edit:'manual'},auto_brake:{type:'b',v:false,edit:'toggle'},friction_lube:{type:'b',v:false,edit:'toggle'},belt_tension:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},gear_ratio:{type:'n',v:2,step:1,min:1,max:6,edit:'manual'},safety_lock:{type:'b',v:true,edit:'toggle'},motor_boost:{type:'b',v:false,edit:'toggle'}}},check:{wheel_speed:[9,12],unclog_rope:true},check2:{axle_heat:[40,90],conveyor_grip:[5,8],safety_lock:true,motor_boost:true},check3:{belt_tension:[4,7],gear_ratio:[2,4]},hint:'Разгони wheel_speed выше 8 (до 9-12) и сними канат unclog_rope.'},
-{num:7,nm:'Пинг-понг',kind:'goal',sc:'paddle',goal:'Шарик в цель',desc:'В пустоте каскадом висят 4 наклонные ракетки. Белый шарик пружинит по ним в чашку, если упругость от 0.7 до 0.95.',task:'Настройте упругость от <b>0.7</b> до <b>0.95</b>.',ch:'═══ ЦЕХ 7 · УПРУГОСТЬ ═══\n1 ● СМОТРИ: 4 ракетки каскадом, внизу чашка.\n  Шарик пружинит по ним — нужна упругость 0.7–0.95.\n2 ● НАСТРОЙ: bounciness → 0.8, wind_force → 0.\n3 ● ЗАПУСТИ: нажми «Запустить механизм».\n  Шарик отскакивает и падает в чашку — этап 1.\n4 ● ЭКСПЕРИМЕНТ: поставь bounciness = 0.4, запусти.\n  Шарик не допрыгивает. Верни 0.8.\n5 ● НАСТРОЙ: table_friction → 4, edge_guard → true.\n6 ● ПРОВЕРЬ: нажми «Проверить настройки» (этап 2).\n7 ● КАЛИБРОВКА: paddle_angle → 5, air_drag → 2,\n  затем нажми «Калибровка» (этап 3). Идеально!',cfg:{PINGPONG_CONFIG:{bounciness:{type:'n',v:0.4,step:0.1,min:0,max:1,edit:'manual'},wind_force:{type:'n',v:0,step:0.1,min:0,max:1,edit:'manual'},table_friction:{type:'n',v:3,step:1,min:0,max:10,edit:'manual'},ball_mass:{type:'n',v:3,step:1,min:1,max:10,edit:'manual'},spin_effect:{type:'n',v:0,step:1,min:0,max:10,edit:'manual'},net_height:{type:'n',v:4,step:1,min:0,max:10,edit:'manual'},paddle_angle:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},air_drag:{type:'n',v:2,step:1,min:0,max:10,edit:'manual'},sweet_spot:{type:'b',v:false,edit:'toggle'},edge_guard:{type:'b',v:true,edit:'toggle'}}},check:{bounciness:[0.7,0.95],wind_force:0},check2:{table_friction:[2,5],ball_mass:[2,5],edge_guard:true,sweet_spot:true},check3:{paddle_angle:[4,7],air_drag:[1,3]},hint:'Подними bounciness до 0.7-0.95, ветер оставь 0.'},
-{num:8,nm:'Водопад',kind:'goal',sc:'pipe',goal:'Вода в нужное место',desc:'Трубная магистраль с двумя насосами (А и Б). Вода попадёт в бассейн, только если оба насоса включены, а слив закрыт.',task:'Включите оба насоса и закройте слив.',ch:'═══ ЦЕХ 8 · ФИНАЛ ═══\n1 ● Запись №1: Два насоса, общая магистраль.\n  Профессор Шестерёнкин: «Вода пойдёт, только если\n  оба насоса работают вместе. Одиночка не пройдёт».\n2 ● Настрой pump_A и pump_B: нажми ⇄ → true.\n  drain_system переведи в false — слив закрыт.\n3 ● Запусти «Запустить механизм». Лейка льёт,\n  уровень воды растёт. Цель достигнута! (этап 1)\n4 ● Опыт: выключи один насос, запусти снова.\n  Воды нет. Вывод: И (AND) — оба должны быть true.\n5 ● Настрой water_tank → 75, relief_valve → true.\n6 ● Проверь: нажми «Проверить настройки» (этап 2).\n7 ● Калибровка: vapor_vent → 3, pipe_capacity → 6,\n  затем «Калибровка» (этап 3). Цех пройден!',cfg:{FINAL_CONFIG:{pump_A_power:{type:'b',v:false,edit:'toggle'},pump_B_power:{type:'b',v:false,edit:'toggle'},drain_system:{type:'b',v:true,edit:'toggle'},water_tank:{type:'n',v:50,step:5,min:0,max:100,edit:'manual'},pressure_psi:{type:'n',v:30,step:5,min:0,max:100,edit:'manual'},filter_flow:{type:'n',v:8,step:1,min:1,max:10,edit:'manual'},vapor_vent:{type:'n',v:3,step:1,min:0,max:10,edit:'manual'},pipe_capacity:{type:'n',v:6,step:1,min:1,max:12,edit:'manual'},relief_valve:{type:'b',v:true,edit:'toggle'},water_recirc:{type:'b',v:false,edit:'toggle'}}},check:{pump_A_power:true,pump_B_power:true,drain_system:false},check2:{water_tank:[60,90],pressure_psi:[40,70],relief_valve:true,water_recirc:true},check3:{vapor_vent:[2,5],pipe_capacity:[5,8]},hint:'Включи pump_A и pump_B, а drain_system переведи в false (закрыть слив).'}
+{num:2,nm:'Лампочка',kind:'goal',sc:'abyss',goal:'Зажечь лампочку',desc:'Рельс обрывается над бездной. Вилка падает на стальную плиту с розеткой — лампочка загорится, если напряжение ровно 220 вольт и цепь замкнута.',task:'Подайте <b>220</b> вольт (сейчас 110) и замкните цепь.',ch:'═══ ЦЕХ 2 · ЭНЕРГЕТИКА ═══\n⚠ Заметка на полях: «110 вольт. Половина. А надо..?»\n🔥 Эксперимент: если дать >300 — «она не простит»\nСовет:  Пометка: «fuse_closed — кажется, замкнуть. Или нет?»',cfg:{LIGHT_CONFIG:{power_supply:{type:'b',v:true,edit:'toggle'},voltage:{type:'n',v:110,step:10,min:0,max:300,edit:'manual'},fuse_closed:{type:'b',v:false,edit:'toggle'},wire_temp:{type:'n',v:25,step:5,min:0,max:200,edit:'manual'},bulb_power:{type:'n',v:60,step:10,min:10,max:200,edit:'manual'},safety_guard:{type:'b',v:true,edit:'toggle'},resistance:{type:'n',v:10,step:1,min:1,max:50,edit:'manual'},current:{type:'n',v:2,step:0.5,min:0,max:10,edit:'manual'},phase_switch:{type:'b',v:false,edit:'toggle'},breaker_reset:{type:'b',v:true,edit:'toggle'}}},check:{voltage:220,fuse_closed:true,power_supply:true},check2:{wire_temp:[30,60],bulb_power:[40,100],safety_guard:true,breaker_reset:true},check3:{resistance:[8,15],current:[1.5,3]},hint:'Крутите напряжение до 220 и включите предохранитель fuse_closed.'},
+{num:3,nm:'Стакан воды',kind:'goal',sc:'hydra',goal:'Налить воды в стакан',desc:'Бак с краном, под ним поворотный жёлоб, внизу мерный стакан. Вода попадёт в стакан, если кран открыт, а угол жёлоба от 15 до 35 градусов.',task:'Откройте кран и настройте угол жёлоба от <b>15</b> до <b>35</b>.',ch:'═══ ЦЕХ 3 · ГИДРАВЛИКА ═══\n⚠ Заметка: «valve_open = ?. Без него вода молчит»\nПрактика:  «Жёлоб: 15–35. Не 5, не 40 — иначе.. мимо»\nСовет:  «Я бы поставил 25. Но это не инструкция»',cfg:{FLUID_CONFIG:{valve_open:{type:'b',v:false,edit:'toggle'},pipe_angle:{type:'n',v:5,step:5,min:0,max:45,edit:'manual'},flow_pressure:{type:'n',v:2,step:1,min:0,max:10,edit:'manual'},tank_level:{type:'n',v:80,step:5,min:0,max:100,edit:'manual'},drip_rate:{type:'n',v:5,step:1,min:1,max:20,edit:'manual'},filter_open:{type:'b',v:true,edit:'toggle'},nozzle_size:{type:'n',v:4,step:1,min:1,max:10,edit:'manual'},hose_length:{type:'n',v:5,step:1,min:1,max:15,edit:'manual'},pump_rpm:{type:'n',v:30,step:5,min:0,max:100,edit:'manual'},spill_sensor:{type:'b',v:false,edit:'toggle'}}},check:{valve_open:true,pipe_angle:[15,35]},check2:{flow_pressure:[3,7],tank_level:[60,100],filter_open:true,spill_sensor:false},check3:{nozzle_size:[3,6],pump_rpm:[40,60]},hint:'Открой valve_open и поднимай pipe_angle до 15-35.'},
+{num:4,nm:'Ящик',kind:'goal',sc:'jump',goal:'Поймать шар в ящик',desc:'Крутой трамплин обрывается над пропастью. Мяч летит по баллистической параболе — крышка ящика захлопнется, если ловушка активна и датчик стоит в зоне 4.2-4.7.',task:'Включите ловушку и поставьте датчик в зону <b>4.2-4.7</b>.',ch:'═══ ЦЕХ 4 · БАЛЛИСТИКА ═══\n⚠ «trap_door_active — активна? Или спит?»\nПрактика:  «trigger_x: 4.5. Середина. Не 1.2 — иначе рано»\n🔥 Для опыта: поставь 1.2 — «крышка чихнёт раньше времени»',cfg:{CATCH_CONFIG:{trap_door_active:{type:'b',v:false,edit:'manual'},trigger_x:{type:'n',v:1.2,step:0.5,min:0,max:6,edit:'manual'},catch_speed:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},latch_spring:{type:'n',v:7,step:1,min:0,max:10,edit:'manual'},auto_reset:{type:'b',v:false,edit:'toggle'},beep_alarm:{type:'b',v:false,edit:'toggle'},net_tension:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},drop_height:{type:'n',v:3,step:1,min:0,max:8,edit:'manual'},wind_comp:{type:'b',v:false,edit:'toggle'},return_timer:{type:'n',v:2,step:1,min:1,max:8,edit:'manual'}}},check:{trap_door_active:true,trigger_x:[4.2,4.7]},check2:{catch_speed:[4,8],latch_spring:[5,9],wind_comp:true,return_timer:[2,5]},check3:{net_tension:[4,7],drop_height:[2,5]},hint:'Активируй ловушку и подвигай trigger_x до 4.2-4.7.'},
+{num:5,nm:'Сейф',kind:'goal',sc:'safe',goal:'Раскодировать сейф',desc:'Рельс упирается в бронированный сейф с латунным лимбом. Дверь откроется, если пароль-строка верный и включён байпас.',task:'Напишите код-слово и включите байпас.',ch:'═══ ЦЕХ 5 · КРИПТОГРАФИЯ ═══\n🔒 «ЗАКРЫТЬ → наоборот = ? Подсказка: ОТ_ _ _ _ТЬ»\nСовет:  «bypass_system — обход. Если false — стена»\n🔥 Опыт: напиши пароль мизерными буквами. Регистр — капризная вещь»',cfg:{SAFE_CONFIG:{code:{type:'s',v:'ЗАКРЫТЬ',opts:['ОТКРЫТЬ','ЗАКРЫТЬ'],edit:'manual'},bypass_system:{type:'b',v:false,edit:'toggle'},alarm_volume:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},lock_attempts:{type:'n',v:3,step:1,min:1,max:10,edit:'manual'},red_light:{type:'b',v:true,edit:'toggle'},power_backup:{type:'b',v:false,edit:'toggle'},bolt_time:{type:'n',v:2,step:1,min:1,max:8,edit:'manual'},dial_speed:{type:'n',v:4,step:1,min:1,max:10,edit:'manual'},keypad_lock:{type:'b',v:false,edit:'toggle'},siren_mode:{type:'b',v:false,edit:'toggle'}}},check:{code:'ОТКРЫТЬ',bypass_system:true},check2:{alarm_volume:[3,7],lock_attempts:[3,6],power_backup:true,keypad_lock:false},check3:{bolt_time:[2,4],dial_speed:[3,6]},hint:'Слово-команда — антоним к «ЗАКРЫТЬ». Впиши его и включи байпас.'},
+{num:6,nm:'Шины',kind:'goal',sc:'tire',goal:'Раскрутить шины и сбросить груз',desc:'Скат обрывается над двумя шинами-валиками. Второе колесо заблокировано канатом. Груз уедет, если скорость больше 8 и канат снят.',task:'Разгоните шину выше <b>8</b> и снимите канат.',ch:'═══ ЦЕХ 6 · МЕХАНИКА ═══\n⚙️ «wheel_speed: ей нужно >8. Иначе — стоит»\nПрактика:  «unclog_rope — канат. True = свободен»\n🔥 Опыт: дай 3, убери канат. «Груз не едет — мало!»',cfg:{GEAR_CONFIG:{wheel_speed:{type:'n',v:3,step:1,min:0,max:12,edit:'manual'},unclog_rope:{type:'b',v:false,edit:'toggle'},axle_heat:{type:'n',v:40,step:5,min:0,max:200,edit:'manual'},conveyor_grip:{type:'n',v:6,step:1,min:0,max:10,edit:'manual'},auto_brake:{type:'b',v:false,edit:'toggle'},friction_lube:{type:'b',v:false,edit:'toggle'},belt_tension:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},gear_ratio:{type:'n',v:2,step:1,min:1,max:6,edit:'manual'},safety_lock:{type:'b',v:true,edit:'toggle'},motor_boost:{type:'b',v:false,edit:'toggle'}}},check:{wheel_speed:[9,12],unclog_rope:true},check2:{axle_heat:[40,90],conveyor_grip:[5,8],safety_lock:true,motor_boost:true},check3:{belt_tension:[4,7],gear_ratio:[2,4]},hint:'Разгони wheel_speed выше 8 (до 9-12) и сними канат unclog_rope.'},
+{num:7,nm:'Пинг-понг',kind:'goal',sc:'paddle',goal:'Шарик в цель',desc:'В пустоте каскадом висят 4 наклонные ракетки. Белый шарик пружинит по ним в чашку, если упругость от 0.7 до 0.95.',task:'Настройте упругость от <b>0.7</b> до <b>0.95</b>.',ch:'═══ ЦЕХ 7 · УПРУГОСТЬ ═══\n🏓 «bounciness: 0.7–0.95. Не 0.4 — не допрыгнет»\n💨 «wind_force: 0. Ветер — лишний. Пусть спит»\n🔥 Опыт: поставь 0.4. «Шарик ленится. Не долетит»',cfg:{PINGPONG_CONFIG:{bounciness:{type:'n',v:0.4,step:0.1,min:0,max:1,edit:'manual'},wind_force:{type:'n',v:0,step:0.1,min:0,max:1,edit:'manual'},table_friction:{type:'n',v:3,step:1,min:0,max:10,edit:'manual'},ball_mass:{type:'n',v:3,step:1,min:1,max:10,edit:'manual'},spin_effect:{type:'n',v:0,step:1,min:0,max:10,edit:'manual'},net_height:{type:'n',v:4,step:1,min:0,max:10,edit:'manual'},paddle_angle:{type:'n',v:5,step:1,min:0,max:10,edit:'manual'},air_drag:{type:'n',v:2,step:1,min:0,max:10,edit:'manual'},sweet_spot:{type:'b',v:false,edit:'toggle'},edge_guard:{type:'b',v:true,edit:'toggle'}}},check:{bounciness:[0.7,0.95],wind_force:0},check2:{table_friction:[2,5],ball_mass:[2,5],edge_guard:true,sweet_spot:true},check3:{paddle_angle:[4,7],air_drag:[1,3]},hint:'Подними bounciness до 0.7-0.95, ветер оставь 0.'},
+{num:8,nm:'Водопад',kind:'goal',sc:'pipe',goal:'Вода в нужное место',desc:'Трубная магистраль с двумя насосами (А и Б). Вода попадёт в бассейн, только если оба насоса включены, а слив закрыт.',task:'Включите оба насоса и закройте слив.',ch:'═══ ЦЕХ 8 · ФИНАЛ ═══\n🔄 «pump_A без pump_B — молчим. Только И (AND)»\nПрактика:  «drain_system: true = убегает. false = держит»\n🔥 Опыт: включи один. «Тишина. Вдвоём — сила»',cfg:{FINAL_CONFIG:{pump_A_power:{type:'b',v:false,edit:'toggle'},pump_B_power:{type:'b',v:false,edit:'toggle'},drain_system:{type:'b',v:true,edit:'toggle'},water_tank:{type:'n',v:50,step:5,min:0,max:100,edit:'manual'},pressure_psi:{type:'n',v:30,step:5,min:0,max:100,edit:'manual'},filter_flow:{type:'n',v:8,step:1,min:1,max:10,edit:'manual'},vapor_vent:{type:'n',v:3,step:1,min:0,max:10,edit:'manual'},pipe_capacity:{type:'n',v:6,step:1,min:1,max:12,edit:'manual'},relief_valve:{type:'b',v:true,edit:'toggle'},water_recirc:{type:'b',v:false,edit:'toggle'}}},check:{pump_A_power:true,pump_B_power:true,drain_system:false},check2:{water_tank:[60,90],pressure_psi:[40,70],relief_valve:true,water_recirc:true},check3:{vapor_vent:[2,5],pipe_capacity:[5,8]},hint:'Включи pump_A и pump_B, а drain_system переведи в false (закрыть слив).'}
 ];
 
 const KEYS=["1_СТАРТ","2_ВЕНТ","3_МАГН","4_ОПТИ","5_ПОРШ","6_РЕДУ","7_МОСТ","8_ЛИФТ","9_ПРЕС","10_КЛАП","11_ВОРО","12_АКСЕ"];
 const NN=["Старт","Вентиль","Магнит","Оптика","Поршень","Редуктор","Мост","Лифт","Пресс","Клапан","Ворота","Аксел"];
 
-let lvlIdx=0, eng="", t0=0, tint=null, tms=0;
-let L=LVLS[0], conf={}, wanted={};
-const lg=document.getElementById('lg'),sb=document.getElementById('sb'),chs=document.getElementById('chs'),chd=document.getElementById('chd'),pb=document.getElementById('pb'),cnt=document.getElementById('cnt'),astTxt=document.getElementById('ast'),taskTxt=document.getElementById('task'),linfo=document.getElementById('lvl-info'),ta=document.getElementById('ta'),hl=document.getElementById('hl'),ln=document.getElementById('ln'),chips=document.getElementById('chips');
+let lvlIdx=0,eng="",t0=0,tint=null,tms=0,L=LVLS[0],conf={};
+const $=id=>document.getElementById(id),lg=$('lg'),sb=$('sb'),chs=$('chs'),chd=$('chd'),pb=$('pb'),cnt=$('cnt'),astTxt=$('ast'),taskTxt=$('task'),linfo=$('lvl-info'),ta=$('ta'),hl=$('hl'),ln=$('ln'),chips=$('chips');
 
 /* ---------- ИМЯ ---------- */
 let savedName=localStorage.getItem('ws_name');
@@ -212,148 +206,224 @@ window.enterW=function(){
 
 /* ---------- КАРТОЧКИ ПРОФЕССОРА ---------- */
 const LESSONS=[
-  {title:'true и false',sub:'Урок 1: Как компьютер понимает «да» и «нет»',lines:[
-    '✧ <b>Булевы значения</b> — это всего два состояния:',
+  {title:'true и false',sub:'Урок 1: Загадка профессора',riddle:[
+    '«Я — страж на границе. Когда я открыт — шар катится,',
+    '  когда закрыт — стоп. Меня зовут одним словом,',
+    '  но у меня всего два лица. Одно — зелёный свет,',
+    '  другое — красный. Сколько лиц у моих двенадцати братьев?»',
     '',
-    '   <u>true</u>  — «истина», «да», «включено», «пуск»',
-    '   <u>false</u> — «ложь», «нет», «выключено», «стоп»',
+    '✧ Профессор не сказал, что делать. Но в коде ты',
+    '   увидишь <b>LVL1_CONFIG</b> и двенадцать ключей.',
+    '   Каждый брат — это узел. Какое лицо должно быть у каждого?'
+  ],info:[
+    'Теория:  <b>true</b> и <b>false</b> — булевы значения.',
+    'Теория:  <b>1 бит</b> информации — одно true/false.',
+    'Практика:  В конвейере <u>12 узлов</u>. Чтобы шар прошёл — все должны быть <b>true</b>.',
+    'Совет:  Название «булевы» — от <u>Джорджа Буля</u>, XIX век.'
+  ],quiz10:[
+    {q:'Что означает true?',opts:['Истина','Ложь','Ноль','Пусто'],ans:0},
+    {q:'Сколько бит в одном булевом значении?',opts:['1','8','16','32'],ans:0},
+    {q:'Сколько узлов на конвейере?',opts:['8','10','12','6'],ans:2},
+    {q:'Если узел false — шар...',opts:['Проходит','Останавливается','Ускоряется','Взрывается'],ans:1},
+    {q:'Как записать «ложь» в коде?',opts:['false','true','0','1'],ans:0},
+    {q:'Что будет если один из 12 узлов false?',opts:['Шар пройдёт','Шар застрянет','Шар ускорится','Ничего'],ans:1},
+    {q:'Кто создал алгебру логики?',opts:['Тьюринг','Буль','Нейман','Лавлейс'],ans:1},
+    {q:'Булево значение — это...',opts:['Строка','Число','true/false','Объект'],ans:2},
+    {q:'Можно ли изменить const?',opts:['Да','Нет','Только через let','Иногда'],ans:1},
+    {q:'Сколько значений у булевого типа?',opts:['1','2','3','4'],ans:1}
+  ]},
+  {title:'Переменные',sub:'Урок 2: Загадка профессора',riddle:[
+    '«В тёмной комнате висит груша — нельзя скушать.',
+    '  Я дал ей имя, но она не знает своего имени.',
+    '  Если дать ей 220 — она заговорит светом.',
+    '  А если больше — она сгорит от гнева.',
+    '  Какое имя я ей дал и что она любит?»',
     '',
-    '📖 В программировании это <b>1 бит</b> информации.',
-    '   Как переключатель: вверх — true, вниз — false.',
+    '✧ В коде ты увидишь <b>LIGHT_CONFIG</b>.',
+    '   Профессор дал имена всем деталям. Найди ту самую',
+    '   «грушу» — что она любит? Ровно 220 и замкнутую цепь.'
+  ],info:[
+    'Теория:  Переменные хранят данные: <b>let</b>, <b>const</b>.',
+    'Теория:  <b>let</b> — можно изменить, <b>const</b> — запечатана.',
+    'Практика:  В цехе: <b>voltage</b> (220), <b>fuse_closed</b> (true).',
+    'Совет:  Имена: <u>camelCase</u>, без пробелов, цифра не первой.'
+],quiz10:[
+    {q:'Как объявить изменяемую переменную?',opts:['let','const','var','int'],ans:0},
+    {q:'Что хранит voltage?',opts:['Ток','Напряжение','Сопротивление','Мощность'],ans:1},
+    {q:'Какой тип у fuse_closed?',opts:['Число','Строка','Булевый','Массив'],ans:2},
+    {q:'Что будет при voltage > 220?',opts:['Лампа загорится','Лампа перегорит','Ничего','Лампа мигнёт'],ans:1},
+    {q:'Какое напряжение нужно для лампы?',opts:['110','220','300','12'],ans:1},
+    {q:'Что делает fuse_closed?',opts:['Замыкает цепь','Размыкает цепь','Увеличивает ток','Снижает напряжение'],ans:0},
+    {q:'Как записать строку?',opts:['"текст"','текст','[текст]','{текст}'],ans:0},
+    {q:'Какое имя стиля в JS?',opts:['snake_case','camelCase','kebab-case','ALL_CAPS'],ans:1},
+    {q:'Можно ли менять let?',opts:['Да','Нет','Только один раз','Только в функции'],ans:0},
+    {q:'Что вернёт typeof true?',opts:['"number"','"string"','"boolean"','"object"'],ans:2}
+  ]},
+  {title:'Сравнения',sub:'Урок 3: Загадка профессора',riddle:[
+    '«Два числа поссорились. Одно говорит: „Я больше!“',
+    '  Другое: „Нет, я!“ Но истина оказалась посередине.',
+    '  Я положил на весы 15 и 35, а третье число должно',
+    '  лечь между ними, не касаясь краёв.',
+    '  Какое число ищет профессор?»',
     '',
-    '🔧 В этом цехе — конвейер с <b>12 узлами</b>. Каждый:',
-    '   true = пропускает шар, false = стопор.',
-    '   Переключай в редакторе и смотри результат!',
+    '✧ В коде <b>FLUID_CONFIG</b>. Одно из чисел — угол.',
+    '   Профессор не сказал «поставь 25». Он сказал:',
+    '   «найди число между 15 и 35». Любое такое — верное.'
+  ],info:[
+    'Теория:  Операторы: <b>&gt;</b>, <b>&lt;</b>, <b>&gt;=</b>, <b>&lt;=</b>, <b>===</b>, <b>!==</b>.',
+    'Теория:  <b>===</b> строгое равно (2 !== "2").',
+    'Практика:  <b>pipe_angle</b> между 15 и 35 — проверка через <b>&&</b>.',
+    'Совет:  <b>==</b> не проверяет тип — всегда используй <b>===</b>.'
+  ],quiz10:[
+    {q:'Что вернёт 5 > 3?',opts:['true','false','5','3'],ans:0},
+    {q:'Что вернёт 2 === "2"?',opts:['true','false','undefined','ошибку'],ans:1},
+    {q:'Что означает &&?',opts:['ИЛИ','И','НЕ','ИСКЛЮЧАЮЩЕЕ ИЛИ'],ans:1},
+    {q:'Как проверить «от 15 до 35 включительно»?',opts:['x>15 && x<35','x>=15 && x<=35','x==25','x!=15'],ans:1},
+    {q:'Какое значение pipe_angle подходит?',opts:['5','10','25','40'],ans:2},
+    {q:'Что делает оператор !?',opts:['Складывает','Переворачивает boolean','Сравнивает','Умножает'],ans:1},
+    {q:'Что вернёт !true?',opts:['true','false','null','undefined'],ans:1},
+    {q:'Сравнение == vs ===:',opts:['== проверяет тип','=== проверяет тип','Они одинаковы','Ни одно'],ans:1},
+    {q:'Что вернёт 10 >= 10?',opts:['true','false','10','null'],ans:0},
+    {q:'Как записать «не равно»?',opts:['!=','!==','=/=','Нет варианта'],ans:1}
+  ]},
+  {title:'Логические операторы',sub:'Урок 4: Загадка профессора',riddle:[
+    '«У механика есть два ключа. Один — „И", другой — „ИЛИ".',
+    '  Он сказал: „Ловушка сработает, если я поверну первый ключ',
+    '  И второй окажется в зелёной зоне".',
+    '  — А если повернуть только первый? — „Не сработает".',
+    '  — А только второй? — „Тоже нет".',
+    '  Сколько ключей нужно повернуть? И куда?»',
     '',
-    '⚡ Название «булевы» — в честь математика',
-    '   <b>Джорджа Буля</b>. Он создал алгебру логики в XIX веке!'
-  ],quiz:'Какая геометрическая фигура символизирует <b>false</b> в конвейере?',opts:['Стопор','Шестерёнка','Рельса','Молоток'],ans:0},
-  {title:'Переменные',sub:'Урок 2: Коробки с именами для данных',lines:[
-    '✧ <b>Переменная</b> — как коробка с этикеткой:',
+    '✧ В коде <b>CATCH_CONFIG</b>. trap_door_active — первый ключ.',
+    '   trigger_x — второй. Профессор хочет, чтобы оба были верны.'
+  ],info:[
+    'Теория:  && (И) — true, только если всё true.',
+    'Теория:  || (ИЛИ) — true, если хоть одно true.',
+    'Теория:  ! (НЕ) — переворачивает значение.',
+    'Практика:  trap_door_active && trigger_x в зоне 4.2-4.7.',
+    'Совет:  !!x — двойное НЕ = boolean.'
+  ],quiz10:[
+    {q:'Что вернёт true && false?',opts:['true','false','undefined','null'],ans:1},
+    {q:'Что вернёт false || true?',opts:['true','false','undefined','null'],ans:0},
+    {q:'Когда trap_door_active=true, trigger_x=4.5 — крышка?',opts:['Не сработает','Сработает','Зависит','Сломается'],ans:1},
+    {q:'Что должно быть true для ловушки?',opts:['trap_door_active','trigger_x>=4.2','Оба','Ничего'],ans:2},
+    {q:'Что вернёт !(true && false)?',opts:['true','false','undefined','null'],ans:0},
+    {q:'Что означает ||?',opts:['И','ИЛИ','НЕ','Исключающее ИЛИ'],ans:1},
+    {q:'trigger_x=1.2 — попадёт мяч?',opts:['Да','Нет','Может','Только с ветром'],ans:1},
+    {q:'Сколько зон проверяет trigger_x?',opts:['Одну','Диапазон','Две','Всё'],ans:1},
+    {q:'Что делает !!x?',opts:['Превращает в boolean','Удваивает','Отменяет','Ломает'],ans:0},
+    {q:'true || true && false — результат?',opts:['true','false','undefined','null'],ans:0}
+  ]},
+  {title:'Условия if/else',sub:'Урок 5: Загадка профессора',riddle:[
+    '«Перед тобой сундук. На нём написано:',
+    '  „Скажи слово — и я откроюсь. Скажи другое —',
+    '  я закричу". Слово состоит из семи букв.',
+    '  Первые две — ОТ, последние три — ТЬ.',
+    '  Что это за слово?»',
     '',
-    '   let voltage = 220;        // коробка «voltage» = 220',
-    '   let name = "Шестеренкин";  // коробка «name» = строка',
-    '   let on = true;             // коробка «on» = true',
+    '✧ В коде <b>SAFE_CONFIG</b>. Поле code ждёт строку.',
+    '   Профессор не сказал: «Введи ОТКРЫТЬ». Он загадал',
+    '   слово-антоним к «ЗАКРЫТЬ». Ты сам должен догадаться.'
+  ],info:[
+    'Теория:  if (условие) { } else { } — выбор пути.',
+    'Теория:  true — первый блок, false — второй.',
+    'Практика:  code должен быть "ОТКРЫТЬ", bypass_system = true.',
+    'Совет:  Не путай = (присвоить) и === (сравнить).'
+  ],quiz10:[
+    {q:'Какой код открывает сейф?',opts:['"ЗАКРЫТЬ"','"ОТКРЫТЬ"','"СЕЙФ"','"1234"'],ans:1},
+    {q:'Что делает bypass_system?',opts:['Отключает сигнал','Обходит защиту','Закрывает сейф','Включает свет'],ans:1},
+    {q:'Сколько букв в слове ОТКРЫТЬ?',opts:['5','6','7','8'],ans:2},
+    {q:'Какой тип у code?',opts:['Число','Строка','Булевый','Массив'],ans:1},
+    {q:'true → if, false → ...',opts:['then','else','end','break'],ans:1},
+    {q:'Если bypass_system=false — сейф?',opts:['Откроется','Не откроется','Зависит','Сломается'],ans:1},
+    {q:'Какое слово НЕ откроет сейф?',opts:['"ОТКРЫТЬ"','"открыть"','"Открыть"','Все откроют'],ans:3},
+    {q:'Что делает ===?',opts:['Сравнивает с типом','Присваивает','Сравнивает без типа','Создаёт'],ans:0},
+    {q:'if (a===b) { } else { } — когда сработает else?',opts:['a===b','a!==b','всегда','никогда'],ans:1},
+    {q:'Можно ли в if проверить число?',opts:['Да','Нет','Только boolean','Только строки'],ans:0}
+  ]},
+  {title:'Функции',sub:'Урок 6: Загадка профессора',riddle:[
+    '«У меня есть колесо. Оно не крутится.',
+    '  Я говорю ему число. Если число больше восьми —',
+    '  колесо оживает, канат падает, груз уезжает.',
+    '  Какое число нужно шепнуть колесу? И где спрятан канат?»',
     '',
-    '📖 <b>let</b> — можно переложить (изменить).',
-    '   <b>const</b> — коробка намертво запечатана.',
-    '   <u>var</u> — старый способ, не используй.',
+    '✧ В коде <b>GEAR_CONFIG</b>. wheel_speed — это число.',
+    '   unclog_rope — про канат. Профессор не сказал «10».',
+    '   Он сказал: «больше восьми». Любое число от 9 до 12.'
+  ],info:[
+    'Теория:  function имя(параметры) { return результат; }',
+    'Теория:  Параметры — вход, return — выход.',
+    'Практика:  wheel_speed > 8 && unclog_rope = true.',
+    'Совет:  Стрелочные функции: const f = (x) => x * 2;'
+  ],quiz10:[
+    {q:'Какая скорость нужна для груза?',opts:['>5','>8','=10','<8'],ans:1},
+    {q:'Что делает unclog_rope=true?',opts:['Натягивает канат','Снимает канат','Крутит колесо','Тормозит'],ans:1},
+    {q:'Если wheel_speed=3 и unclog_rope=true — груз?',opts:['Уедет','Не уедет','Зависит','Упадёт'],ans:1},
+    {q:'Сколько колёс на сцене?',opts:['1','2','3','4'],ans:1},
+    {q:'Как объявить функцию?',opts:['func','function','fn','def'],ans:1},
+    {q:'Что возвращает void-функция?',opts:['0','null','undefined','false'],ans:2},
+    {q:'Стрелочная функция: const f = ...',opts:['=>','->','=>','<= '],ans:2},
+    {q:'Что такое параметр?',opts:['Входное значение','Выходное значение','Имя функции','Тип'],ans:0},
+    {q:'wheel_speed — какой тип?',opts:['Число','Строка','Булевый','Массив'],ans:0},
+    {q:'Что будет если wheel_speed=12?',opts:['Груз едет','Груз стоит','Поломка','Искрит'],ans:0}
+  ]},
+  {title:'Объекты',sub:'Урок 7: Загадка профессора',riddle:[
+    '«Я собрал четыре ракетки в одну конструкцию.',
+    '  Они висят одна под другой. Между ними летит',
+    '  лёгкий белый шарик. Чтобы он допрыгал до чаши,',
+    '  ему нужна упругость — но не слишком малая и не слишком большая.',
+    '  Я назвал это свойство „bounciness". В каких пределах',
+    '  оно должно быть, чтобы шарик не упал и не улетел?»',
     '',
-    '🔧 В этом цехе ты меняешь параметры лампочки:',
-    '   voltage, fuse_closed, wire_temp, bulb_power…',
-    '   Каждый — это <b>переменная в коде</b>!',
+    '✧ В коде <b>PINGPONG_CONFIG</b>. bounciness — дробь от 0 до 1.',
+    '   Профессор хочет от 0.7 до 0.95. Любое значение между.'
+  ],info:[
+    'Теория:  Объект { ключ: значение, ... } — данные под одной крышей.',
+    'Теория:  Доступ через точку: config.bounciness.',
+    'Практика:  bounciness от 0.7 до 0.95, wind_force = 0.',
+    'Совет:  Объекты можно вкладывать: config.settings.power.'
+  ],quiz10:[
+    {q:'Сколько ракеток в каскаде?',opts:['2','3','4','5'],ans:2},
+    {q:'Диапазон bounciness?',opts:['0.1-0.5','0.7-0.95','0.5-1.0','0-0.5'],ans:1},
+    {q:'Куда должен попасть шарик?',opts:['В ведро','В чашку','В коробку','На пол'],ans:1},
+    {q:'Как получить свойство объекта?',opts:['obj->prop','obj.prop','obj[prop]','prop.obj'],ans:1},
+    {q:'Если bounciness=0.4 — шарик?',opts:['Долетит','Не долетит','Перелетит','Зависнет'],ans:1},
+    {q:'Какой тип у bounciness?',opts:['Целое','Дробь','Строка','Булевый'],ans:1},
+    {q:'За что отвечает wind_force?',opts:['Упругость','Ветер','Трение','Массу'],ans:1},
+    {q:'Сколько раз шарик отскакивает?',opts:['1','2','3','до 4'],ans:3},
+    {q:'Как записать объект?',opts:['[]','{}','()','<>'],ans:1},
+    {q:'bounciness=0.9 — шарик долетит?',opts:['Да','Нет','Может','Зависит'],ans:0}
+  ]},
+  {title:'Массивы и циклы',sub:'Урок 8: Загадка профессора',riddle:[
+    '«У меня два насоса. Один говорит: „Пусти меня —',
+    '  и вода пойдёт!" Другой говорит то же самое.',
+    '  Но слив ворчит: „Если я открыт — вода убежит".',
+    '  Чтобы вода попала в бассейн, нужно послушать',
+    '  обоих насосов И заткнуть слив. Сколько условий?»',
     '',
-    '⚡ Имя: буквы, $, _, <u>но не цифра первой</u>.',
-    '   Без пробелов. Стиль: <b>camelCase</b>.'
-  ],quiz:'Как объявить переменную, которую можно изменить?',opts:['let','const','var','bool'],ans:0},
-  {title:'Сравнения',sub:'Урок 3: Код умеет сравнивать числа и строки',lines:[
-    '✧ Операторы сравнения всегда возвращают true/false:',
-    '',
-    '   <b>&gt;</b>  больше    (10 > 5  → true)',
-    '   <b>&lt;</b>  меньше    (3 < 1   → false)',
-    '   <b>&gt;=</b> больше или равно',
-    '   <b>&lt;=</b> меньше или равно',
-    '   <b>===</b> строго равно  (2 === "2" → false)',
-    '   <b>!==</b> строго не равно',
-    '',
-    '🔧 Жёлоб наклонится только если pipe_angle',
-    '   <u>от 15 до 35</u>: >= 15 && <= 35.',
-    '',
-    '⚡ <b>Важно:</b> == не проверяет тип (2=="2" → true).',
-    '   Всегда используй <b>===</b> — это безопаснее!'
-  ],quiz:'Что вернёт выражение <b>5 === "5"</b>?',opts:['true','false','undefined','ошибку'],ans:1},
-  {title:'Логические операторы',sub:'Урок 4: && (И), || (ИЛИ), ! (НЕ)',lines:[
-    '✧ Три кита булевой логики:',
-    '',
-    '   <b>&&</b> (И) — true, только если <u>всё</u> true',
-    '      true && true → true',
-    '      true && false → false',
-    '',
-    '   <b>||</b> (ИЛИ) — true, если <u>хоть одно</u> true',
-    '      false || true → true',
-    '',
-    '   <b>!</b> (НЕ) — переворачивает значение',
-    '      !true → false,  !false → true',
-    '',
-    '🔧 Ловушка сработает если trap_door_active = true',
-    '   <b>И</b> trigger_x между 4.2 и 4.7 — два &&.',
-    '',
-    '⚡ <b>!!x</b> — двойное НЕ = превращает в true/false!'
-  ],quiz:'Что вернёт <b>true && false</b>?',opts:['true','false','undefined','null'],ans:1},
-  {title:'Условия if/else',sub:'Урок 5: Код принимает решения',lines:[
-    '✧ <b>if</b> — как стрелочный переводчик на рельсах:',
-    '',
-    '   if (code === "ОТКРЫТЬ") {',
-    '       дверь_открыта();',
-    '   } else {',
-    '       сирена_включена();',
-    '   }',
-    '',
-    '📖 Если условие <b>true</b> — первый блок,',
-    '   если <b>false</b> — второй (или ничего).',
-    '',
-    '🔧 Сейф проверяет твой пароль через if:',
-    '   верный → дверь открывается, неверный → сирена.',
-    '',
-    '⚡ Не путай <b>=</b> (присвоить) и <b>===</b> (сравнить)!'
-  ],quiz:'Что делает <b>else</b>?',opts:['Выполняется если if true','Выполняется если if false','Завершает программу','Создаёт цикл'],ans:1},
-  {title:'Функции',sub:'Урок 6: Станки для обработки данных',lines:[
-    '✧ <b>Функция</b> — как станок: сырьё на вход, деталь на выход.',
-    '',
-    '   function <u>add</u>(a, b) {',
-    '       return a + b;',
-    '   }',
-    '   let sum = <u>add</u>(10, 5);  // sum = 15',
-    '',
-    '📖 <b>Параметры</b> (a, b) — что кладём в станок.',
-    '   <b>return</b> — результат на выходе.',
-    '',
-    '🔧 Скорость шины wheel_speed передаётся в функцию',
-    '   вращения. Больше 8 — груз уезжает!',
-    '',
-    '⚡ Стрелочные функции (<u>современный стиль</u>):',
-    '   const f = (x) => x * 2;  // коротко и ясно'
-  ],quiz:'Что делает <b>return</b> в функции?',opts:['Печатает результат','Возвращает значение и выходит','Повторяет код','Создаёт переменную'],ans:1},
-  {title:'Объекты',sub:'Урок 7: Всё в одном ящике',lines:[
-    '✧ <b>Объект</b> собирает данные под одной крышей:',
-    '',
-    '   let config = {',
-    '       voltage: 220,',
-    '       fuse: true,',
-    '       name: "Лампа"',
-    '   };',
-    '',
-    '📖 Доступ через <b>точку</b>: config.voltage → 220',
-    '   Можно менять: config.voltage = 300;',
-    '',
-    '🔧 В каждом цехе у тебя объект конфигурации:',
-    '   LIGHT_CONFIG = { voltage, fuse, … }',
-    '   Его ты редактируешь в окне кода!',
-    '',
-    '⚡ Объекты можно <b>вкладывать</b>:',
-    '   config.settings.power = true;  // цепочка свойств'
-  ],quiz:'Как обратиться к свойству <b>voltage</b> объекта config?',opts:['config[voltage]','config.voltage','voltage.config','config→voltage'],ans:1},
-  {title:'Массивы и циклы',sub:'Урок 8: Списки и конвейеры',lines:[
-    '✧ <b>Массив</b> — нумерованный список:',
-    '',
-    '   let levels = [1, 2, 3, 4, 5, 6, 7, 8];',
-    '   levels[0] = 1, levels[3] = 4.',
-    '   <u>Счёт с НУЛЯ!</u>',
-    '',
-    '📖 <b>Цикл for</b> — перебирает по порядку:',
-    '   for (let i = 0; i < levels.length; i++) {',
-    '       console.log(levels[i]);',
-    '   }',
-    '',
-    '🔧 Финальный цех: оба насоса pump_A <b>&&</b> pump_B',
-    '   должны быть true — проверка массива условий.',
-    '',
-    '⚡ <b>forEach</b> — современный перебор:',
-    '   levels.forEach(l => console.log(l));'
-  ],quiz:'С какого индекса начинается массив в JavaScript?',opts:['С 1','С 0','С -1','С любого'],ans:1}
+    '✧ В коде <b>FINAL_CONFIG</b>. Три поля: pump_A, pump_B,',
+    '   drain_system. Профессор не сказал: «включи оба и закрой».',
+    '   Он загадал: «послушай обоих и заткни слив».'
+  ],info:[
+    'Теория:  Массив — [] , счёт с НУЛЯ. levels[0] = 1.',
+    'Теория:  for (let i=0; i<n; i++) { } — цикл.',
+    'Практика:  Нужны: pump_A=true, pump_B=true, drain_system=false.',
+    'Совет:  arr.forEach(l => ...) — современный перебор.'
+  ],quiz10:[
+    {q:'Сколько насосов на сцене 8?',opts:['1','2','3','4'],ans:1},
+    {q:'Что делает drain_system=true?',opts:['Наполняет','Сливает','Качает','Греет'],ans:1},
+    {q:'Какой символ для массива?',opts:['{}','[]','()','<>'],ans:1},
+    {q:'С какого индекса начинается массив?',opts:['-1','0','1','2'],ans:1},
+    {q:'Как перебрать массив?',opts:['for','if','switch','while'],ans:0},
+    {q:'Какое условие пускает воду?',opts:['pump_A=true','pump_A && pump_B','pump_A || pump_B','!drain'],ans:1},
+    {q:'Если drain_system=false — вода?',opts:['Убегает','Остаётся','Испаряется','Замерзает'],ans:1},
+    {q:'Сколько условий в check для сцены 8?',opts:['1','2','3','4'],ans:3},
+    {q:'Что вернёт [1,2,3][1]?',opts:['1','2','3','null'],ans:1},
+    {q:'forEach — это ...',opts:['Цикл','Условие','Массив','Функция'],ans:0}
+  ]},
 ];
 
-let lessonTimer=null, lessonAnswer=null;
+let lessonTimer=null;
 
 function showLesson(idx){
   const ol=document.getElementById('lesson-overlay');
@@ -361,80 +431,70 @@ function showLesson(idx){
   const Ldata=LESSONS[idx];
   if(!Ldata)return;
   const fmt=s=>s.replace(/<b>(.*?)<\/b>/g,'<b style="font-weight:700;color:#2a1e14">$1</b>').replace(/<u>(.*?)<\/u>/g,'<u style="text-decoration:underline;text-decoration-color:#c8a050;text-underline-offset:3px;text-decoration-thickness:2px">$1</u>');
-  const content=Ldata.lines.map(l=>{
-    if(l.startsWith('✧'))return `<div style="color:#b8860a;font-weight:700;font-size:28px;margin-top:12px">${fmt(l)}</div>`;
-    if(l.startsWith('📖'))return `<div style="color:#1a6a1a;font-size:24px;margin-top:8px;line-height:1.4">${fmt(l)}</div>`;
-    if(l.startsWith('🔧'))return `<div style="color:#b83030;font-size:24px;margin-top:8px;line-height:1.4">${fmt(l)}</div>`;
-    if(l.startsWith('⚡'))return `<div style="color:#8a2020;font-size:24px;margin-top:8px;line-height:1.4">${fmt(l)}</div>`;
-    if(l.trim()==='')return '<div style="height:4px"></div>';
-    if(l.startsWith('   '))return `<div style="font-size:22px;color:#5a3a2a;padding-left:24px;line-height:1.45;font-family:'Caveat',serif">${fmt(l.trim())}</div>`;
+  const riddleHtml=Ldata.riddle.map(l=>{
+    if(l.startsWith('«')||l.startsWith('  '))return `<div style="font-size:22px;color:#5a3a2a;padding-left:20px;line-height:1.5;font-style:italic;margin:3px 0">${fmt(l.trim())}</div>`;
+    if(l.startsWith('✧'))return `<div style="color:#b8860a;font-weight:700;font-size:24px;margin-top:10px;line-height:1.4">${fmt(l.replace(/^✧\s*/,''))}</div>`;
+    if(l.trim()==='')return '<div style="height:5px"></div>';
+    if(l.startsWith('   '))return `<div style="font-size:22px;color:#5a3a2a;padding-left:32px;line-height:1.45">${fmt(l.trim())}</div>`;
     return `<div style="font-size:23px;color:#4a2a1a;line-height:1.45">${fmt(l)}</div>`;
   }).join('');
-  card.innerHTML=`<div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;padding-bottom:12px;border-bottom:2px solid #c8a050">
+  const infoHtml=Ldata.info.map(l=>{
+    const txt=l.replace(/^(Теория: |Практика: |Совет: )\s*/,'');
+    if(l.startsWith('Теория: '))return `<div style="margin-bottom:8px;padding:10px 14px;background:#e8f0e4;border-radius:5px;font-size:19px;color:#1a5a1a;line-height:1.45">${fmt(txt)}</div>`;
+    if(l.startsWith('Практика: '))return `<div style="margin-bottom:8px;padding:10px 14px;background:#f5e4d8;border-radius:5px;font-size:19px;color:#b83030;line-height:1.45">${fmt(txt)}</div>`;
+    if(l.startsWith('Совет: '))return `<div style="margin-bottom:8px;padding:10px 14px;background:#f5ede0;border-radius:5px;font-size:19px;color:#8a5030;line-height:1.45">${fmt(txt)}</div>`;
+    return `<div style="font-size:19px;color:#4a2a1a;line-height:1.4;margin:3px 0">${fmt(l)}</div>`;
+  }).join('');
+  // stage 1: riddle
+  card.style.padding='48px 56px';
+  card.innerHTML=`<div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;padding-bottom:12px;border-bottom:2px solid #c8a050">
     <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#5a3a2a,#3a2a1a);border:2px solid #c8a050;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#c8a050;flex-shrink:0">Ш</div>
-    <div style="text-align:left"><div style="font-size:32px;font-weight:700;color:#2a1e14;font-family:'Caveat',serif">${Ldata.title}</div><div style="font-size:21px;color:#8a6a3a;font-weight:600;margin-top:2px;font-family:'Caveat',serif">${Ldata.sub}</div></div>
+    <div style="text-align:left"><div style="font-size:32px;font-weight:700;color:#2a1e14">${Ldata.title}</div><div style="font-size:21px;color:#8a6a3a;font-weight:600;margin-top:2px">${Ldata.sub}</div></div>
   </div>
-  <div style="font-size:23px;line-height:1.45;color:#3a2a1a;text-align:left;padding:6px 0;font-family:'Caveat',serif">${content}</div>
-  <div style="margin-top:8px;padding-top:10px;border-top:2px solid #c8a050;text-align:center">
-    <div style="font-size:18px;color:#8a6a3a;font-family:'Caveat',serif;margin-bottom:6px">⏳ Изучи конспект курса. Продолжить через 60 секунд:</div>
-    <button class="b2" id="lesson-continue" disabled style="opacity:.5;cursor:default;font-size:20px;padding:14px 24px;font-family:'Caveat',serif;font-weight:700;background:#3a2a1a;border-color:#8a6a3a;color:#c8a050;border-radius:8px">⏳ 60 секунд</button>
+  <div style="font-size:22px;line-height:1.5;color:#3a2a1a;text-align:left;padding:10px 0">${riddleHtml}</div>
+  <div style="margin-top:10px;padding-top:10px;border-top:2px solid #c8a050;text-align:center">
+    <button class="b2" id="lesson-continue" style="font-size:20px;padding:14px 24px;font-weight:700;background:#c8a050;border-color:#c8a050;color:#2a1e14;border-radius:8px;cursor:pointer">Отгадал →</button>
   </div>`;
   ol.style.display='flex';
-  let sec=60;
-  const btn=document.getElementById('lesson-continue');
-  if(lessonTimer){clearInterval(lessonTimer);lessonTimer=null}
-  lessonTimer=setInterval(()=>{
-    sec--;
-    if(sec<=0){
-      clearInterval(lessonTimer);lessonTimer=null;
-      btn.textContent='Понял! Начать уровень →';
-      btn.disabled=false;btn.style.opacity='1';btn.style.cursor='pointer';
-      btn.style.background='#c8a050';btn.style.borderColor='#c8a050';btn.style.color='#2a1e14';
-      btn.onclick=()=>{
-        document.getElementById('lesson-overlay').style.display='none';
-      };
-    }else{btn.textContent='⏳ '+sec+' сек'}
-  },1000);
+  document.getElementById('lesson-continue').onclick=()=>{
+    // stage 2: конспект
+    card.innerHTML=`<div style="display:flex;align-items:center;gap:16px;margin-bottom:12px;padding-bottom:12px;border-bottom:2px solid #c8a050">
+      <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#5a3a2a,#3a2a1a);border:2px solid #c8a050;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#c8a050;flex-shrink:0">Ш</div>
+      <div style="text-align:left"><div style="font-size:28px;font-weight:700;color:#2a1e14">Конспект урока</div><div style="font-size:18px;color:#8a6a3a;font-weight:600;margin-top:2px">${Ldata.title}</div></div>
+    </div>
+    <div style="margin:8px 0">${infoHtml}</div>
+    <div style="margin-top:10px;padding-top:10px;border-top:2px solid #c8a050;text-align:center">
+      <button class="b2" id="lesson-continue2" style="font-size:20px;padding:14px 24px;font-weight:700;background:#c8a050;border-color:#c8a050;color:#2a1e14;border-radius:8px;cursor:pointer">Понял! Начать уровень →</button>
+    </div>`;
+    document.getElementById('lesson-continue2').onclick=()=>{ol.style.display='none';};
+  };
 }
 
 /* ---------- ПРОВЕРКА ПОСЛЕ УРОВНЯ ---------- */
 let quizData=null;
-
-function showQuiz(){
+window.showQuiz=function(){
+  const Ldata=LESSONS[lvlIdx];
+  if(!Ldata||!Ldata.quiz10)return;
+  const qs=Ldata.quiz10;
+  quizData=qs.map(q=>({q:q.q,opts:q.opts,ans:q.ans,myAns:null}));
   const ol=document.getElementById('lesson-overlay');
   const card=document.getElementById('lesson-card');
-  // собираем вопросы из всех пройденных уровней
-  const pool=[];
-  for(let i=0;i<=lvlIdx;i++)if(LESSONS[i]&&LESSONS[i].quiz)pool.push({lesson:i,q:LESSONS[i].quiz});
-  const count=Math.min(pool.length,4);
-  const chosen=pool.sort(()=>Math.random()-.5).slice(0,count);
-  quizData=chosen.map(c=>({q:c.q,ans:null,lesson:c.lesson}));
-  const fmt=s=>s.replace(/<b>(.*?)<\/b>/g,'<b style="font-weight:700;color:#2a1e14">$1</b>').replace(/<u>(.*?)<\/u>/g,'<u style="text-decoration:underline;text-decoration-color:#c8a050;text-underline-offset:3px;text-decoration-thickness:2px">$1</u>');
-  const qHtml=quizData.map((item,qi)=>{
-    const q=item.q;
-    const optsHtml=q.opts.map((o,i)=>`<label style="display:block;padding:8px 14px;background:#eae0c8;border:1px solid #c8a050;border-radius:6px;margin:5px 0;cursor:pointer;font-size:18px;font-family:'Caveat',serif;color:#3a2a1a;transition:.2s" onmouseover="this.style.borderColor='#8a6a3a';this.style.background='#e0d4b8'" onmouseout="this.style.borderColor='#c8a050';this.style.background='#eae0c8'"><input type="radio" name="quiz_${qi}" value="${i}" style="margin-right:8px;width:14px;height:14px">${o}</label>`).join('');
-    return `<div style="margin-top:${qi>0?'14':'6'}px;padding-top:${qi>0?'10':'0'}px;border-top:${qi>0?'1px solid #d4c8a0':'none'}">
-      <div style="font-size:18px;color:#2a1e14;font-weight:600;font-family:'Caveat',serif;margin-bottom:4px"><span style="color:#c8a050">Вопрос ${qi+1}.</span> ${fmt(q.q)}</div>
-      <div>${optsHtml}</div>
-      <div id="qfb_${qi}" style="font-size:18px;margin-top:4px;font-family:'Caveat',serif;display:none"></div>
-    </div>`;
-  }).join('');
-  card.innerHTML=`<div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;padding-bottom:12px;border-bottom:2px solid #c8a050">
-    <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#5a3a2a,#3a2a1a);border:2px solid #c8a050;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#c8a050;flex-shrink:0">Ш</div>
-    <div style="text-align:left"><div style="font-size:28px;font-weight:700;color:#2a1e14;font-family:'Caveat',serif">Проверка знаний</div><div style="font-size:18px;color:#8a6a3a;font-weight:600;margin-top:2px;font-family:'Caveat',serif">Ответь на вопросы, чтобы перейти дальше</div></div>
-  </div>
-  ${qHtml}
-  <div style="margin-top:14px;padding-top:12px;border-top:2px solid #c8a050;text-align:center">
-    <div id="quiz-feedback" style="font-size:20px;margin-bottom:6px;font-family:'Caveat',serif;display:none"></div>
-    <button class="b2" style="font-size:20px;padding:14px 24px;font-family:'Caveat',serif;font-weight:700;background:#c8a050;border-color:#c8a050;color:#2a1e14;border-radius:8px;cursor:pointer" onclick="submitQuiz()">Проверить ответы</button>
-  </div>`;
-  ol.style.display='flex';
-  quizData.forEach((_,qi)=>{
-    document.querySelectorAll(`input[name="quiz_${qi}"]`).forEach(r=>r.addEventListener('change',()=>{quizData[qi].ans=parseInt(r.value)}));
+  if(!ol||!card)return;
+  card.style.padding='24px 32px';
+  card.style.background='#f8f2e0';
+  let h='<div style="text-align:center;font-size:22px;font-weight:700;color:#2a1e14;margin-bottom:12px">Урок '+(lvlIdx+1)+' — 10 вопросов</div>';
+  qs.forEach((item,qi)=>{
+    h+='<div style="margin:8px 0;padding:6px;background:#f0e8d4;border-radius:4px;font-size:15px;color:#2a1e14"><b>'+(qi+1)+'. '+item.q+'</b><br>';
+    item.opts.forEach((o,i)=>h+='<label style="display:block;padding:4px 8px;margin:3px 0;background:#eae0c8;border:1px solid #c8a050;border-radius:3px;cursor:pointer;font-size:14px"><input type="radio" name="q'+qi+'" value="'+i+'" style="margin-right:6px">'+o+'</label>');
+    h+='<div id="qfb_'+qi+'" style="font-size:14px;margin-top:3px;display:none;color:#2a1e14"></div></div>';
   });
+  h+='<div style="text-align:center;margin-top:12px;padding-top:10px;border-top:2px solid #c8a050"><div id="quiz-feedback" style="font-size:16px;margin-bottom:6px;display:none;color:#2a1e14"></div><button style="font-size:18px;padding:10px 20px;background:#c8a050;border:1px solid #c8a050;color:#2a1e14;border-radius:6px;cursor:pointer;font-weight:700" onclick="window.submitQuiz()">Проверить ответы</button></div>';
+  card.innerHTML=h;
+  ol.style.display='flex';
+  document.querySelectorAll('#lesson-card input[type="radio"]').forEach(r=>r.addEventListener('change',function(){const m=this.name.match(/q(\d+)/);if(m)quizData[parseInt(m[1])].myAns=parseInt(this.value)}));
 }
-function submitQuiz(){
-  const missing=quizData.some(d=>d.ans===null);
+window.submitQuiz=function(){
+  const missing=quizData.some(d=>d.myAns===null);
   if(missing){
     const fb=document.getElementById('quiz-feedback');
     fb.style.display='block';fb.innerHTML='❓ <b>Ответь на все вопросы!</b>';fb.style.color='#b83030';
@@ -444,54 +504,30 @@ function submitQuiz(){
   quizData.forEach((d,i)=>{
     const fb=document.getElementById('qfb_'+i);
     fb.style.display='block';
-    if(d.ans===d.q.ans){fb.innerHTML='✅ Верно!';correct++}
-    else{fb.innerHTML='❌ Правильно: '+d.q.opts[d.q.ans];}
+    if(d.myAns===d.ans){fb.innerHTML='✅ Верно!';correct++}
+    else{fb.innerHTML='❌ Правильно: '+d.opts[d.ans];}
   });
   const fb=document.getElementById('quiz-feedback');fb.style.display='block';
-  if(correct===quizData.length){
-    fb.innerHTML='✅ <b>Всё верно!</b> Ты усвоил теорию, инженер!';
+  if(correct>=7){
+    fb.innerHTML='✅ <b>Всё верно! ('+correct+'/10)</b> Ты усвоил теорию, инженер!';
     fb.style.color='#1a6a1a';
-    setTimeout(()=>{
-      document.getElementById('lesson-overlay').style.display='none';
-      unblockNext();
-      loadLevel(lvlIdx+1);
-    },1500);
+    setTimeout(()=>{document.getElementById('lesson-overlay').style.display='none';},1500);
   }else{
-    fb.innerHTML='❌ <b>Есть ошибки.</b> Исправь и нажми "Проверить" снова.';
+    fb.innerHTML='❌ <b>Есть ошибки ('+correct+'/10). Исправь и нажми "Проверить" снова.';
     fb.style.color='#b83030';
     quizData.forEach((d,i)=>{
-      if(d.ans!==d.q.ans){
-        document.querySelectorAll(`input[name="quiz_${i}"]`).forEach(r=>r.checked=false);
-        d.ans=null;
+      if(d.myAns!==d.ans){
+        document.querySelectorAll('input[name="q'+i+'"]').forEach(r=>r.checked=false);
+        d.myAns=null;
       }
     });
-  }
-}
-function finishLesson(idx){
-  if(lessonTimer){clearInterval(lessonTimer);lessonTimer=null}
-  const fb=document.getElementById('quiz-feedback');fb.style.display='block';
-  const q=LESSONS[idx].quiz;
-  if(lessonAnswer===null){fb.innerHTML='❓ <b>Выбери вариант!</b>';fb.style.color='#b83030';return}
-  if(lessonAnswer===q.ans){
-    fb.innerHTML='✅ <b>Верно!</b> Ты усвоил урок, инженер!';
-    fb.style.color='#1a6a1a';
-    localStorage.setItem('ws_lesson_'+L.num,'1');
-    setTimeout(()=>{document.getElementById('lesson-overlay').style.display='none'},1500);
-  }else{
-    fb.innerHTML='❌ <b>Не совсем.</b> Правильный ответ: '+q.opts[q.ans];
-    fb.style.color='#b83030';
-    setTimeout(()=>{fb.style.display='none';document.querySelectorAll('input[name="quiz"]').forEach(r=>r.checked=false);lessonAnswer=null},3000);
   }
 }
 /* ---------- КОНФИГ/КОД ---------- */
 function initLevel(){
   L=LVLS[lvlIdx];
-  if(L.kind==='nodes'){
-    wanted={};conf={};KEYS.forEach((k,i)=>{wanted[k]=(i===0)?true:(L.w==='all'?true:false);conf[k]=(i===0)?true:false});
-  }else{
-    conf={};const ck=Object.keys(L.cfg)[0];const defs=L.cfg[ck];conf[ck]={};
-    Object.keys(defs).forEach(k=>{conf[ck][k]=defs[k].v});
-  }
+  if(L.kind==='nodes'){conf={};KEYS.forEach((k,i)=>{conf[k]=(i===0)?true:false})}
+  else{conf={};const ck=Object.keys(L.cfg)[0];const defs=L.cfg[ck];conf[ck]={};Object.keys(defs).forEach(k=>{conf[ck][k]=defs[k].v})}
 }
 function codeText(){
   if(L.kind==='nodes'){
@@ -517,6 +553,21 @@ ta.addEventListener('scroll',function(){
   hl.style.transform='translateY(-'+ta.scrollTop+'px) translateX(-'+ta.scrollLeft+'px)';
   ln.scrollTop=ta.scrollTop;
 });
+function doCheck(data,okMsg){
+  if(!eng){showGate();return}
+  if(run||crash)return;
+  if(!parseC())return;
+  if(!data||L.kind==='nodes'){lg.textContent='% Для этого этапа нет проверок.';return}
+  const ck=Object.keys(L.cfg)[0];const c=conf[ck]||{};
+  const keys=Object.keys(data);
+  for(const k of keys){
+    const expect=data[k];const got=c[k];
+    if(Array.isArray(expect)){if(!(got>=expect[0]&&got<=expect[1]))return badMsg(k,got,expect[0]+'-'+expect[1])}
+    else{if(got!==expect)return badMsg(k,got,expect)}
+  }
+  lg.textContent='% '+okMsg;lg.style.color='';
+}
+function badMsg(name,got,want){lg.textContent='% Параметр "'+name+'" = '+got+'. Нужно: '+want;lg.style.color='var(--bad)';return false}
 function rebuildEdit(){
   ta.value=codeText();sync();
   ta.scrollTop=0;ta.scrollLeft=0;
@@ -629,47 +680,18 @@ function checkGoal(){
   }
   return{ok:true};
 }
-
-// Вторая кнопка: проверка дополнительных (экспериментальных) настроек
-function checkExtra2(){
-  doCheck(L.check2,'Доп. настройки в норме! Эксперимент готов.');
-}
-// Третья кнопка: калибровка (check3)
-function checkExtra3(){
-  doCheck(L.check3,'Калибровка пройдена! Параметры идеальны.');
-}
-function doCheck(data,okMsg){
-  if(!eng){showGate();return}
-  if(run||crash)return;
-  if(!parseC())return;
-  if(!data||L.kind==='nodes'){lg.textContent='% Для этого этапа нет проверок.';return}
-  const ck=Object.keys(L.cfg)[0];const c=conf[ck]||{};
-  const keys=Object.keys(data);
-  for(const k of keys){
-    const expect=data[k];const got=c[k];
-    if(Array.isArray(expect)){
-      if(!(got>=expect[0]&&got<=expect[1]))return(badMsg(shortKey(k),got,expect[0]+'-'+expect[1]));
-    }else{if(got!==expect)return badMsg(shortKey(k),got,expect)}
-  }
-  lg.textContent='% '+okMsg;
-  lg.style.color='';
-}
-function badMsg(name,got,want){
-  lg.textContent='% Параметр "'+name+'" = '+got+'. Нужно: '+want;
-  lg.style.color='var(--bad)';
-  return false;
-}
+window.checkExtra2=function(){doCheck(L.check2,'Доп. настройки в норме! Эксперимент готов.')}
+window.checkExtra3=function(){doCheck(L.check3,'Калибровка пройдена! Параметры идеальны.')}
 
 /* ---------- THREE.JS ---------- */
-const vp=document.getElementById('vp'),vw=vp.clientWidth,vh=vp.clientHeight;
+const vp=$('vp'),vw=vp.clientWidth,vh=vp.clientHeight;
 const sc=new THREE.Scene();sc.background=new THREE.Color(0x34261c);
 const cam=new THREE.PerspectiveCamera(36,vw/vh,0.1,60);cam.position.set(-0.3,3.8,16);cam.lookAt(0,-1.2,0);
-const ren=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});ren.setSize(vw,vh);ren.setPixelRatio(Math.min(devicePixelRatio,1.5));
+const ren=new THREE.WebGLRenderer({antialias:true,powerPreference:"high-performance"});ren.setSize(vw,vh);ren.setPixelRatio(Math.min(devicePixelRatio,1.25));
 ren.shadowMap.enabled=true;ren.shadowMap.type=THREE.PCFSoftShadowMap;ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=.8;
 vp.appendChild(ren.domElement);
 const cmp=new EffectComposer(ren);cmp.addPass(new RenderPass(sc,cam));
-const bl=new UnrealBloomPass(new THREE.Vector2(vw,vh),.25,.15,.08);bl.threshold=.2;bl.strength=.25;bl.radius=.25;cmp.addPass(bl);
-const sa=new SSAOPass(sc,cam,vw,vh);sa.kernelRadius=2;sa.minDistance=.02;sa.maxDistance=.2;cmp.addPass(sa);
+const bl=new UnrealBloomPass(new THREE.Vector2(vw,vh),.15,.08,.04);bl.threshold=.3;bl.strength=.15;bl.radius=.15;cmp.addPass(bl);
 cmp.addPass(new OutputPass());
 sc.add(new THREE.AmbientLight(0x5a4a3a,.5));
 sc.add(new THREE.HemisphereLight(0xd0c0a8,0x2a1e14,.35));
@@ -685,7 +707,7 @@ const floor=new THREE.Mesh(new THREE.PlaneGeometry(50,22),new THREE.MeshStandard
 floor.rotation.x=-Math.PI/2;floor.position.set(1.5,-5.86,0);floor.receiveShadow=true;sc.add(floor);
 const grid=new THREE.GridHelper(50,25,0x5a3a2a,0x3a2a1e);grid.position.set(1.5,-5.7,0);sc.add(grid);
 
-const env=new THREE.CubeTextureLoader().setPath('https://threejs.org/examples/textures/cube/SwedishRoyalCastle/').load(['px.jpg','nx.jpg','py.jpg','ny.jpg','pz.jpg','nz.jpg']);
+let env=null;try{env=new THREE.CubeTextureLoader().setPath('https://threejs.org/examples/textures/cube/SwedishRoyalCastle/').load(['px.jpg','nx.jpg','py.jpg','ny.jpg','pz.jpg','nz.jpg'])}catch(e){}
 const ball=new THREE.Group();
 ball.position.set(-6.5,4,0);ball.userData={vx:0,vy:0};sc.add(ball);
 let actorMat=null, actorExtra={};
@@ -748,7 +770,7 @@ function setActorColor(hex){if(actorMat)actorMat.color.setHex(hex)}
 
 const M={base:new THREE.MeshStandardMaterial({color:0x5a3a2a,roughness:.85}),frame:new THREE.MeshStandardMaterial({color:0x8a6a4a,roughness:.4,metalness:.7}),brass:new THREE.MeshStandardMaterial({color:0xceb07a,roughness:.3,metalness:.8}),iron:new THREE.MeshStandardMaterial({color:0x4a3a2e,roughness:.75}),dark:new THREE.MeshStandardMaterial({color:0x2a1e14,roughness:.75}),glow:new THREE.MeshStandardMaterial({color:0x6a4a3a,roughness:.4,emissive:new THREE.Color(0),emissiveIntensity:0}),copper:new THREE.MeshStandardMaterial({color:0xb8865a,roughness:.35,metalness:.7}),water:new THREE.MeshStandardMaterial({color:0x3a6a8a,roughness:.2,metalness:.1,transparent:true,opacity:.8})};
 
-const nodes=[];let run=false,crash=false,cur=0,goalReached=false;const SPD=.024;
+const nodes=[];let run=false,crash=false,cur=0,goalReached=false;let waterOverflow=false,overflowTimer=0;const SPD=.024;
 const deco=[];let targetObj=null,targetX=6.2,winAnim=0,levelPrev=0,goalObjs=null,dropState=null,waterDrops=[],dropTimer=0,waterCaptured=0,waterMissed=0;
 
 function sceneLayout(){
@@ -775,7 +797,7 @@ function clearObjects(){
   deco.forEach(d=>sc.remove(d));deco.length=0;
   sc.children.filter(c=>c.userData&&(c.userData.isPipe||c.userData.isFin||c.userData.isGoal||c.userData.isWater||c.userData.isDrop||c.userData.isWaterTop||c.userData.isJet||c.userData.isChute)).forEach(c=>sc.remove(c));
   waterDrops.forEach(d=>sc.remove(d));waterDrops.length=0;
-  targetObj=null;goalReached=false;dropTimer=0;waterCaptured=0;waterMissed=0;
+  targetObj=null;goalReached=false;dropTimer=0;waterCaptured=0;waterMissed=0;waterOverflow=false;overflowTimer=0;
 }
 
 function addGoalObject(layout){
@@ -812,6 +834,7 @@ function addGoalObject(layout){
     const w1=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.9,6),wireMat);w1.position.set(.55,-.2,-.2);w1.rotation.z=-0.6;gr.add(w1);
     const w2=w1.clone();w2.position.set(.55,-.2,.2);w2.rotation.z=-0.6;w2.position.z=-.2;gr.add(w2);
     gr.userData={isGoal:true,hasSocket:true,platePos:plate.position.y};sc.add(gr);targetObj=gr;obj.fil=fil;obj.glowFil=glowFil;obj.hasFil=true;
+    goalObjs={fil,glowFil,hasFil:true};
 }else if(L.num===3){
     // ============ СЦЕНА 3: ВОДОНАПОРНАЯ СТАНЦИЯ (живая вода) ============
     const matWater=new THREE.MeshStandardMaterial({color:0x2f8fd8,roughness:.1,metalness:.05,transparent:true,opacity:.9});
@@ -954,23 +977,30 @@ function addGoalObject(layout){
     // Рама-станина под валиками
     const bed6=new THREE.Mesh(new THREE.BoxGeometry(1.7,.18,.5),M.iron);bed6.position.set(c6x+0.1,c6y-0.55,0);
     bed6.receiveShadow=true;bed6.castShadow=true;sc.add(bed6);deco.push(bed6);
-    // Две опорные стойки
-    const st1=new THREE.Mesh(new THREE.BoxGeometry(.14,.5,.3),M.iron);st1.position.set(c6x-0.45,c6y-0.55,0);sc.add(st1);deco.push(st1);
-    const st2=st1.clone();st2.position.set(c6x+0.65,c6y-0.55,0);sc.add(st2);deco.push(st2);
+    // Две опорные стойки (индустриальные, сварные)
+    function makeStand(px){
+      const sg=new THREE.Group();
+      const col=new THREE.Mesh(new THREE.CylinderGeometry(.06,.07,.45,8),M.iron);col.position.y=-.22;sg.add(col);
+      const base=new THREE.Mesh(new THREE.CylinderGeometry(.12,.15,.04,8),M.iron);base.position.y=-.45;sg.add(base);
+      const cap=new THREE.Mesh(new THREE.CylinderGeometry(.08,.06,.04,8),M.copper);cap.position.y=-.02;sg.add(cap);
+      sg.position.set(px,c6y-0.55,0);sc.add(sg);deco.push(sg);
+    }
+    makeStand(c6x-0.45);makeStand(c6x+0.65);
     // Оси
     const axle1=new THREE.Mesh(new THREE.CylinderGeometry(.03,.03,.6,8),M.copper);axle1.rotation.z=Math.PI/2;axle1.position.set(c6x-0.15,c6y-0.4,0);sc.add(axle1);deco.push(axle1);
     // Два колеса (группы: шина с протектором + диск-обод + ступица)
     const gr6=new THREE.Group();gr6.position.set(c6x-0.4,c6y-0.3,0);
     function makeWheel(){
       const w=new THREE.Group();
-      // ШИНА-ТОР спереди
+      // ШИНА-ТОР (резина, матовая тёмная)
       const tire=new THREE.Mesh(new THREE.TorusGeometry(.36,.11,14,26),new THREE.MeshStandardMaterial({color:0x181410,roughness:.95}));
       tire.castShadow=true;tire.position.z=.01;w.add(tire);
-      // ОБОД-ЦИЛИНДР сзади
-      const disc=new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,.12,18),M.brass);
-      disc.rotation.x=Math.PI/2;disc.position.z=-.01;w.add(disc);
-      // Спицы (плоскость XY)
+      // ОБОД (латунный диск, заполняет внутреннее отверстие шины: 0.36-0.11=0.25)
+      const disc=new THREE.Mesh(new THREE.CylinderGeometry(.24,.24,.14,24),M.brass);
+      disc.rotation.x=Math.PI/2;disc.position.z=0;w.add(disc);
+      // Спицы (6 шт, от центра к ободу)
       for(let s=0;s<6;s++){const a=s/6*Math.PI;const spoke=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.24,4),M.copper);spoke.rotation.x=Math.PI/2;spoke.position.set(Math.cos(a)*.14,Math.sin(a)*.14,0);w.add(spoke)}
+      // Ступица
       const hub=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,.16,10),M.copper);hub.rotation.x=Math.PI/2;w.add(hub);
       return w;
     }
@@ -1159,6 +1189,8 @@ function loadLevel(idx){
   taskTxt.innerHTML=`<b>Цель:</b> ${L.goal}. ${L.task}`;
   document.getElementById('pv').style.display=lvlIdx===0?'none':'inline';
   document.getElementById('nx').textContent=lvlIdx>=7?'Финал':'Далее';
+  document.getElementById('nx').disabled=true;
+  document.getElementById('nx').style.opacity='.4';
   cnt.textContent=L.kind==='nodes'?'0/12':L.goal;
   // Вторая и третья кнопки: показываем по наличию check2/check3
 const sb2=document.getElementById('sb2');
@@ -1166,23 +1198,16 @@ const sb2=document.getElementById('sb2');
   const sb3=document.getElementById('sb3');
   if(sb3){sb3.style.display=(L.check3&&L.kind!=='nodes')?'block':'none';}
   resetScene();rebuildEdit();showGate();
-  unblockNext();
 }
 document.getElementById('pv').onclick=()=>{if(lvlIdx>0)loadLevel(lvlIdx-1)};
 document.getElementById('nx').onclick=()=>{
   if(lvlIdx>=7)return;
-  // проверяем пройден ли текущий уровень
-  const doneKey='ws_done_'+L.num;
-  if(!localStorage.getItem(doneKey)){
-    lg.textContent='% Сначала выполни ЦЕЛЬ и пройди проверку знаний!';
-    lg.style.color='var(--bad)';
-    return;
-  }
   loadLevel(lvlIdx+1);
 };
 
 function resetScene(){
   run=false;crash=false;cur=0;winAnim=0;
+  sb.onclick=window.startRun;sb.textContent='Запустить механизм';
   waterDrops.forEach(d=>sc.remove(d));waterDrops.length=0;
   dropTimer=0;waterCaptured=0;waterMissed=0;
   clearObjects();buildScene();buildActor();
@@ -1242,15 +1267,17 @@ function winLevel(){
   run=false;clearInterval(tint);winAnim=1;
   setActorColor(0x4a9a5a);
   const key='ws_lvl'+L.num;const rec=JSON.parse(localStorage.getItem(key)||'[]');rec.push({name:eng,time:tms});localStorage.setItem(key,JSON.stringify(rec));
+  // Отмечаем уровень как пройденный (цель выполнена)
+  localStorage.setItem('ws_done_'+L.num,'1');
   lg.textContent='% Победа! Цель "'+L.goal+'" достигнута за '+fmt(tms)+'!';
-  sb.textContent='Готово!';chs.textContent='УСПЕХ';chs.style.color='var(--ok)';chd.className='chn-d ok';pb.style.width='100%';tone(1000,.3);
+  sb.textContent='Готово!';sb.onclick=window.showQuiz;chs.textContent='УСПЕХ';chs.style.color='var(--ok)';chd.className='chn-d ok';pb.style.width='100%';tone(1000,.3);
   cnt.textContent='УСПЕХ';
-  astTxt.innerHTML='Отлично! Цель достигнута. '+(lvlIdx<7?'<b style="color:var(--accent);cursor:pointer" onclick="showQuiz()">Проверка знаний →</b>':'Это был финальный уровень мастерской!');
+  astTxt.innerHTML='Отлично! Цель достигнута!';
   // блокируем кнопку "Далее" до прохождения проверки
-  document.getElementById('nx').disabled=true;
-  document.getElementById('nx').style.opacity='.4';
+  document.getElementById('nx').disabled=false;
+  document.getElementById('nx').style.opacity='1';
 }
-function unblockNext(){
+window.unblockNext=function(){
   document.getElementById('nx').disabled=false;
   document.getElementById('nx').style.opacity='1';
 }
@@ -1321,11 +1348,22 @@ function anim(){
       b.userData.vx+=(SPD-b.userData.vx)*.04;
       b.position.x+=b.userData.vx;b.position.y+=b.userData.vy;
       if(b.children.length&&b.children[0].geometry.type==='SphereGeometry')b.children[0].rotation.z-=b.userData.vx*3;
-    }else if(L.num===2){ // 2: вилка падает на розетку
+}else if(L.num===2){ // 2: вилка падает на розетку
       b.userData.vy-=.006;b.userData.vy*=.99;
       b.position.y+=b.userData.vy;
       if(b.position.y<=-0.1){ // штыри вошли в гнёзда
         b.position.y=-0.1;b.userData.vy=0;
+        const g2v=conf.LIGHT_CONFIG?.voltage||0;
+        if(g2v>220){
+          if(goalObjs.fil)goalObjs.fil.material.color.setHex(0xffaa22);
+          if(goalObjs.glowFil){goalObjs.glowFil.material.opacity=1;goalObjs.glowFil.scale.setScalar(4)}
+          sparks(b.position,40);
+          setTimeout(()=>{
+            if(goalObjs.fil){goalObjs.fil.material.color.setHex(0x1a0a00);goalObjs.fil.scale.y=.3}
+            if(goalObjs.glowFil){goalObjs.glowFil.material.opacity=0;goalObjs.glowFil.scale.setScalar(1)}
+          },300);
+          failLevel('Напряжение слишком высокое! Лампочка перегорела. Нужно ровно 220.');return;
+        }
         const r=checkGoal();
         if(r.ok){winLevel();sparks(b.position,20);tone(880,.15);lg.textContent='% Лампа загорелась! Цепь замкнута.'}
         else{failLevel(r.msg);return}
@@ -1389,19 +1427,36 @@ function anim(){
           dr.userData.vy-=.008;dr.userData.vy*=.995;
           dr.position.x+=dr.userData.vx;dr.position.y+=dr.userData.vy;
         }
-        // попала в стакан?
+// попала в стакан?
         if(dr.position.x>=goalObjs.glassX-0.32&&dr.position.x<=goalObjs.glassX+0.32&&dr.position.y<=goalObjs.glassTopY&&dr.position.y>=goalObjs.glassBottomY){
-          sc.remove(dr);waterDrops.splice(i,1);waterCaptured++;
-          // вода заполняет стакан от ДНА: масштаб считаем от текущего fill
-if(goalObjs.water){
-            const w=goalObjs.water;
-            const f=Math.min(.55,w.userData.fill+.045);
-            w.userData.fill=f;
-            const h=0.06+f*1.0;
-            w.scale.y=Math.max(.06,h);
-            w.position.y=goalObjs.glassBottomY+h/2;
-            // поверхность воды следует за уровнем
-            if(goalObjs.waterTop){goalObjs.waterTop.position.y=goalObjs.glassBottomY+h}
+          if(!waterOverflow){
+            sc.remove(dr);waterDrops.splice(i,1);waterCaptured++;
+            if(goalObjs.water){
+              const w=goalObjs.water;
+              const nf=w.userData.fill+.045;
+              if(nf>=0.55){
+                // стакан полон — начинаем переполнение
+                w.userData.fill=0.55;
+                const h=0.06+0.55*1.0;
+                w.scale.y=Math.max(.06,h);
+                w.position.y=goalObjs.glassBottomY+h/2;
+                if(goalObjs.waterTop)goalObjs.waterTop.position.y=goalObjs.glassBottomY+h;
+                waterOverflow=true;overflowTimer=0;
+              }else{
+                w.userData.fill=nf;
+                const h=0.06+nf*1.0;
+                w.scale.y=Math.max(.06,h);
+                w.position.y=goalObjs.glassBottomY+h/2;
+                if(goalObjs.waterTop)goalObjs.waterTop.position.y=goalObjs.glassBottomY+h;
+              }
+            }
+          }
+          // переполнение: капли не исчезают, а стекают по стенке
+          if(waterOverflow){
+            dr.userData.vy-=.005;dr.position.x+=Math.sin(t*2+dr.position.x)*.002;dr.position.y+=dr.userData.vy;
+            if(dr.position.y>goalObjs.glassTopY+0.05){dr.position.y=goalObjs.glassTopY;dr.position.x=goalObjs.glassX}
+            if(dr.position.y<-14||dr.position.x>goalObjs.glassX+1){sc.remove(dr);waterDrops.splice(i,1)}
+            continue;
           }
           if(waterCaptured===12){
             const r=checkGoal();
@@ -1630,60 +1685,15 @@ if(goalObjs.water){
   }
 
   /* ---------- КАМЕРА ---------- */
-function updateCamera(t){
-  if(L.num===2){
-    const tx=targetX;
-    cam.position.x+=(tx-cam.position.x)*.06;
-    cam.position.y+=(1.4-cam.position.y)*.06;
-    cam.position.z+=(6.2-cam.position.z)*.06;
-    cam.lookAt(tx,0.2,0);
-  }else if(L.num===3&&goalObjs){
-    const cx=(goalObjs.tipX+goalObjs.glassX)/2;
-    const cy=(goalObjs.tipY+goalObjs.glassTopY-1.2)/2;
-    cam.position.x+=(cx-cam.position.x)*.06;
-    cam.position.y+=(cy+1.2-cam.position.y)*.06;
-    cam.position.z+=(6.8-cam.position.z)*.06;
-    cam.lookAt(cx,cy,0);
-  }else if(L.num===4&&goalObjs){
-    const midX=(goalObjs.trampEndX+goalObjs.boxX)/2;
-    const followX=ball.position.x*0.7+midX*0.3;
-    const fy=Math.max(0.3,ball.position.y*0.6);
-    const tx=cam.position.x+(followX+0.3-cam.position.x)*.04;
-    const ty=cam.position.y+(fy+0.6-cam.position.y)*.04;
-    cam.position.set(tx,ty,6.8);
-    cam.lookAt(tx*0.6+followX*0.4,Math.max(-0.2,fy-0.3),0);
-  }else if(L.num===5&&goalObjs){
-    const sx=goalObjs.safeX;
-    cam.position.x+=((sx-0.5)-cam.position.x)*.06;
-    cam.position.y+=(0.6-cam.position.y)*.06;
-    cam.position.z+=(5.5-cam.position.z)*.06;
-    cam.lookAt(sx,0.0,0);
-  }else if(L.num===6&&goalObjs){
-    const cx=goalObjs.cx;
-    cam.position.x+=((cx-0.2)-cam.position.x)*.06;
-    cam.position.y+=(0.4-cam.position.y)*.06;
-    cam.position.z+=(5.2-cam.position.z)*.06;
-    cam.lookAt(cx+0.3,0.0,0);
-  }else if(L.num===7&&goalObjs){
-    const cx=goalObjs.cupX-1.4;
-    cam.position.x+=(cx-cam.position.x)*.06;
-    cam.position.y+=(-0.1-cam.position.y)*.06;
-    cam.position.z+=(6.0-cam.position.z)*.06;
-    cam.lookAt(cx+0.3,0.1,0);
-  }else if(L.num===8&&goalObjs){
-    const cx=goalObjs.cx;
-    cam.position.x+=((cx+0.2)-cam.position.x)*.06;
-    cam.position.y+=(0.5-cam.position.y)*.06;
-    cam.position.z+=(5.8-cam.position.z)*.06;
-    cam.lookAt(cx+0.5,-0.1,0);
-  }else{
-    const tx=ball.position.x*.3;
-    cam.position.x+=(tx-cam.position.x)*.005;
-    cam.lookAt(tx,-1,0);
-  }
-}
-updateCamera(t);
-cmp.render();
+  if(L.num===2){const tx=targetX;cam.position.x+=(tx-cam.position.x)*.06;cam.position.y+=(1.4-cam.position.y)*.06;cam.position.z+=(6.2-cam.position.z)*.06;cam.lookAt(tx,0.2,0)}
+  else if(L.num===3&&goalObjs){const cx=(goalObjs.tipX+goalObjs.glassX)/2,cy=(goalObjs.tipY+goalObjs.glassTopY-1.2)/2;cam.position.x+=(cx-cam.position.x)*.06;cam.position.y+=(cy+1.2-cam.position.y)*.06;cam.position.z+=(6.8-cam.position.z)*.06;cam.lookAt(cx,cy,0)}
+  else if(L.num===4&&goalObjs){const mx=(goalObjs.trampEndX+goalObjs.boxX)/2,fx=ball.position.x*.7+mx*.3,fy=Math.max(.3,ball.position.y*.6),tx=cam.position.x+(fx+.3-cam.position.x)*.04,ty=cam.position.y+(fy+.6-cam.position.y)*.04;cam.position.set(tx,ty,6.8);cam.lookAt(tx*.6+fx*.4,Math.max(-.2,fy-.3),0)}
+  else if(L.num===5&&goalObjs){const sx=goalObjs.safeX;cam.position.x+=((sx-.5)-cam.position.x)*.06;cam.position.y+=(.6-cam.position.y)*.06;cam.position.z+=(5.5-cam.position.z)*.06;cam.lookAt(sx,0,0)}
+  else if(L.num===6&&goalObjs){const cx=goalObjs.cx;cam.position.x+=((cx-.2)-cam.position.x)*.06;cam.position.y+=(.4-cam.position.y)*.06;cam.position.z+=(5.2-cam.position.z)*.06;cam.lookAt(cx+.3,0,0)}
+  else if(L.num===7&&goalObjs){const cx=goalObjs.cupX-1.4;cam.position.x+=(cx-cam.position.x)*.06;cam.position.y+=(-.1-cam.position.y)*.06;cam.position.z+=(6-cam.position.z)*.06;cam.lookAt(cx+.3,.1,0)}
+  else if(L.num===8&&goalObjs){const cx=goalObjs.cx;cam.position.x+=((cx+.2)-cam.position.x)*.06;cam.position.y+=(.5-cam.position.y)*.06;cam.position.z+=(5.8-cam.position.z)*.06;cam.lookAt(cx+.5,-.1,0)}
+  else{const tx=ball.position.x*.3;cam.position.x+=(tx-cam.position.x)*.005;cam.lookAt(tx,-1,0)}
+  cmp.render();
 }
 
 window.addEventListener('resize',()=>{const w2=vp.clientWidth,h2=vp.clientHeight;cam.aspect=w2/h2;cam.updateProjectionMatrix();ren.setSize(w2,h2);cmp.setSize(w2,h2)});
